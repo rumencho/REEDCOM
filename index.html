@@ -4,38 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
-    <!-- ИМПОРТИРАНЕ НА ETHERS.JS -->
-    <script src="https://cloudflare.com"></script>
-    
-    <!-- Импортиране на WalletConnect AppKit -->
-    <script type="module">
-      import { createAppKit } from 'https://esm.sh';
-      import { EthersAdapter } from 'https://esm.sh-adapter-ethers';
-      import { bsc } from 'https://esm.sh/networks';
-
-      // ==========================================
-      // ЗАМЕНЕТЕ ТЕКСТА ОТДОЛУ С ВАШИЯ КЛЮЧ ОТ REOWN:
-      const projectId = 'a930055e8e09714214a80fce568ba908';
-      // ==========================================
-
-      const metadata = {
-        name: 'Reedcom Network',
-        description: 'Reedcom Clicker Web3 Game',
-        url: 'https://github.io',
-        icons: ['https://github.ioicon.png']
-      };
-
-      window.modal = createAppKit({
-        adapters: [new EthersAdapter()],
-        networks: [bsc],
-        metadata,
-        projectId,
-        features: {
-          analytics: true
-        }
-      });
-    </script>
-    
     <style>
         body {
             background-color: #0d121d;
@@ -46,6 +14,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .game-container {
             max-width: 400px;
@@ -86,11 +56,6 @@
             color: #00d2ff;
             margin-top: 5px;
         }
-        .blockchain-balance {
-            font-size: 12px;
-            color: #4ade80;
-            margin-top: 4px;
-        }
         .clicker-container {
             display: flex;
             justify-content: center;
@@ -103,6 +68,7 @@
             cursor: pointer;
             outline: none;
             transition: transform 0.1s ease;
+            padding: 0;
         }
         .coin-btn:active {
             transform: scale(0.95);
@@ -170,10 +136,9 @@
     <div class="balance-container">
         <div class="balance-label">Вашият Баланс в Играта</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
-        <div class="blockchain-balance" id="walletBalanceDisplay" style="display: none;">В портфейла: 0 RC</div>
     </div>
 
-    <div class="clicker-container" id="clickArea">
+    <div class="clicker-container">
         <button class="coin-btn" onclick="handleTap(event)">
             <svg class="lotus-svg" viewBox="0 0 100 100">
                 <path d="M50,85 C40,70 30,55 35,40 C40,25 50,15 50,15 C50,15 60,25 65,40 C70,55 60,70 50,85 Z"/>
@@ -199,16 +164,12 @@
         <div style="font-weight: bold; margin-bottom: 10px;">Задачи за Монети</div>
         <div class="task-row">
             <span>Присъедини се в Telegram</span>
-            <!-- ТУК МОЖЕ ДА СЛОЖИТЕ ВАШИЯ TELEGRAM ЛИНК -->
-            <a href="https://t.me" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+            <a href="https://t.me/+1H6v9c3U3lM3ZTBk"https://t.me/+1H6v9c3U3lM3ZTBk"_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
 </div>
 
 <script>
-    const TOKEN_ADDRESS = "0x21858b8fd230735373fe2719c7a1143a75eba4d3";
-    const MIN_ABI = ["function balanceOf(address owner) view returns (uint256)"];
-    
     let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
     let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
 
@@ -256,38 +217,35 @@
         text.style.fontWeight = "bold";
         text.style.pointerEvents = "none";
         text.style.zIndex = "9999";
-        text.style.transition = "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s";
+        text.style.transition = "transform 0.5s ease-out, opacity 0.5s";
         
         document.body.appendChild(text);
         
         setTimeout(() => {
-            text.style.transform = "translateY(-40px) scale(1.2)";
+            text.style.transform = "translateY(-40px)";
             text.style.opacity = "0";
         }, 20);
         
-        setTimeout(() => text.remove(), 600);
+        setTimeout(() => text.remove(), 500);
     }
 
-    // НОВАТА INTEGRATION С WALLETCONNECT / APPKIT
-    async function connectWallet() {
-        try {
-            if (!window.modal) {
-                alert("Системата за портфейли се зарежда, моля изчакайте секунда...");
-                return;
-            }
+    // Сигурно свързване без чупене на браузъра
+    function connectWallet() {
+        if (window.ethereum) {
+            window.ethereum.request({ method: 'eth_requestAccounts' })
+                .then(accounts => {
+                    const walletAddress = accounts[0];
+                    document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
+                })
+                .catch(err => {
+                    console.error("Грешка:", err);
+                });
+        } else {
+            // Ако е на телефон извън MetaMask, линкът отваря автоматично портфейла им
+            window.open("https://app.link", "_blank");
+        }
+    }
+</script>
 
-            await window.modal.open();
-
-            window.modal.subscribeState(async (state) => {
-                if (state.selectedNetworkId && window.modal.getIsConnected()) {
-                    const walletAddress = window.modal.getAddress();
-                    
-                    if (walletAddress) {
-                        document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
-                        
-                        const walletProvider = window.modal.getWalletProvider();
-                        const provider = new ethers.BrowserProvider(walletProvider);
-                        
-                        const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
-                        const balance = await contract.balanceOf(walletAddress);
-                        
+</body>
+</html>
