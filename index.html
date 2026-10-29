@@ -1,9 +1,40 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
+    
+    <!-- Импортиране на WalletConnect AppKit библиотеки -->
+    <script type="module">
+      import { createAppKit } from 'https://esm.sh';
+      import { EthersAdapter } from 'https://esm.sh-adapter-ethers';
+      import { bsc } from 'https://esm.sh/networks';
+
+      // !!! ЗАМЕНЕТЕ ТЕКСТА ОТДОЛУ С ВАШИЯ ВЗЕТ КЛЮЧ !!!
+      const projectId = 'a930055e8e09714214a80fce568ba908';
+
+      const metadata = {
+        name: 'Reedcom Network',
+        description: 'Reedcom Clicker Web3 Game',
+        url: 'https://github.io',
+        icons: ['https://github.ioicon.png']
+      };
+
+      // Инициализиране на Web3 бутона
+      createAppKit({
+        adapters: [new EthersAdapter()],
+        networks: [bsc],
+        metadata,
+        projectId,
+        features: {
+          analytics: true,
+          email: false, // Изключваме имейл за по-чист интерфейс
+          socials: false
+        }
+      });
+    </script>
+    
     <style>
         body {
             background-color: #0d121d;
@@ -14,6 +45,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .game-container {
             max-width: 400px;
@@ -24,16 +57,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-        }
-        .btn-wallet {
-            background: linear-gradient(135deg, #00d2ff 0%, #0066ff 100%);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
         }
         .balance-container {
             text-align: center;
@@ -117,11 +140,12 @@
 <div class="game-container">
     <div class="header">
         <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
-        <button class="btn-wallet" onclick="connectWallet()">Свържи Портфейл</button>
+        <!-- Автоматичен Web3 бутон, контролиран изцяло от WalletConnect -->
+        <appkit-button size="sm"></appkit-button>
     </div>
 
     <div class="balance-container">
-        <div class="balance-label">Вашият Баланс</div>
+        <div class="balance-label">Your Balance</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
     </div>
 
@@ -139,7 +163,7 @@
 
     <div class="energy-container">
         <div style="display: flex; justify-content: space-between; font-size: 13px;">
-            <span>⚡ Енергия</span>
+            <span>⚡ Energy</span>
             <span id="energyText">1000/1000</span>
         </div>
         <div class="energy-bar">
@@ -148,9 +172,9 @@
     </div>
 
     <div class="tasks-container">
-        <div style="font-weight: bold; margin-bottom: 10px;">Задачи за Монети</div>
+        <div style="font-weight: bold; margin-bottom: 10px;">Tasks for Coins</div>
         <div class="task-row">
-            <span>Присъедини се в Telegram</span>
+            <span>Join Telegram</span>
             <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
@@ -185,10 +209,6 @@
         score += reward;
         document.getElementById("balanceDisplay").innerText = score;
         localStorage.setItem("reedcom_score", score);
-    }
-
-    function connectWallet() {
-        alert("Тази функция ще бъде добавена скоро!");
     }
 </script>
 
