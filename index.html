@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reedcom Network - Clicker</title>
+    <!-- ИМПОРТИРАНЕ НА ETHERS.JS (Задължително за Web3 интеграцията) -->
+    <script src="https://cloudflare.com"></script>
+    
+    <style>
+        body {
+            background-color: #0d121d;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .btn-wallet {
+            background: linear-gradient(135deg, #00d2ff 0%, #0066ff 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .balance-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+        }
+        .balance-label {
+            font-size: 14px;
+            color: #8a99ad;
+        }
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00d2ff;
+            margin-top: 5px;
+        }
+        .blockchain-balance {
+            font-size: 12px;
+            color: #4ade80;
+            margin-top: 4px;
+        }
+        .clicker-container {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            position: relative;
+        }
+        .coin-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.1s ease;
+        }
+        .coin-btn:active {
+            transform: scale(0.95);
+        }
+        .lotus-svg {
+            width: 180px;
+            height: 180px;
+            fill: #00d2ff;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.6));
+        }
+        .energy-container {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .energy-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #1c2c3e;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .energy-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00d2ff, #00ffaa);
+            transition: width 0.1s linear;
+        }
+        .tasks-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .task-row:last-child {
+            border: none;
+        }
+        .task-btn {
+            background-color: #1c2c3e;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
+        <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">Свържи Портфейл</button>
+    </div>
+
+    <div class="balance-container">
+        <div class="balance-label">Вашият Баланс в Играта</div>
+        <div class="balance-amount" id="balanceDisplay">0</div>
+        <!-- Нов сектор за показване на реалния токен баланс на потребителя -->
+        <div class="blockchain-balance" id="walletBalanceDisplay" style="display: none;">В портфейла: 0 RC</div>
+    </div>
+
+    <div class="clicker-container" id="clickArea">
+        <button class="coin-btn" onclick="handleTap(event)">
+            <svg class="lotus-svg" viewBox="0 0 100 100">
+                <path d="M50,85 C40,70 30,55 35,40 C40,25 50,15 50,15 C50,15 60,25 65,40 C70,55 60,70 50,85 Z"/>
+                <path d="M50,85 C35,75 20,60 20,45 C20,30 35,25 40,35 C45,45 48,65 50,85 Z"/>
+                <path d="M50,85 C65,75 80,60 80,45 C80,30 65,25 60,35 C55,45 52,65 50,85 Z"/>
+                <path d="M50,85 C25,80 10,65 15,50 C20,35 35,40 40,50 C45,60 48,75 50,85 Z"/>
+                <path d="M50,85 C75,80 90,65 85,50 C80,35 65,40 60,50 C55,60 52,75 50,85 Z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="energy-container">
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span>⚡ Енергия</span>
+            <span id="energyText">1000/1000</span>
+        </div>
+        <div class="energy-bar">
+            <div class="energy-fill" id="energyFill"></div>
+        </div>
+    </div>
+
+    <div class="tasks-container">
+        <div style="font-weight: bold; margin-bottom: 10px;">Задачи за Монети</div>
+        <div class="task-row">
+            <span>Присъедини се в Telegram</span>
+            <a href="https://t.me" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TOKEN_ADDRESS = "0x21858b8fd230735373fe2719c7a1143a75eba4d3";
+    const MIN_ABI = ["function balanceOf(address owner) view returns (uint256)"];
+    
+    let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
+    let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
+
+    // Инициализация на интерфейса
+    document.getElementById("balanceDisplay").innerText = score;
+    updateUI();
+
+    function handleTap(event) {
+        if (energy >= 1) {
+            score += 1;
+            energy -= 1;
+            updateUI();
+            localStorage.setItem("reedcom_score", score);
+            localStorage.setItem("reedcom_energy", energy);
+            createFloatingText(event);
+        }
+    }
+
+    function updateUI() {
+        document.getElementById("balanceDisplay").innerText = score;
+        document.getElementById("energyText").innerText = `${energy}/1000`;
+        document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
+    }
+
+    // Регенерация на енергията
+    setInterval(() => {
+        if (energy < 1000) {
+            energy += 1;
+            updateUI();
+            localStorage.setItem("reedcom_energy", energy);
+        }
+    }, 1000);
+
+    function claimTask(reward) {
+        score += reward;
+        updateUI();
+        localStorage.setItem("reedcom_score", score);
+    }
+
+    function createFloatingText(e) {
+        const text = document.createElement("div");
+        text.innerText = "+1";
+        text.style.position = "fixed"; // Променено на fixed за точно позициониране спрямо екрана
+        text.style.left = `${e.clientX}px`;
+        text.style.top = `${e.clientY}px`;
+        text.style.color = "#00d2ff";
+        text.style.fontWeight = "bold";
+        text.style.pointerEvents = "none";
+        text.style.zIndex = "9999";
+        text.style.transition = "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s";
+        
+        document.body.appendChild(text);
+        
+        setTimeout(() => {
+            text.style.transform = "translateY(-40px) scale(1.2)";
+            text.style.opacity = "0";
+        }, 20);
+        
+        setTimeout(() => text.remove(), 600);
+    }
+
+    // Web3 интеграция чрез коригираната версия на Ethers v6
+    async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                // Използване на правилния синтаксис за версия Ethers v6
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                const walletAddress = accounts[0];
+                
+                // Визуализиране на съкратен адрес
+                document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
+                
+                // Връзка със Смарт Договора
+                const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
+                const balance = await contract.balanceOf(walletAddress);
+                
+                // Преобразуване с форматиране (за 18 десетични знака)
+                const formattedBalance = ethers.formatUnits(balance, 18);
+                
+                // Показване на баланса отделно от точките от кликане
+                const bscBalanceContainer = document.getElementById("walletBalanceDisplay");
+                bscBalanceContainer.innerText = `В портфейла: ${parseFloat(formattedBalance).toFixed(2)} RC`;
+                bscBalanceContainer.style.display = "block";
+
+            } catch (error) {
+                console.error("Грешка при Web3 свързване:", error);
+                alert("Неуспешно свързване с портфейла.");
+            }
+        } else {
+            alert("Моля, отворете играта през Web3 портфейл (Metamask, Trust Wallet) или инсталирайте разширението!");
+        }
+    }
+</script>
+
+</body>
+</html>
