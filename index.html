@@ -5,35 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
     
-    <!-- 1. Зареждаме скрипта за Telegram Web Apps -->
+    <!-- 1. Официален скрипт на Telegram -->
     <script src="https://telegram.org"></script>
-
-    <!-- 2. Инициализираме WalletConnect AppKit чрез чист уеб компонент -->
-    <script type="module">
-      import { createAppKit } from 'https://esm.sh';
-      import { EthersAdapter } from 'https://esm.sh-adapter-ethers';
-      import { bsc } from 'https://esm.sh/networks';
-
-      const projectId = 'a930055e8e09714214a80fce568ba908'; // Вашият работещ ключ
-
-      createAppKit({
-        adapters: [new EthersAdapter()],
-        networks: [bsc],
-        metadata: {
-          name: 'Reedcom Network',
-          description: 'Reedcom Clicker',
-          url: 'https://github.io',
-          icons: ['https://github.ioicon.png']
-        },
-        projectId,
-        features: {
-          analytics: false,
-          email: false,
-          socials: false
-        }
-      });
-    </script>
     
+    <!-- 2. Класически библиотеки за Web3 връзка (без модули, за да не чупят Telegram) -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://jsdelivr.net"></script>
+
     <style>
         body {
             background-color: #0d121d;
@@ -57,6 +35,16 @@
             align-items: center;
             margin-bottom: 25px;
         }
+        .btn-wallet {
+            background: linear-gradient(135deg, #00d2ff 0%, #0066ff 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
         .balance-container {
             text-align: center;
             background: rgba(255, 255, 255, 0.03);
@@ -74,6 +62,12 @@
             font-weight: bold;
             color: #00d2ff;
             margin-top: 5px;
+        }
+        .blockchain-balance {
+            font-size: 12px;
+            color: #4ade80;
+            margin-top: 4px;
+            display: none;
         }
         .clicker-container {
             display: flex;
@@ -139,13 +133,14 @@
 <div class="game-container">
     <div class="header">
         <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
-        <!-- Използваме вградения готов бутон на AppKit, който работи автоматично в Telegram -->
-        <appkit-button size="sm"></appkit-button>
+        <!-- Вашият оригинален бутон, който вече няма да изчезва -->
+        <button class="btn-wallet" id="walletBtn" onclick="initiateWalletConnection()">Connect Wallet</button>
     </div>
 
     <div class="balance-container">
         <div class="balance-label">Your Balance</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
+        <div class="blockchain-balance" id="walletBalanceDisplay">Wallet RC: 0</div>
     </div>
 
     <div class="clicker-container">
@@ -180,11 +175,14 @@
 </div>
 
 <script>
-    // Активираме Telegram Web App функциите веднага
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) {
+        tg.ready();
+        tg.expand();
     }
+
+    const TOKEN_ADDRESS = "0x21858b8fd230735373fe2719c7a1143a75eba4d3";
+    const MIN_ABI = ["function balanceOf(address owner) view returns (uint256)"];
 
     let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
     let energy = 1000;
@@ -214,6 +212,58 @@
         score += reward;
         document.getElementById("balanceDisplay").innerText = score;
         localStorage.setItem("reedcom_score", score);
+    }
+
+    // ИНТЕЛЕГЕНТНО РЕШЕНИЕ ЗА СВЪРЗВАНЕ ВЪТРЕ В TELEGRAM
+    async function initiateWalletConnection() {
+        // Ако играчът отвори играта през компютър или браузър с разширение (MetaMask)
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const walletAddress = accounts[0];
+                updateWalletUI(walletAddress);
+            } catch (err) {
+                console.error("User rejected alignment", err);
+            }
+        } else {
+            // Ако потребителят е на телефон вътре в Telegram, извикваме изскачащ интуитивен прозорец 
+            // който му позволява да избере MetaMask или Trust Wallet без изхвърляне
+            if (tg) {
+                tg.showPopup({
+                    title: 'Connect Cryptowallet',
+                    message: 'Choose how you want to pair your Web3 wallet with Reedcom Network:',
+                    buttons: [
+                        {id: 'mm', type: 'default', text: 'Open MetaMask'},
+                        {id: 'tw', type: 'default', text: 'Open Trust Wallet'},
+                        {type: 'cancel', text: 'Close'}
+                    ]
+                }, function(buttonId) {
+                    const appUrl = "rumencho.github.io/REEDCOM/";
+                    if (buttonId === 'mm') {
+                        tg.openLink("https://app.link" + appUrl);
+                    } else if (buttonId === 'tw') {
+                        tg.openLink("https://wallet.com" + appUrl);
+                    }
+                });
+            } else {
+                alert("Please open this game inside Telegram or use a Web3 browser!");
+            }
+        }
+    }
+
+    function updateWalletUI(address) {
+        document.getElementById("walletBtn").innerText = address.substring(0,6) + "..." + address.substring(38);
+        
+        // Вземане на баланса на реалния токен след свързване
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
+        
+        contract.balanceOf(address).then(balance => {
+            const formatted = ethers.formatUnits(balance, 18);
+            const display = document.getElementById("walletBalanceDisplay");
+            display.innerText = "Wallet RC: " + parseFloat(formatted).toFixed(2);
+            display.style.display = "block";
+        }).catch(e => console.error("Error reading token balance", e));
     }
 </script>
 
