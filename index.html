@@ -80,7 +80,6 @@
             height: 180px;
             fill: #00d2ff;
             filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.6));
-            transition: transform 0.05s ease;
         }
         .energy-container {
             width: 100%;
@@ -98,7 +97,6 @@
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #00d2ff, #00ffaa);
-            transition: width 0.1s linear;
         }
         .wallet-section {
             background: rgba(255, 255, 255, 0.03);
@@ -179,7 +177,7 @@
         <div class="balance-amount" id="balanceDisplay">0</div>
     </div>
 
-    <!-- Секция за Ръчно Въвеждане на Портфейл -->
+    <!-- Секция за въвеждане на адрес -->
     <div class="wallet-section">
         <div class="wallet-title">Submit BSC Wallet Address</div>
         <div class="wallet-input-container">
@@ -188,9 +186,9 @@
         </div>
     </div>
 
-    <!-- Оптимизиран бутон за бързо кликане на мобилни устройства -->
     <div class="clicker-container">
-        <button class="coin-btn" id="clickBtn">
+        <!-- Върнат класически onclick за максимална съвместимост -->
+        <button class="coin-btn" onclick="handleTap(event)">
             <svg class="lotus-svg" viewBox="0 0 100 100">
                 <path d="M50,85 C40,70 30,55 35,40 C40,25 50,15 50,15 C50,15 60,25 65,40 C70,55 60,70 50,85 Z"/>
                 <path d="M50,85 C35,75 20,60 20,45 C20,30 35,25 40,35 C45,45 48,65 50,85 Z"/>
@@ -221,31 +219,32 @@
 </div>
 
 <script>
-    // Инициализация на Telegram интерфейса
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-    if (tg) {
-        tg.ready();
-        tg.expand();
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     }
 
-    let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
-    let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
+    // ЗАЩИТА ПРОТИВ NaN: Четем паметта и ако стойността е счупена, автоматично я превръщаме в 0
+    let score = parseInt(localStorage.getItem("reedcom_score"));
+    if (isNaN(score)) {
+        score = 0;
+        localStorage.setItem("reedcom_score", 0);
+    }
+
+    let energy = parseInt(localStorage.getItem("reedcom_energy"));
+    if (isNaN(energy)) {
+        energy = 1000;
+        localStorage.setItem("reedcom_energy", 1000);
+    }
+
     let savedAddress = localStorage.getItem("reedcom_wallet") || "";
 
-    // Настройване на екрана при старт
+    // Показване на чистите данни
     document.getElementById("balanceDisplay").innerText = score;
     if (savedAddress) {
         document.getElementById("walletInput").value = savedAddress;
     }
     updateUI();
-
-    // Закачане на събития за сигурно кликане (и за компютър, и за телефони)
-    const clickBtn = document.getElementById("clickBtn");
-    clickBtn.addEventListener("click", handleTap);
-    clickBtn.addEventListener("touchstart", function(e) {
-        e.preventDefault(); // Спира двойното зумване на телефона
-        handleTap(e);
-    });
 
     function handleTap(event) {
         if (energy >= 1) {
@@ -260,11 +259,10 @@
 
     function updateUI() {
         document.getElementById("balanceDisplay").innerText = score;
-        document.getElementById("energyText").innerText = `${energy}/1000`;
-        document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
+        document.getElementById("energyText").innerText = energy + "/1000";
+        document.getElementById("energyFill").style.width = (energy / 10) + "%";
     }
 
-    // Възстановяване на енергията всяка секунда
     setInterval(() => {
         if (energy < 1000) {
             energy += 1;
@@ -281,17 +279,14 @@
 
     function saveWalletAddress() {
         const address = document.getElementById("walletInput").value.trim();
-        
         if (address === "") {
             alert("Please enter an address!");
             return;
         }
-        
         if (!address.startsWith("0x") || address.length < 40) {
-            alert("Please enter a valid BSC (BEP-20) address starting with 0x!");
+            alert("Please enter a valid BSC address starting with 0x!");
             return;
         }
-
         localStorage.setItem("reedcom_wallet", address);
         alert("Wallet address saved successfully for the Airdrop!");
     }
@@ -301,10 +296,17 @@
         text.innerText = "+1";
         text.style.position = "fixed";
         
-        // Намиране на точните координати спрямо вида кликване
-        let clientX = e.clientX;
-        let clientY = e.clientY;
+        let clientX = e.clientX || (window.innerWidth / 2);
+        let clientY = e.clientY || (window.innerHeight / 2 - 50);
+
+        text.style.left = clientX + "px";
+        text.style.top = clientY + "px";
+        text.style.color = "#00d2ff";
+        text.style.fontWeight = "bold";
+        text.style.pointerEvents = "none";
+        text.style.zIndex = "9999";
+        text.style.transition = "transform 0.5s ease-out, opacity 0.5s";
         
-        if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
+        document.body.appendChild(text);
+        
+        setTimeout(() => {
