@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
     
-    <!-- 1. Официален скрипт на Telegram -->
+    <!-- Официален скрипт на Telegram за Mini Apps -->
     <script src="https://telegram.org"></script>
     
-    <!-- 2. Класически библиотеки за Web3 връзка (без модули, за да не чупят Telegram) -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://jsdelivr.net"></script>
-
     <style>
         body {
             background-color: #0d121d;
@@ -35,15 +31,14 @@
             align-items: center;
             margin-bottom: 25px;
         }
-        .btn-wallet {
-            background: linear-gradient(135deg, #00d2ff 0%, #0066ff 100%);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
+        .airdrop-badge {
+            background: linear-gradient(135deg, #f3ba2f 0%, #f0a500 100%);
+            color: #0d121d;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: bold;
-            font-size: 13px;
+            letter-spacing: 0.5px;
         }
         .balance-container {
             text-align: center;
@@ -63,22 +58,17 @@
             color: #00d2ff;
             margin-top: 5px;
         }
-        .blockchain-balance {
-            font-size: 12px;
-            color: #4ade80;
-            margin-top: 4px;
-            display: none;
-        }
         .clicker-container {
             display: flex;
             justify-content: center;
-            margin: 40px 0;
+            margin: 30px 0;
         }
         .coin-btn {
             background: none;
             border: none;
             cursor: pointer;
             outline: none;
+            padding: 0;
         }
         .coin-btn:active {
             transform: scale(0.95);
@@ -105,6 +95,49 @@
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #00d2ff, #00ffaa);
+            transition: width 0.1s linear;
+        }
+        .wallet-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .wallet-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #f3ba2f;
+            letter-spacing: 0.5px;
+        }
+        .wallet-input-container {
+            display: flex;
+            gap: 8px;
+        }
+        .wallet-input {
+            flex: 1;
+            background-color: #16222f;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-size: 13px;
+            outline: none;
+        }
+        .wallet-input::placeholder {
+            color: #56667a;
+        }
+        .btn-save {
+            background-color: #00d2ff;
+            color: #0d121d;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
         }
         .tasks-container {
             background: rgba(255, 255, 255, 0.03);
@@ -125,6 +158,8 @@
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 13px;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -133,14 +168,21 @@
 <div class="game-container">
     <div class="header">
         <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
-        <!-- Вашият оригинален бутон, който вече няма да изчезва -->
-        <button class="btn-wallet" id="walletBtn" onclick="initiateWalletConnection()">Connect Wallet</button>
+        <div class="airdrop-badge">🎁 AIRDROP PHASE</div>
     </div>
 
     <div class="balance-container">
         <div class="balance-label">Your Balance</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
-        <div class="blockchain-balance" id="walletBalanceDisplay">Wallet RC: 0</div>
+    </div>
+
+    <!-- Новата Секция за Ръчно Въвеждане на Портфейл -->
+    <div class="wallet-section">
+        <div class="wallet-title">Submit BSC Wallet Address</div>
+        <div class="wallet-input-container">
+            <input type="text" id="walletInput" class="wallet-input" placeholder="Paste 0x... address from Binance/MetaMask">
+            <button class="btn-save" onclick="saveWalletAddress()">Save</button>
+        </div>
     </div>
 
     <div class="clicker-container">
@@ -175,95 +217,95 @@
 </div>
 
 <script>
+    // Инициализация на Telegram интерфейса
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) {
         tg.ready();
         tg.expand();
     }
 
-    const TOKEN_ADDRESS = "0x21858b8fd230735373fe2719c7a1143a75eba4d3";
-    const MIN_ABI = ["function balanceOf(address owner) view returns (uint256)"];
-
     let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
-    let energy = 1000;
+    let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
+    let savedAddress = localStorage.getItem("reedcom_wallet") || "";
 
+    // Зареждане на първоначалните данни на екрана
     document.getElementById("balanceDisplay").innerText = score;
+    if (savedAddress) {
+        document.getElementById("walletInput").value = savedAddress;
+    }
+    updateUI();
 
     function handleTap(event) {
         if (energy >= 1) {
             score += 1;
             energy -= 1;
-            document.getElementById("balanceDisplay").innerText = score;
-            document.getElementById("energyText").innerText = energy + "/1000";
-            document.getElementById("energyFill").style.width = (energy / 10) + "%";
+            updateUI();
             localStorage.setItem("reedcom_score", score);
+            localStorage.setItem("reedcom_energy", energy);
+            createFloatingText(event);
         }
     }
 
+    function updateUI() {
+        document.getElementById("balanceDisplay").innerText = score;
+        document.getElementById("energyText").innerText = `${energy}/1000`;
+        document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
+    }
+
+    // Автоматично регенериране на енергия
     setInterval(() => {
         if (energy < 1000) {
             energy += 1;
-            document.getElementById("energyText").innerText = energy + "/1000";
-            document.getElementById("energyFill").style.width = (energy / 10) + "%";
+            updateUI();
+            localStorage.setItem("reedcom_energy", energy);
         }
     }, 1000);
 
     function claimTask(reward) {
         score += reward;
-        document.getElementById("balanceDisplay").innerText = score;
+        updateUI();
         localStorage.setItem("reedcom_score", score);
     }
 
-    // ИНТЕЛЕГЕНТНО РЕШЕНИЕ ЗА СВЪРЗВАНЕ ВЪТРЕ В TELEGRAM
-    async function initiateWalletConnection() {
-        // Ако играчът отвори играта през компютър или браузър с разширение (MetaMask)
-        if (typeof window.ethereum !== 'undefined') {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const walletAddress = accounts[0];
-                updateWalletUI(walletAddress);
-            } catch (err) {
-                console.error("User rejected alignment", err);
-            }
-        } else {
-            // Ако потребителят е на телефон вътре в Telegram, извикваме изскачащ интуитивен прозорец 
-            // който му позволява да избере MetaMask или Trust Wallet без изхвърляне
-            if (tg) {
-                tg.showPopup({
-                    title: 'Connect Cryptowallet',
-                    message: 'Choose how you want to pair your Web3 wallet with Reedcom Network:',
-                    buttons: [
-                        {id: 'mm', type: 'default', text: 'Open MetaMask'},
-                        {id: 'tw', type: 'default', text: 'Open Trust Wallet'},
-                        {type: 'cancel', text: 'Close'}
-                    ]
-                }, function(buttonId) {
-                    const appUrl = "rumencho.github.io/REEDCOM/";
-                    if (buttonId === 'mm') {
-                        tg.openLink("https://app.link" + appUrl);
-                    } else if (buttonId === 'tw') {
-                        tg.openLink("https://wallet.com" + appUrl);
-                    }
-                });
-            } else {
-                alert("Please open this game inside Telegram or use a Web3 browser!");
-            }
+    // Логика за сигурно локално запазване на адреса
+    function saveWalletAddress() {
+        const address = document.getElementById("walletInput").value.trim();
+        
+        // Лека валидация дали адресът започва правилно като BSC адрес (с 0x)
+        if (address === "") {
+            alert("Please enter an address!");
+            return;
         }
+        
+        if (!address.startsWith("0x") || address.length < 40) {
+            alert("Please enter a valid BSC (BEP-20) address starting with 0x!");
+            return;
+        }
+
+        localStorage.setItem("reedcom_wallet", address);
+        alert("Wallet address saved successfully for the Airdrop!");
     }
 
-    function updateWalletUI(address) {
-        document.getElementById("walletBtn").innerText = address.substring(0,6) + "..." + address.substring(38);
+    function createFloatingText(e) {
+        const text = document.createElement("div");
+        text.innerText = "+1";
+        text.style.position = "fixed";
+        text.style.left = `${e.clientX}px`;
+        text.style.top = `${e.clientY}px`;
+        text.style.color = "#00d2ff";
+        text.style.fontWeight = "bold";
+        text.style.pointerEvents = "none";
+        text.style.zIndex = "9999";
+        text.style.transition = "transform 0.5s ease-out, opacity 0.5s";
         
-        // Вземане на баланса на реалния токен след свързване
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
+        document.body.appendChild(text);
         
-        contract.balanceOf(address).then(balance => {
-            const formatted = ethers.formatUnits(balance, 18);
-            const display = document.getElementById("walletBalanceDisplay");
-            display.innerText = "Wallet RC: " + parseFloat(formatted).toFixed(2);
-            display.style.display = "block";
-        }).catch(e => console.error("Error reading token balance", e));
+        setTimeout(() => {
+            text.style.transform = "translateY(-40px)";
+            text.style.opacity = "0";
+        }, 20);
+        
+        setTimeout(() => text.remove(), 500);
     }
 </script>
 
