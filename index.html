@@ -20,6 +20,7 @@
             align-items: center;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
         .game-container {
             max-width: 400px;
@@ -69,6 +70,7 @@
             cursor: pointer;
             outline: none;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         .coin-btn:active {
             transform: scale(0.95);
@@ -78,6 +80,7 @@
             height: 180px;
             fill: #00d2ff;
             filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.6));
+            transition: transform 0.05s ease;
         }
         .energy-container {
             width: 100%;
@@ -176,7 +179,7 @@
         <div class="balance-amount" id="balanceDisplay">0</div>
     </div>
 
-    <!-- Новата Секция за Ръчно Въвеждане на Портфейл -->
+    <!-- Секция за Ръчно Въвеждане на Портфейл -->
     <div class="wallet-section">
         <div class="wallet-title">Submit BSC Wallet Address</div>
         <div class="wallet-input-container">
@@ -185,8 +188,9 @@
         </div>
     </div>
 
+    <!-- Оптимизиран бутон за бързо кликане на мобилни устройства -->
     <div class="clicker-container">
-        <button class="coin-btn" onclick="handleTap(event)">
+        <button class="coin-btn" id="clickBtn">
             <svg class="lotus-svg" viewBox="0 0 100 100">
                 <path d="M50,85 C40,70 30,55 35,40 C40,25 50,15 50,15 C50,15 60,25 65,40 C70,55 60,70 50,85 Z"/>
                 <path d="M50,85 C35,75 20,60 20,45 C20,30 35,25 40,35 C45,45 48,65 50,85 Z"/>
@@ -211,7 +215,7 @@
         <div style="font-weight: bold; margin-bottom: 10px;">Tasks for Coins</div>
         <div class="task-row">
             <span>Join Telegram</span>
-            <a href="https://t.me" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
 </div>
@@ -228,12 +232,20 @@
     let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
     let savedAddress = localStorage.getItem("reedcom_wallet") || "";
 
-    // Зареждане на първоначалните данни на екрана
+    // Настройване на екрана при старт
     document.getElementById("balanceDisplay").innerText = score;
     if (savedAddress) {
         document.getElementById("walletInput").value = savedAddress;
     }
     updateUI();
+
+    // Закачане на събития за сигурно кликане (и за компютър, и за телефони)
+    const clickBtn = document.getElementById("clickBtn");
+    clickBtn.addEventListener("click", handleTap);
+    clickBtn.addEventListener("touchstart", function(e) {
+        e.preventDefault(); // Спира двойното зумване на телефона
+        handleTap(e);
+    });
 
     function handleTap(event) {
         if (energy >= 1) {
@@ -252,7 +264,7 @@
         document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
     }
 
-    // Автоматично регенериране на енергия
+    // Възстановяване на енергията всяка секунда
     setInterval(() => {
         if (energy < 1000) {
             energy += 1;
@@ -267,11 +279,9 @@
         localStorage.setItem("reedcom_score", score);
     }
 
-    // Логика за сигурно локално запазване на адреса
     function saveWalletAddress() {
         const address = document.getElementById("walletInput").value.trim();
         
-        // Лека валидация дали адресът започва правилно като BSC адрес (с 0x)
         if (address === "") {
             alert("Please enter an address!");
             return;
@@ -290,24 +300,11 @@
         const text = document.createElement("div");
         text.innerText = "+1";
         text.style.position = "fixed";
-        text.style.left = `${e.clientX}px`;
-        text.style.top = `${e.clientY}px`;
-        text.style.color = "#00d2ff";
-        text.style.fontWeight = "bold";
-        text.style.pointerEvents = "none";
-        text.style.zIndex = "9999";
-        text.style.transition = "transform 0.5s ease-out, opacity 0.5s";
         
-        document.body.appendChild(text);
+        // Намиране на точните координати спрямо вида кликване
+        let clientX = e.clientX;
+        let clientY = e.clientY;
         
-        setTimeout(() => {
-            text.style.transform = "translateY(-40px)";
-            text.style.opacity = "0";
-        }, 20);
-        
-        setTimeout(() => text.remove(), 500);
-    }
-</script>
-
-</body>
-</html>
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
