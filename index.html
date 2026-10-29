@@ -4,8 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
-    <!-- ИМПОРТИРАНЕ НА ETHERS.JS (Задължително за Web3 интеграцията) -->
+    <!-- ИМПОРТИРАНЕ НА ETHERS.JS -->
     <script src="https://cloudflare.com"></script>
+    
+    <!-- Импортиране на WalletConnect AppKit -->
+    <script type="module">
+      import { createAppKit } from 'https://esm.sh';
+      import { EthersAdapter } from 'https://esm.sh-adapter-ethers';
+      import { bsc } from 'https://esm.sh/networks';
+
+      // ==========================================
+      // ЗАМЕНЕТЕ ТЕКСТА ОТДОЛУ С ВАШИЯ КЛЮЧ ОТ REOWN:
+      const projectId = 'a930055e8e09714214a80fce568ba908';
+      // ==========================================
+
+      const metadata = {
+        name: 'Reedcom Network',
+        description: 'Reedcom Clicker Web3 Game',
+        url: 'https://github.io',
+        icons: ['https://github.ioicon.png']
+      };
+
+      window.modal = createAppKit({
+        adapters: [new EthersAdapter()],
+        networks: [bsc],
+        metadata,
+        projectId,
+        features: {
+          analytics: true
+        }
+      });
+    </script>
     
     <style>
         body {
@@ -141,7 +170,6 @@
     <div class="balance-container">
         <div class="balance-label">Вашият Баланс в Играта</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
-        <!-- Нов сектор за показване на реалния токен баланс на потребителя -->
         <div class="blockchain-balance" id="walletBalanceDisplay" style="display: none;">В портфейла: 0 RC</div>
     </div>
 
@@ -171,7 +199,8 @@
         <div style="font-weight: bold; margin-bottom: 10px;">Задачи за Монети</div>
         <div class="task-row">
             <span>Присъедини се в Telegram</span>
-            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+            <!-- ТУК МОЖЕ ДА СЛОЖИТЕ ВАШИЯ TELEGRAM ЛИНК -->
+            <a href="https://t.me" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
 </div>
@@ -183,7 +212,6 @@
     let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
     let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
 
-    // Инициализация на интерфейса
     document.getElementById("balanceDisplay").innerText = score;
     updateUI();
 
@@ -204,7 +232,6 @@
         document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
     }
 
-    // Регенерация на енергията
     setInterval(() => {
         if (energy < 1000) {
             energy += 1;
@@ -222,7 +249,7 @@
     function createFloatingText(e) {
         const text = document.createElement("div");
         text.innerText = "+1";
-        text.style.position = "fixed"; // Променено на fixed за точно позициониране спрямо екрана
+        text.style.position = "fixed";
         text.style.left = `${e.clientX}px`;
         text.style.top = `${e.clientY}px`;
         text.style.color = "#00d2ff";
@@ -241,39 +268,26 @@
         setTimeout(() => text.remove(), 600);
     }
 
-    // Web3 интеграция чрез коригираната версия на Ethers v6
+    // НОВАТА INTEGRATION С WALLETCONNECT / APPKIT
     async function connectWallet() {
-        if (window.ethereum) {
-            try {
-                // Използване на правилния синтаксис за версия Ethers v6
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                const walletAddress = accounts[0];
-                
-                // Визуализиране на съкратен адрес
-                document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
-                
-                // Връзка със Смарт Договора
-                const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
-                const balance = await contract.balanceOf(walletAddress);
-                
-                // Преобразуване с форматиране (за 18 десетични знака)
-                const formattedBalance = ethers.formatUnits(balance, 18);
-                
-                // Показване на баланса отделно от точките от кликане
-                const bscBalanceContainer = document.getElementById("walletBalanceDisplay");
-                bscBalanceContainer.innerText = `В портфейла: ${parseFloat(formattedBalance).toFixed(2)} RC`;
-                bscBalanceContainer.style.display = "block";
-
-            } catch (error) {
-                console.error("Грешка при Web3 свързване:", error);
-                alert("Неуспешно свързване с портфейла.");
+        try {
+            if (!window.modal) {
+                alert("Системата за портфейли се зарежда, моля изчакайте секунда...");
+                return;
             }
-        } else {
-            alert("Моля, отворете играта през Web3 портфейл (Metamask, Trust Wallet) или инсталирайте разширението!");
-        }
-    }
-</script>
 
-</body>
-</html>
+            await window.modal.open();
+
+            window.modal.subscribeState(async (state) => {
+                if (state.selectedNetworkId && window.modal.getIsConnected()) {
+                    const walletAddress = window.modal.getAddress();
+                    
+                    if (walletAddress) {
+                        document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
+                        
+                        const walletProvider = window.modal.getWalletProvider();
+                        const provider = new ethers.BrowserProvider(walletProvider);
+                        
+                        const contract = new ethers.Contract(TOKEN_ADDRESS, MIN_ABI, provider);
+                        const balance = await contract.balanceOf(walletAddress);
+                        
