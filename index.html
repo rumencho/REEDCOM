@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,35 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network - Clicker</title>
     
-    <!-- Импортиране на WalletConnect AppKit библиотеки -->
-    <script type="module">
-      import { createAppKit } from 'https://esm.sh';
-      import { EthersAdapter } from 'https://esm.sh-adapter-ethers';
-      import { bsc } from 'https://esm.sh/networks';
-
-      // !!! ЗАМЕНЕТЕ ТЕКСТА ОТДОЛУ С ВАШИЯ ВЗЕТ КЛЮЧ !!!
-      const projectId = 'a930055e8e09714214a80fce568ba908';
-
-      const metadata = {
-        name: 'Reedcom Network',
-        description: 'Reedcom Clicker Web3 Game',
-        url: 'https://github.io',
-        icons: ['https://github.ioicon.png']
-      };
-
-      // Инициализиране на Web3 бутона
-      createAppKit({
-        adapters: [new EthersAdapter()],
-        networks: [bsc],
-        metadata,
-        projectId,
-        features: {
-          analytics: true,
-          email: false, // Изключваме имейл за по-чист интерфейс
-          socials: false
-        }
-      });
-    </script>
+    <!-- Използваме стабилна, класическа версия на Ethers за сигурна връзка -->
+    <script src="https://cloudflare.com"></script>
     
     <style>
         body {
@@ -57,6 +31,17 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
+        }
+        .btn-wallet {
+            background: linear-gradient(135deg, #00d2ff 0%, #0066ff 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            display: block !important; /* Гарантира, че бутонът винаги ще е видим */
         }
         .balance-container {
             text-align: center;
@@ -140,8 +125,8 @@
 <div class="game-container">
     <div class="header">
         <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
-        <!-- Автоматичен Web3 бутон, контролиран изцяло от WalletConnect -->
-        <appkit-button size="sm"></appkit-button>
+        <!-- Стандартен, неразрушим бутон -->
+        <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
     <div class="balance-container">
@@ -175,7 +160,7 @@
         <div style="font-weight: bold; margin-bottom: 10px;">Tasks for Coins</div>
         <div class="task-row">
             <span>Join Telegram</span>
-            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+            <a href="https://t.me" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
 </div>
@@ -209,6 +194,23 @@
         score += reward;
         document.getElementById("balanceDisplay").innerText = score;
         localStorage.setItem("reedcom_score", score);
+    }
+
+    // Класически метод за свързване без тежки външни библиотеки
+    async function connectWallet() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const walletAddress = accounts[0];
+                document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
+            } catch (error) {
+                console.error(error);
+                alert("Connection rejected.");
+            }
+        } else {
+            // Директна препратка към MetaMask браузъра за мобилни устройства
+            window.open("https://app.link", "_blank");
+        }
     }
 </script>
 
