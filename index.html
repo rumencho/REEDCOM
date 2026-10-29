@@ -14,13 +14,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
         }
         .game-container {
             max-width: 400px;
             width: 100%;
-            position: relative;
         }
         .header {
             display: flex;
@@ -60,15 +57,12 @@
             display: flex;
             justify-content: center;
             margin: 40px 0;
-            position: relative;
         }
         .coin-btn {
             background: none;
             border: none;
             cursor: pointer;
             outline: none;
-            transition: transform 0.1s ease;
-            padding: 0;
         }
         .coin-btn:active {
             transform: scale(0.95);
@@ -95,7 +89,6 @@
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #00d2ff, #00ffaa);
-            transition: width 0.1s linear;
         }
         .tasks-container {
             background: rgba(255, 255, 255, 0.03);
@@ -108,10 +101,6 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .task-row:last-child {
-            border: none;
         }
         .task-btn {
             background-color: #1c2c3e;
@@ -120,8 +109,6 @@
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 13px;
-            border: none;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -130,11 +117,11 @@
 <div class="game-container">
     <div class="header">
         <div style="font-weight: bold; letter-spacing: 1px;">REEDCOM NETWORK</div>
-        <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">Свържи Портфейл</button>
+        <button class="btn-wallet" onclick="connectWallet()">Свържи Портфейл</button>
     </div>
 
     <div class="balance-container">
-        <div class="balance-label">Вашият Баланс в Играта</div>
+        <div class="balance-label">Вашият Баланс</div>
         <div class="balance-amount" id="balanceDisplay">0</div>
     </div>
 
@@ -164,86 +151,44 @@
         <div style="font-weight: bold; margin-bottom: 10px;">Задачи за Монети</div>
         <div class="task-row">
             <span>Присъедини се в Telegram</span>
-            <a href="https://t.me/+1H6v9c3U3lM3ZTBk"https://t.me/+1H6v9c3U3lM3ZTBk"_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
+            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="task-btn" onclick="claimTask(100)">+100 RC</a>
         </div>
     </div>
 </div>
 
 <script>
     let score = parseInt(localStorage.getItem("reedcom_score")) || 0;
-    let energy = parseInt(localStorage.getItem("reedcom_energy")) ?? 1000;
+    let energy = 1000;
 
     document.getElementById("balanceDisplay").innerText = score;
-    updateUI();
 
     function handleTap(event) {
         if (energy >= 1) {
             score += 1;
             energy -= 1;
-            updateUI();
+            document.getElementById("balanceDisplay").innerText = score;
+            document.getElementById("energyText").innerText = energy + "/1000";
+            document.getElementById("energyFill").style.width = (energy / 10) + "%";
             localStorage.setItem("reedcom_score", score);
-            localStorage.setItem("reedcom_energy", energy);
-            createFloatingText(event);
         }
-    }
-
-    function updateUI() {
-        document.getElementById("balanceDisplay").innerText = score;
-        document.getElementById("energyText").innerText = `${energy}/1000`;
-        document.getElementById("energyFill").style.width = `${(energy / 1000) * 100}%`;
     }
 
     setInterval(() => {
         if (energy < 1000) {
             energy += 1;
-            updateUI();
-            localStorage.setItem("reedcom_energy", energy);
+            document.getElementById("energyText").innerText = energy + "/1000";
+            document.getElementById("energyFill").style.width = (energy / 10) + "%";
         }
     }, 1000);
 
     function claimTask(reward) {
         score += reward;
-        updateUI();
+        document.getElementById("balanceDisplay").innerText = score;
         localStorage.setItem("reedcom_score", score);
     }
 
-    function createFloatingText(e) {
-        const text = document.createElement("div");
-        text.innerText = "+1";
-        text.style.position = "fixed";
-        text.style.left = `${e.clientX}px`;
-        text.style.top = `${e.clientY}px`;
-        text.style.color = "#00d2ff";
-        text.style.fontWeight = "bold";
-        text.style.pointerEvents = "none";
-        text.style.zIndex = "9999";
-        text.style.transition = "transform 0.5s ease-out, opacity 0.5s";
-        
-        document.body.appendChild(text);
-        
-        setTimeout(() => {
-            text.style.transform = "translateY(-40px)";
-            text.style.opacity = "0";
-        }, 20);
-        
-        setTimeout(() => text.remove(), 500);
-    }
-
-    // Сигурно свързване без чупене на браузъра
     function connectWallet() {
-        if (window.ethereum) {
-            window.ethereum.request({ method: 'eth_requestAccounts' })
-                .then(accounts => {
-                    const walletAddress = accounts[0];
-                    document.getElementById("walletBtn").innerText = walletAddress.substring(0,6) + "..." + walletAddress.substring(38);
-                })
-                .catch(err => {
-                    console.error("Грешка:", err);
-                });
-        } else {
-            // Ако е на телефон извън MetaMask, линкът отваря автоматично портфейла им
-            window.open("https://app.link", "_blank");
-        }
+        alert("Тази функция ще бъде добавена скоро!");
     }
 </script>
 
