@@ -23,8 +23,8 @@
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
         
-        /* Монета и подобрена анимация при натискане */
-        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; perspective: 1000px; }
+        /* Хардуерно ускорена 3D монета през CSS */
+        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; }
         .interactive-coin { 
             width: 220px; 
             height: 220px; 
@@ -39,13 +39,13 @@
             overflow: hidden; 
             position: relative;
             box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
-            transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.05s ease;
             will-change: transform;
         }
         
-        /* Клас, който се добавя чрез JS при клик за по-силен 3D ефект */
-        .interactive-coin.clicked { 
-            transform: scale(0.90) rotateX(10deg); 
+        /* 100% стабилен ефект при натискане на екрана без JS намеса */
+        .interactive-coin:active { 
+            transform: scale(0.92) rotateX(8deg); 
         }
         
         .coin-image { 
@@ -93,7 +93,7 @@
     <div id="screen-tap" class="page-screen active">
         <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="balance-txt">788 REED</div></div>
         <div class="coin-container" id="coin-area">
-            <div class="interactive-coin" id="main-coin" onclick="clickCoin(event)">
+            <div class="interactive-coin" onclick="clickCoin(event)">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
                 <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
@@ -133,20 +133,12 @@
                 document.getElementById('energy-txt').textContent = energy;
                 document.getElementById('energy-bar').style.width = (energy / 10) + "%";
 
-                // Анимационен ефект за натискане (3D хлътване)
-                const coinEl = document.getElementById('main-coin');
-                coinEl.classList.add('clicked');
-                setTimeout(() => {
-                    coinEl.classList.remove('clicked');
-                }, 800);
-
                 // Изскачащ текст +1
                 let float = document.createElement('div');
                 float.className = 'floating-text';
                 float.textContent = '+1';
                 let rect = document.getElementById('coin-area').getBoundingClientRect();
                 
-                // Изчисляване на позицията на клика спрямо монетата
                 let clickX = e.clientX ? e.clientX - rect.left : rect.width / 2;
                 let clickY = e.clientY ? e.clientY - rect.top : rect.height / 2;
                 
@@ -163,3 +155,13 @@
                 document.getElementById('energy-txt').textContent = energy;
                 document.getElementById('energy-bar').style.width = (energy / 10) + "%";
             }
+        }, 1000);
+
+        function selectWallet(name, color) {
+            document.getElementById('wallet-modal').classList.remove('open');
+            let btn = document.getElementById('wallet-btn');
+            btn.textContent = name + ": 0x7a...2f";
+            btn.style.background = color;
+        }
+
+        function switchScreen(navId, screenId) {
