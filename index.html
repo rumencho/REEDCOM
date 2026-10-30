@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,22 +10,18 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #0b0f19;
             color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100vh; /* Фиксирана височина на екрана */
-            max-height: 100vh;
-            padding: 12px;
-            padding-bottom: 85px; /* Задължително разстояние за менюто */
-            overflow: hidden; /* Спира скролването на страницата */
-            position: relative;
+            padding: 16px;
+            /* Важно: голямо разстояние отдолу, за да не скрива нищо менюто */
+            padding-bottom: 120px; 
+            min-height: 100vh;
+            user-select: none;
         }
 
         /* Top Bar */
@@ -34,17 +30,13 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            height: 40px;
-            z-index: 10;
+            margin-bottom: 25px;
         }
 
         .user-info {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             color: #e2e8f0;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 12px;
-            border-radius: 15px;
         }
 
         .connect-wallet-btn {
@@ -57,77 +49,58 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            transition: all 0.2s ease;
         }
 
-        .connect-wallet-btn.connected {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-
-        /* Screens Handler */
-        .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            flex-grow: 1;
-            width: 100%;
-            padding: 10px 0;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        /* --- SCREEN 1: TAP (HOME) --- */
+        /* Блок Баланс */
         .balance-container {
             text-align: center;
+            margin-bottom: 20px;
         }
 
         .balance-label {
-            font-size: 12px;
+            font-size: 13px;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .balance-amount {
-            font-size: 42px;
+            font-size: 44px;
             font-weight: 800;
             color: #00b4db;
-            text-shadow: 0 0 25px rgba(0, 180, 219, 0.5);
+            text-shadow: 0 0 20px rgba(0, 180, 219, 0.4);
         }
 
+        /* Централна Зона: Монета */
         .coin-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
-            width: 100%;
+            margin: 40px 0;
         }
 
         .interactive-coin {
-            width: 210px;
-            height: 210px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
             background: radial-gradient(circle, #172237 0%, #0e1420 100%);
             border: 5px solid #00b4db;
-            box-shadow: 0 0 40px rgba(0, 180, 219, 0.6), inset 0 0 20px rgba(0, 180, 219, 0.3);
+            box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             transition: transform 0.05s ease;
-            position: relative;
-            user-select: none;
+        }
+
+        .interactive-coin:active {
+            transform: scale(0.92);
         }
 
         .coin-icon {
             font-size: 50px;
-            filter: drop-shadow(0 0 10px #00b4db);
             margin-bottom: 5px;
         }
 
@@ -145,24 +118,22 @@
             color: #00b4db;
         }
 
-        .interactive-coin:active {
-            transform: scale(0.94);
-        }
-
+        /* Блок Енергия */
         .energy-container {
             width: 100%;
-            max-width: 360px;
-            background: rgba(255, 255, 255, 0.02);
+            max-width: 400px;
+            margin: 30px auto 0 auto;
+            background: rgba(255, 255, 255, 0.03);
             padding: 12px;
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .energy-text {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 6px;
+            font-size: 14px;
+            margin-bottom: 8px;
             color: #94a3b8;
         }
 
@@ -172,9 +143,9 @@
 
         .progress-bar-bg {
             width: 100%;
-            height: 10px;
+            height: 12px;
             background-color: #1e293b;
-            border-radius: 5px;
+            border-radius: 6px;
             overflow: hidden;
         }
 
@@ -182,64 +153,25 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, #00b4db, #00ffcc);
+            border-radius: 6px;
             box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
         }
 
-        /* --- SCREENS CONTENT --- */
-        .screen-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            color: #00b4db;
-        }
-
-        .list-container {
-            width: 100%;
-            max-width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-grow: 1;
-            justify-content: flex-start;
-        }
-
-        .list-item {
-            background: #111723;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 14px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-btn {
-            background: #1e293b;
-            border: none;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* FIXED STICKY BOTTOM NAV BAR */
+        /* ФИКСИРАНО ДОЛНО МЕНЮ - СИГУРНА ПОЗИЦИЯ */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px; /* Конкретна фиксирана височина */
+            bottom: 15px; /* Леко повдигнато от самия ръб, за да не се скрива */
+            left: 5%;
+            width: 90%; /* Като плаващ панел, за да пасне на всеки модел телефон */
+            height: 65px;
             background-color: #111723;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 9999; /* Винаги най-отгоре над всичко */
-            box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7);
-            padding-bottom: env(safe-area-inset-bottom); /* Защита за iPhone екрани */
+            z-index: 99999;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
         .nav-item {
@@ -248,11 +180,10 @@
             align-items: center;
             justify-content: center;
             color: #64748b;
-            text-decoration: none;
             font-size: 12px;
             font-weight: 600;
-            height: 100%;
             width: 25%;
+            height: 100%;
             cursor: pointer;
         }
 
@@ -261,75 +192,83 @@
         }
 
         .nav-icon {
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 2px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Bar Component -->
+    <!-- 1. Top Bar -->
     <div class="top-bar" translate="no">
-        <div class="user-info" id="username-display">👤 @ReedcomUser</div>
+        <div class="user-info">👤 @ReedcomUser</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
-    <!-- SCREEN 1: TAP (HOME) -->
-    <div class="screen active" id="screen-tap" translate="no">
-        <div class="balance-container">
-            <div class="balance-label">Your Balance</div>
-            <div class="balance-amount" id="balance-txt">788 REED</div>
-        </div>
+    <!-- 2. Блок Баланс -->
+    <div class="balance-container" translate="no">
+        <div class="balance-label">Your Balance</div>
+        <div class="balance-amount" id="balance-txt">788 REED</div>
+    </div>
 
-        <div class="coin-container">
-            <div class="interactive-coin" id="coin">
-                <div class="coin-text-top">REED TOKEN</div>
-                <div class="coin-icon">🪷</div>
-                <div class="coin-text-bottom">COMMUNITY</div>
-            </div>
-        </div>
-
-        <div class="energy-container">
-            <div class="energy-text">
-                <span>⚡ Energy</span>
-                <span><strong id="energy-txt">1000</strong> / 1000</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="energy-bar"></div>
-            </div>
+    <!-- 3. Централна Зона: Монета -->
+    <div class="coin-container" translate="no">
+        <div class="interactive-coin" id="coin">
+            <div class="coin-text-top">REED TOKEN</div>
+            <div class="coin-icon">🪷</div>
+            <div class="coin-text-bottom">COMMUNITY</div>
         </div>
     </div>
 
-    <!-- SCREEN 2: TASKS -->
-    <div class="screen" id="screen-tasks" translate="no">
-        <h2 class="screen-title">Tasks for Coins</h2>
-        <div class="list-container">
-            <div class="list-item">
-                <div>
-                    <div>Join Telegram Channel</div>
-                    <small style="color: #00ffcc;">+100 REED</small>
-                </div>
-                <button class="item-btn">Start</button>
-            </div>
-            <div class="list-item">
-                <div>
-                    <div>Follow X (Twitter)</div>
-                    <small style="color: #00ffcc;">+150 REED</small>
-                </div>
-                <button class="item-btn">Start</button>
-            </div>
+    <!-- 4. Блок Енергия -->
+    <div class="energy-container" translate="no">
+        <div class="energy-text">
+            <span>⚡ Energy</span>
+            <span><strong id="energy-txt">1000</strong> / 1000</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="energy-bar"></div>
         </div>
     </div>
 
-    <!-- SCREEN 3: FRIENDS -->
-    <div class="screen" id="screen-friends" translate="no">
-        <h2 class="screen-title">Invite Friends</h2>
-        <div class="list-container" style="text-align: center; justify-content: center;">
-            <p style="color: #94a3b8; margin-bottom: 20px;">Earn 10% of your friends' token claims!</p>
-            <button class="connect-wallet-btn" style="width: 100%; max-width: 250px; margin: 0 auto; padding: 12px;">Copy Invite Link</button>
+    <!-- 5. Фиксирано Долно Меню (Плаващ стил срещу скриване) -->
+    <nav class="bottom-nav" translate="no">
+        <div class="nav-item active" onclick="alert('Tap Menu Clicked')">
+            <span class="nav-icon">⚡</span>
+            <span>Tap</span>
         </div>
-    </div>
+        <div class="nav-item" onclick="alert('Tasks Menu Clicked')">
+            <span class="nav-icon">📋</span>
+            <span>Tasks</span>
+        </div>
+        <div class="nav-item" onclick="alert('Friends Menu Clicked')">
+            <span class="nav-icon">👥</span>
+            <span>Friends</span>
+        </div>
+        <div class="nav-item" onclick="alert('Profile Menu Clicked')">
+            <span class="nav-icon">👤</span>
+            <span>Profile</span>
+        </div>
+    </nav>
 
-    <!-- SCREEN 4: PROFILE -->
-    <div class="screen" id="screen-profile" translate="no">
-        <h2 class="screen-title">User Profile</h2>
+    <script>
+        // Две прости и сигурни функции за тест на реакцията
+        const coin = document.getElementById('coin');
+        const balanceTxt = document.getElementById('balance-txt');
+        let balance = 788;
+
+        // Клик върху монетата
+        coin.addEventListener('click', () => {
+            balance += 1;
+            balanceTxt.textContent = balance + " REED";
+        });
+
+        // Клик върху портфейла
+        const walletBtn = document.getElementById('wallet-btn');
+        walletBtn.addEventListener('click', () => {
+            walletBtn.textContent = "0x7a...2f";
+            walletBtn.style.background = "#10b981";
+        });
+    </script>
+</body>
+</html>
