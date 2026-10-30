@@ -5,124 +5,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; user-select: none; text-align: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
         
-        /* Горна лента с бутон */
-        .top-bar { display: flex; justify-content: center; margin-bottom: 20px; margin-top: 10px; }
-        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; }
+        /* Фиксиран екран - не позволява на целия браузър да мърда */
+        html, body { 
+            background-color: #0b0f19; 
+            color: #ffffff; 
+            height: 100%; 
+            overflow: hidden; 
+            user-select: none;
+        }
+
+        /* Контейнер, който приплъзва страниците наляво/надясно */
+        .wrapper {
+            display: flex;
+            width: 400%; /* 4 страници х 100% */
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Общ стил за всяка отделна страница */
+        .page-screen {
+            width: 25%; /* Всяка страница заема точно екрана */
+            height: 100%;
+            padding: 16px;
+            padding-bottom: 100px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Горна лента с бутон (Само на първия екран) */
+        .top-bar { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; margin-top: 10px; }
+        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; text-align: center; }
         
         /* Баланс */
-        .balance-container { margin-bottom: 20px; }
+        .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; margin-top: 5px; }
         
         /* Централна монета */
-        .coin-container { display: flex; justify-content: center; margin: 25px 0; position: relative; }
+        .coin-container { display: flex; justify-content: center; margin: 25px 0; position: relative; width: 100%; }
         .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); }
-        .interactive-coin:active { transform: scale(0.95); }
+        .interactive-coin:active { transform: scale(0.94); }
         .coin-image { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
         /* Енергия */
-        .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .energy-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: auto; margin-bottom: 20px; }
         .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
         .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
         
-        /* Секция с линкове (Задачи) - Директно на екрана */
-        .social-tasks { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin: 30px auto 0 auto; background: rgba(255, 255, 255, 0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .social-title { font-size: 16px; font-weight: bold; color: #00b4db; text-align: left; margin-bottom: 4px; padding-left: 4px; }
-        .social-link { display: flex; align-items: center; justify-content: space-between; background: #111723; border: 1px solid rgba(255, 255, 255, 0.08); padding: 14px; border-radius: 12px; text-decoration: none; color: white; font-weight: bold; font-size: 14px; }
+        /* Секция Задачи (Тasks) */
+        .social-tasks { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 20px; background: rgba(255, 255, 255, 0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .social-title { font-size: 18px; font-weight: bold; color: #00b4db; text-align: left; margin-bottom: 8px; }
+        .social-link { display: flex; align-items: center; justify-content: space-between; background: #111723; border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 12px; text-decoration: none; color: white; font-weight: bold; font-size: 14px; }
         .social-link:active { background: rgba(0, 180, 219, 0.1); border-color: #00b4db; }
-        .link-icon { font-size: 18px; }
         
+        /* Плейсхолдъри за другите страници */
+        .placeholder-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 30px 20px; border-radius: 20px; text-align: center; margin-top: 40px; width: 100%; max-width: 400px; }
+        .placeholder-title { font-size: 22px; font-weight: bold; color: #00b4db; margin-bottom: 10px; }
+        .placeholder-desc { color: #94a3b8; font-size: 14px; }
+
+        /* ФИКСИРАНО ДОЛНО МЕНЮ (По логиката на Blum) */
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
+        .nav-item.active { color: #00b4db; }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+
         .floating-text { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
     </style>
 </head>
 <body>
 
-    <!-- Портфейл бутон -->
-    <div class="top-bar">
-        <button class="connect-wallet-btn" id="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
-    </div>
-
-    <!-- Баланс -->
-    <div class="balance-container">
-        <div class="balance-label">Your Balance</div>
-        <div class="balance-amount" id="balance-txt">788 REED</div>
-    </div>
-
-    <!-- Монета с вашата картинка -->
-    <div class="coin-container" id="coin-area">
-        <div class="interactive-coin" onclick="clickCoin(event)">
-            <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-            <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
-            <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
+    <!-- Плъзгащ се контейнер -->
+    <div class="wrapper" id="main-wrapper">
+        
+        <!-- ЕКРАН 1: TAP (Основен кликер) -->
+        <div class="page-screen">
+            <div class="top-bar">
+                <button class="connect-wallet-btn" id="wallet-btn" ontouchstart="connectWallet()">Connect Wallet</button>
+            </div>
+            <div class="balance-container">
+                <div class="balance-label">Your Balance</div>
+                <div class="balance-amount class-balance-txt">788 REED</div>
+            </div>
+            <div class="coin-container" id="coin-area">
+                <div class="interactive-coin" ontouchstart="clickCoin(event)">
+                    <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                    <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
+                    <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
+                </div>
+            </div>
+            <div class="energy-container">
+                <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
+            </div>
         </div>
+
+        <!-- ЕКРАН 2: TASKS (Задачи с реални линкове) -->
+        <div class="page-screen">
+            <div class="balance-container" style="margin-top: 20px;">
+                <div class="balance-label">Your Balance</div>
+                <div class="balance-amount class-balance-txt">788 REED</div>
+            </div>
+            <div class="social-tasks">
+                <div class="social-title">📋 Tasks & Community</div>
+                <!-- СМЕНЕТЕ С ВАШИЯ ТЕЛЕГРАМ ЛИНК -->
+                <a href="https://t.me" target="_blank" class="social-link">
+                    <span>💬 Join Telegram Channel</span>
+                    <span>➔</span>
+                </a>
+                <!-- СМЕНЕТЕ С ВАШИЯ Х ЛИНК -->
+                <a href="https://x.com" target="_blank" class="social-link">
+                    <span>🐦 Follow us on X (Twitter)</span>
+                    <span>➔</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ЕКРАН 3: FRIENDS -->
+        <div class="page-screen">
+            <div class="placeholder-box">
+                <div class="placeholder-title">👥 Friends</div>
+                <div class="placeholder-desc">Invite your buddies and get 10% of their mined tokens. Section coming soon!</div>
+            </div>
+        </div>
+
+        <!-- ЕКРАН 4: PROFILE -->
+        <div class="page-screen">
+            <div class="placeholder-box">
+                <div class="placeholder-title">👤 User Profile</div>
+                <div class="placeholder-desc" style="font-size: 16px; font-weight: bold; color: #00b4db; margin-top: 10px;">
+                    Connected: @ReedcomUser
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Енергия -->
-    <div class="energy-container">
-        <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
-    </div>
-
-    <!-- Задачи - Директни Линкове (Няма какво да се счупи!) -->
-    <div class="social-tasks">
-        <div class="social-title">📋 Tasks & Community</div>
-        
-        <!-- СМЕНЕТЕ С ВАШИЯ ТЕЛЕГРАМ ЛИНК -->
-        <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="social-link">
-            <span>💬 Join Telegram Channel</span>
-            <span class="link-icon">➔</span>
-        </a>
-        
-        <!-- СМЕНЕТЕ С ВАШИЯ Х (TWITTER) ЛИНК -->
-        <a href="https://x.com/REEDCOMapp" target="_blank" class="social-link">
-            <span>🐦 Follow us on X</span>
-            <span class="link-icon">➔</span>
-        </a>
-    </div>
+    <!-- МЕНЮ В ДОЛНИЯ КОНТУР (ВИНАГИ ФИКСИРАНО НА ЕКРАНА) -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-tap" ontouchstart="scrollToPage(0, 'nav-tap')">
+            <span class="nav-icon">⚡</span><span>Tap</span>
+        </div>
+        <div class="nav-item" id="nav-tasks" ontouchstart="scrollToPage(1, 'nav-tasks')">
+            <span class="nav-icon">📋</span><span>Tasks</span>
+        </div>
+        <div class="nav-item" id="nav-friends" ontouchstart="scrollToPage(2, 'nav-friends')">
+            <span class="nav-icon">👥</span><span>Friends</span>
+        </div>
+        <div class="nav-item" id="nav-profile" ontouchstart="scrollToPage(3, 'nav-profile')">
+            <span class="nav-icon">👤</span><span>Profile</span>
+        </div>
+    </nav>
 
     <script>
         let balance = 788;
         let energy = 1000;
+        const maxEnergy = 1000;
 
-        function clickCoin(e) {
+        function updateBalanceDisplays() {
+            // Обновяваме цифрата едновременно на екрана за цъкане и на екрана за задачи
+            const elements = document.getElementsByClassName('class-balance-txt');
+            for(let i=0; i<elements.length; i++) {
+                elements[i].textContent = balance + " REED";
+            }
+        }
+
+        window.clickCoin = function(e) {
             if (energy > 0) {
                 balance += 1;
                 energy -= 1;
-                document.getElementById('balance-txt').textContent = balance + " REED";
-                document.getElementById('energy-txt').textContent = energy;
-                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
-
-                // Ефект +1
-                let float = document.createElement('div');
-                float.className = 'floating-text';
-                float.textContent = '+1';
-                let rect = document.getElementById('coin-area').getBoundingClientRect();
-                float.style.left = (e.clientX - rect.left - 15) + 'px';
-                float.style.top = (e.clientY - rect.top - 20) + 'px';
-                document.getElementById('coin-area').appendChild(float);
-                setTimeout(() => float.remove(), 600);
-            }
-        }
-
-        setInterval(() => {
-            if (energy < 1000) {
-                energy = Math.min(energy + 3, 1000);
-                document.getElementById('energy-txt').textContent = energy;
-                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
-            }
-        }, 1000);
-
-        function connectWallet() {
-            let btn = document.getElementById('wallet-btn');
-            btn.textContent = "Binance: 0x7a...2f";
-            btn.style.background = "#F3BA2F";
-            btn.style.color = "#000000";
-        }
-    </script>
-</body>
-</html>
+                updateBalanceDisplays();
