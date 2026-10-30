@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -18,10 +18,40 @@
             background-color: #0b0f19;
             color: #ffffff;
             padding: 16px;
-            /* Важно: голямо разстояние отдолу, за да не скрива нищо менюто */
             padding-bottom: 120px; 
             min-height: 100vh;
             user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Екрани (Табове) */
+        .page-screen {
+            display: none;
+        }
+
+        .page-screen.active {
+            display: block;
+        }
+
+        .screen-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 20px;
+        }
+
+        .screen-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #00b4db;
+        }
+
+        .screen-desc {
+            color: #94a3b8;
+            font-size: 14px;
         }
 
         /* Top Bar */
@@ -49,6 +79,99 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* МОДАЛЕН ПРОЗОРЕЦ ЗА ПОРТФЕЙЛИ */
+        .wallet-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 8, 15, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .wallet-modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #111723;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 340px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            position: relative;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 20px;
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .wallet-option {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .wallet-option:hover, .wallet-option:active {
+            background: rgba(0, 180, 219, 0.1);
+            border-color: #00b4db;
+        }
+
+        .wallet-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            margin-right: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Цветове на логата като заместители */
+        .logo-binance { background: #F3BA2F; color: #000; }
+        .logo-okx { background: #000000; color: #fff; border: 1px solid #333; }
+        .logo-gate { background: #E84142; color: #fff; }
+
+        .wallet-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
         }
 
         /* Блок Баланс */
@@ -78,6 +201,7 @@
             justify-content: center;
             align-items: center;
             margin: 40px 0;
+            position: relative;
         }
 
         .interactive-coin {
@@ -118,6 +242,23 @@
             color: #00b4db;
         }
 
+        /* Стил за изскачащото число +1 */
+        .floating-text {
+            position: absolute;
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ffcc;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+        }
+
         /* Блок Енергия */
         .energy-container {
             width: 100%;
@@ -141,6 +282,10 @@
             color: #00ffcc;
         }
 
+        .energy-text span.low-energy strong {
+            color: #ef4444;
+        }
+
         .progress-bar-bg {
             width: 100%;
             height: 12px;
@@ -155,14 +300,15 @@
             background: linear-gradient(90deg, #00b4db, #00ffcc);
             border-radius: 6px;
             box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            transition: width 0.1s ease-out;
         }
 
-        /* ФИКСИРАНО ДОЛНО МЕНЮ - СИГУРНА ПОЗИЦИЯ */
+        /* ФИКСИРАНО ДОЛНО МЕНЮ */
         .bottom-nav {
             position: fixed;
-            bottom: 15px; /* Леко повдигнато от самия ръб, за да не се скрива */
+            bottom: 15px; 
             left: 5%;
-            width: 90%; /* Като плаващ панел, за да пасне на всеки модел телефон */
+            width: 90%; 
             height: 65px;
             background-color: #111723;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -185,6 +331,7 @@
             width: 25%;
             height: 100%;
             cursor: pointer;
+            transition: color 0.2s ease;
         }
 
         .nav-item.active {
@@ -205,70 +352,14 @@
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
-    <!-- 2. Блок Баланс -->
-    <div class="balance-container" translate="no">
-        <div class="balance-label">Your Balance</div>
-        <div class="balance-amount" id="balance-txt">788 REED</div>
-    </div>
+    <!-- ИЗСКАЧАЩО МЕНЮ ЗА ИЗБОР НА ПОРТФЕЙЛ -->
+    <div class="wallet-modal" id="wallet-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <div class="modal-title">Connect Web3 Wallet</div>
+            
+            <div class="wallet-option" onclick="connectSpecificWallet('Binance', '#F3BA2F')">
+                <div class="wallet-logo logo-binance">🔶</div>
+                <div class="wallet-name">Binance Web3</div>
+            </div>
 
-    <!-- 3. Централна Зона: Монета -->
-    <div class="coin-container" translate="no">
-        <div class="interactive-coin" id="coin">
-            <div class="coin-text-top">REED TOKEN</div>
-            <div class="coin-icon">🪷</div>
-            <div class="coin-text-bottom">COMMUNITY</div>
-        </div>
-    </div>
-
-    <!-- 4. Блок Енергия -->
-    <div class="energy-container" translate="no">
-        <div class="energy-text">
-            <span>⚡ Energy</span>
-            <span><strong id="energy-txt">1000</strong> / 1000</span>
-        </div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="energy-bar"></div>
-        </div>
-    </div>
-
-    <!-- 5. Фиксирано Долно Меню (Плаващ стил срещу скриване) -->
-    <nav class="bottom-nav" translate="no">
-        <div class="nav-item active" onclick="alert('Tap Menu Clicked')">
-            <span class="nav-icon">⚡</span>
-            <span>Tap</span>
-        </div>
-        <div class="nav-item" onclick="alert('Tasks Menu Clicked')">
-            <span class="nav-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="nav-item" onclick="alert('Friends Menu Clicked')">
-            <span class="nav-icon">👥</span>
-            <span>Friends</span>
-        </div>
-        <div class="nav-item" onclick="alert('Profile Menu Clicked')">
-            <span class="nav-icon">👤</span>
-            <span>Profile</span>
-        </div>
-    </nav>
-
-    <script>
-        // Две прости и сигурни функции за тест на реакцията
-        const coin = document.getElementById('coin');
-        const balanceTxt = document.getElementById('balance-txt');
-        let balance = 788;
-
-        // Клик върху монетата
-        coin.addEventListener('click', () => {
-            balance += 1;
-            balanceTxt.textContent = balance + " REED";
-        });
-
-        // Клик върху портфейла
-        const walletBtn = document.getElementById('wallet-btn');
-        walletBtn.addEventListener('click', () => {
-            walletBtn.textContent = "0x7a...2f";
-            walletBtn.style.background = "#10b981";
-        });
-    </script>
-</body>
-</html>
