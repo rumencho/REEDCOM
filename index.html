@@ -18,11 +18,11 @@
             position: relative;
         }
         
-        /* 100% сигурно превключване на екрани без JavaScript */
+        /* Сигурно превключване на екрани без тежък JavaScript */
         .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page-screen:target { display: flex; }
         
-        /* По подразбиране първият екран (Tap) е active при стартиране */
+        /* По подразбиране първият екран (Tap) е активен при стартиране */
         #screen-tap { display: flex; }
         .page-screen:target ~ #screen-tap { display: none; }
         #screen-tap:target { display: flex; }
@@ -101,7 +101,8 @@
         </div>
         <div class="social-tasks">
             <div class="social-title">📋 Tasks & Community</div>
-            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
+            <!-- ПОСТАВЕТЕ ВАШИТЕ ТЕЛЕГРАМ И Х ЛИНКОВЕ ТУК -->
+            <a href="https://t.me" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
             <a href="https://x.com" target="_blank" class="social-link"><span>🐦 Follow us on X</span><span>➔</span></a>
         </div>
     </div>
@@ -134,14 +135,15 @@
         let balance = 788;
         let energy = 1000;
 
-        // При стартиране проверяваме дали потребителят вече има генериран адрес на телефона си
         document.addEventListener("DOMContentLoaded", function() {
             const savedAddr = localStorage.getItem("reedcom_connected_address");
             if (savedAddr) {
                 const btn = document.getElementById('wallet-btn');
-                btn.textContent = "Wallet: " + savedAddr;
-                btn.style.background = "#10b981";
-                btn.style.color = "#ffffff";
+                if (btn) {
+                    btn.textContent = "Wallet: " + savedAddr;
+                    btn.style.background = "#10b981";
+                    btn.style.color = "#ffffff";
+                }
             }
         });
 
@@ -167,5 +169,6 @@
             }
         }
 
-        // Интелигентна функция: генерира уникален за потребителя адрес веднага, ако няма инжектиран Web3
         function requestWeb3Wallet() {
+            const btn = document.getElementById('wallet-btn');
+            
