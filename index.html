@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -22,36 +21,6 @@
             min-height: 100vh;
             user-select: none;
             overflow-x: hidden;
-        }
-
-        /* Екрани (Табове) */
-        .page-screen {
-            display: none;
-        }
-
-        .page-screen.active {
-            display: block;
-        }
-
-        .screen-placeholder {
-            text-align: center;
-            padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-top: 20px;
-        }
-
-        .screen-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #00b4db;
-        }
-
-        .screen-desc {
-            color: #94a3b8;
-            font-size: 14px;
         }
 
         /* Top Bar */
@@ -79,97 +48,6 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        /* МОДАЛЕН ПРОЗОРЕЦ ЗА ПОРТФЕЙЛИ */
-        .wallet-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 8, 15, 0.85);
-            z-index: 100000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .wallet-modal.open {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #111723;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 340px;
-            padding: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            position: relative;
-            text-align: center;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #ffffff;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 24px;
-            color: #64748b;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .wallet-option {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-        }
-
-        .wallet-option:hover, .wallet-option:active {
-            background: rgba(0, 180, 219, 0.1);
-            border-color: #00b4db;
-        }
-
-        .wallet-logo {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            margin-right: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 11px;
-        }
-
-        .logo-binance { background: #F3BA2F; color: #000000; }
-        .logo-okx { background: #ffffff; color: #000000; }
-        .logo-gate { background: #E84142; color: #ffffff; }
-
-        .wallet-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
         }
 
         /* Блок Баланс */
@@ -294,7 +172,6 @@
             background: linear-gradient(90deg, #00b4db, #00ffcc);
             border-radius: 6px;
             box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-            transition: width 0.1s ease-out;
         }
 
         /* ДОЛНО МЕНЮ */
@@ -339,23 +216,107 @@
 </head>
 <body>
 
-    <!-- Top Bar -->
+    <!-- 1. Top Bar -->
     <div class="top-bar" translate="no">
         <div class="user-info">👤 @ReedcomUser</div>
-        <button class="connect-wallet-btn" id="wallet-btn" onclick="openWalletMenu()">Connect Wallet</button>
+        <button class="connect-wallet-btn" id="wallet-btn" onclick="connectWalletMock()">Connect Wallet</button>
     </div>
 
-    <!-- МОДАЛЕН ПРОЗОРЕЦ ЗА ПОРТФЕЙЛИ -->
-    <div class="wallet-modal" id="wallet-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeWalletMenu()">&times;</button>
-            <div class="modal-title">Connect Web3 Wallet</div>
-            
-            <div class="wallet-option" onclick="triggerWeb3Connection('Binance', '#F3BA2F')">
-                <div class="wallet-logo logo-binance">BNC</div>
-                <div class="wallet-name">Binance Web3</div>
-            </div>
-            <div class="wallet-option" onclick="triggerWeb3Connection('OKX', '#10b981')">
-                <div class="wallet-logo logo-okx">OKX</div>
-                <div class="wallet-name">OKX Wallet</div>
-            </div>
+    <!-- 2. Блок Баланс -->
+    <div class="balance-container" translate="no">
+        <div class="balance-label">Your Balance</div>
+        <div class="balance-amount" id="balance-txt">788 REED</div>
+    </div>
+
+    <!-- 3. Централна Зона: Монета -->
+    <div class="coin-container" translate="no" id="coin-area">
+        <div class="interactive-coin" id="coin">
+            <div class="coin-text-top">REED TOKEN</div>
+            <div class="coin-icon">🪷</div>
+            <div class="coin-text-bottom">COMMUNITY</div>
+        </div>
+    </div>
+
+    <!-- 4. Блок Енергия -->
+    <div class="energy-container" translate="no">
+        <div class="energy-text">
+            <span>⚡ Energy</span>
+            <span><strong id="energy-txt">1000</strong> / 1000</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="energy-bar"></div>
+        </div>
+    </div>
+
+    <!-- 5. Фиксирано Долно Меню -->
+    <nav class="bottom-nav" translate="no">
+        <div class="nav-item active" onclick="alert('Главният екран е зареден!')">
+            <span class="nav-icon">⚡</span>
+            <span>Tap</span>
+        </div>
+        <div class="nav-item" onclick="alert('Куестовете ще бъдат добавени следващата стъпка!')">
+            <span class="nav-icon">📋</span>
+            <span>Tasks</span>
+        </div>
+        <div class="nav-item" onclick="alert('Рефералите ще бъдат добавени следващата стъпка!')">
+            <span class="nav-icon">👥</span>
+            <span>Friends</span>
+        </div>
+        <div class="nav-item" onclick="alert('Профилът ще бъде добавен следващата стъпка!')">
+            <span class="nav-icon">👤</span>
+            <span>Profile</span>
+        </div>
+    </nav>
+
+    <script>
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
+        const coin = document.getElementById('coin');
+        const balanceTxt = document.getElementById('balance-txt');
+        const energyTxt = document.getElementById('energy-txt');
+        const energyBar = document.getElementById('energy-bar');
+        const coinArea = document.getElementById('coin-area');
+
+        // Клик върху монетата
+        if(coin) {
+            coin.addEventListener('click', (e) => {
+                if (energy > 0) {
+                    balance += 1;
+                    balanceTxt.textContent = balance + " REED";
+                    energy -= 1;
+                    energyTxt.textContent = energy;
+                    energyBar.style.width = (energy / maxEnergy * 100) + "%";
+
+                    // Изскачащ ефект +1
+                    const float = document.createElement('div');
+                    float.className = 'floating-text';
+                    float.textContent = '+1';
+                    const rect = coinArea.getBoundingClientRect();
+                    let x = e.clientX ? e.clientX - rect.left : rect.width / 2;
+                    let y = e.clientY ? e.clientY - rect.top : rect.height / 2;
+                    float.style.left = (x - 15) + 'px';
+                    float.style.top = (y - 20) + 'px';
+                    coinArea.appendChild(float);
+                    setTimeout(() => float.remove(), 600);
+                }
+            });
+        }
+
+        // Възстановяване на енергията
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy = Math.min(energy + 3, maxEnergy);
+                energyTxt.textContent = energy;
+                energyBar.style.width = (energy / maxEnergy * 100) + "%";
+            }
+        }, 1000);
+
+        // Прост тест за бутона за портфейл
+        function connectWalletMock() {
+            const btn = document.getElementById('wallet-btn');
+            btn.textContent = "OKX: 0x7a...2f";
+            btn.style.background = "#10b981";
+        }
+    </script>
