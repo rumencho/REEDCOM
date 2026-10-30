@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -34,6 +34,7 @@
             width: 100%;
         }
 
+        /* Само човечето без текст */
         .user-avatar-only {
             font-size: 22px;
             background: rgba(255, 255, 255, 0.05);
@@ -96,9 +97,10 @@
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-            margin: 15px 0;
+            margin: 20px 0;
         }
 
+        /* Оригиналната неонова монета */
         .interactive-coin {
             width: 230px;
             height: 230px;
@@ -137,23 +139,43 @@
             color: #00b4db;
         }
 
-        /* ТОЧНА ПОЗИЦИЯ: Логото стои твърдо НАД плаващото меню на мястото на бара */
-        .bottom-logo-container {
+        /* Енергиен Бар (Върнат на мястото си) */
+        .energy-container {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: auto;
-            margin-bottom: 15px; /* Разстояние до долното меню */
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
         }
 
-        .bottom-logo-img {
-            width: 110px; 
-            height: 110px;
-            border-radius: 50%;
-            border: 3px solid #00b4db;
-            box-shadow: 0 0 25px rgba(0, 180, 219, 0.4);
-            object-fit: cover;
+        .energy-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+
+        .energy-text span strong {
+            color: #00ffcc;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background-color: #1e293b;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00b4db, #00ffcc);
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
         }
 
         /* --- ВЪТРЕШНИ ЕКРАНИ --- */
@@ -235,7 +257,7 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar -->
+    <!-- 1. Top Bar (Само иконата на синьото човече) -->
     <div class="top-bar" translate="no">
         <div class="user-avatar-only">👤</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
@@ -253,6 +275,16 @@
                 <div class="coin-text-top">REED TOKEN</div>
                 <div class="coin-icon">🪷</div>
                 <div class="coin-text-bottom">COMMUNITY</div>
+            </div>
+        </div>
+
+        <div class="energy-container">
+            <div class="energy-text">
+                <span>⚡ Energy</span>
+                <span><strong id="energy-txt">1000</strong> / 1000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="energy-bar"></div>
             </div>
         </div>
     </div>
@@ -302,34 +334,9 @@
         </div>
     </div>
 
-    <!-- Коригирано позициониране: Винаги НАД долното меню, извън екраните -->
-    <div class="bottom-logo-container" translate="no">
-        <img class="bottom-logo-img" src="coin.jpg.jpg" alt="Reedcom Coin Logo">
-    </div>
-
-    <!-- 5. Плаващо Долно Меню -->
+    <!-- 5. Плаващо Долно Меню за Превключване -->
     <nav class="bottom-nav" translate="no">
         <div class="nav-item active" data-target="screen-tap">
             <span class="nav-icon">⚡</span>
             <span>Tap</span>
         </div>
-        <div class="nav-item" data-target="screen-tasks">
-            <span class="nav-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="nav-item" data-target="screen-friends">
-            <span class="nav-icon">👥</span>
-            <span>Friends</span>
-        </div>
-        <div class="nav-item" data-target="screen-profile">
-            <span class="nav-icon">👤</span>
-            <span>Profile</span>
-        </div>
-    </nav>
-
-    <script>
-        let balance = 788;
-        let totalClicks = 0;
-
-        const coin = document.getElementById('coin');
-        const balanceTxt = document.getElementById('balance-txt');
