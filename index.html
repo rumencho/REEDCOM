@@ -29,8 +29,7 @@
 
         /* Горна лента */
         .top-bar { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; margin-top: 10px; }
-        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; }
-        .connect-wallet-btn:active { background: #F3BA2F; color: #000000; }
+        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; transition: all 0.3s ease; }
         
         /* Баланс */
         .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
@@ -75,7 +74,8 @@
     <!-- ЕКРАН 1: TAP (Основен кликер) -->
     <div id="screen-tap" class="page-screen">
         <div class="top-bar">
-            <button class="connect-wallet-btn" id="wallet-btn" onclick="this.textContent='Binance: 0x7a...2f'; this.style.background='#F3BA2F'; this.style.color='#000'">Connect Wallet</button>
+            <!-- Реално свързване при натискане -->
+            <button class="connect-wallet-btn" id="wallet-btn" onclick="requestWeb3Wallet()">Connect Wallet</button>
         </div>
         <div class="balance-container">
             <div class="balance-label">Your Balance</div>
@@ -102,6 +102,7 @@
         </div>
         <div class="social-tasks">
             <div class="social-title">📋 Tasks & Community</div>
+            <!-- СЛОЖЕТЕ ВАШИТЕ РЕАЛНИ ЛИНКОВЕ ТУК ПАК -->
             <a href="https://t.me" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
             <a href="https://x.com" target="_blank" class="social-link"><span>🐦 Follow us on X</span><span>➔</span></a>
         </div>
@@ -123,7 +124,7 @@
         </div>
     </div>
 
-    <!-- ФИКСИРАНО ДОЛНО МЕНЮ (Чисти HTML линкове - Никога не забиват) -->
+    <!-- ФИКСИРАНО ДОЛНО МЕНЮ -->
     <nav class="bottom-nav">
         <a href="#screen-tap" class="nav-item"><span class="nav-icon">⚡</span><span>Tap</span></a>
         <a href="#screen-tasks" class="nav-item"><span class="nav-icon">📋</span><span>Tasks</span></a>
@@ -140,14 +141,12 @@
                 balance += 1;
                 energy -= 1;
                 
-                // Синхронизиране на баланса по всички екрани
                 const displays = document.querySelectorAll('.balance-txt-sync');
                 displays.forEach(el => el.textContent = balance + " REED");
                 
                 document.getElementById('energy-txt').textContent = energy;
                 document.getElementById('energy-bar').style.width = (energy / 10) + "%";
 
-                // Текст +1
                 let float = document.createElement('div');
                 float.className = 'floating-text';
                 float.textContent = '+1';
@@ -159,13 +158,12 @@
             }
         }
 
-        setInterval(() => {
-            if (energy < 1000) {
-                energy = Math.min(energy + 3, 1000);
-                document.getElementById('energy-txt').textContent = energy;
-                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
-            }
-        }, 1000);
-    </script>
-</body>
-</html>
+        // Истинска Web3 функция за извличане на акаунт
+        function requestWeb3Wallet() {
+            const btn = document.getElementById('wallet-btn');
+            
+            // Проверка дали играта е отворена в Web3 браузър (вътре в OKX, Binance или Gate)
+            if (typeof window.ethereum !== 'undefined') {
+                window.ethereum.request({ method: 'eth_requestAccounts' })
+                .then(function(accounts) {
+                    if (accounts && accounts.length > 0) {
