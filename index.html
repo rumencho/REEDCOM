@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -34,6 +34,7 @@
             width: 100%;
         }
 
+        /* Махнат е текстът @ReedcomUser, остава само синьото човече */
         .user-avatar-only {
             font-size: 22px;
             background: rgba(255, 255, 255, 0.05);
@@ -96,67 +97,68 @@
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
-        /* Новият дизайн: Монетата вече зарежда вашето GitHub 3D Лого */
+        /* Център: Запазена неоновата монета от снимката */
         .interactive-coin {
             width: 230px;
             height: 230px;
             border-radius: 50%;
-            border: 4px solid #00b4db;
+            background: radial-gradient(circle, #172237 0%, #0e1420 100%);
+            border: 5px solid #00b4db;
             box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
             transition: transform 0.05s ease;
-            background-image: url('coin.jpg.jpg'); /* Името на вашия GitHub файл */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
         }
 
         .interactive-coin:active {
             transform: scale(0.93);
         }
 
-        /* Енергиен Бар */
-        .energy-container {
+        .coin-icon {
+            font-size: 50px;
+            margin-bottom: 5px;
+        }
+
+        .coin-text-top {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #88f2ff;
+        }
+
+        .coin-text-bottom {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #00b4db;
+        }
+
+        /* НОВО: Вашето 3D Лого от GitHub на мястото на Енергийния бар */
+        .bottom-logo-container {
             width: 100%;
             max-width: 400px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .energy-text {
+            margin: 15px auto 0 auto;
             display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #94a3b8;
+            justify-content: center;
+            align-items: center;
         }
 
-        .energy-text span strong {
-            color: #00ffcc;
+        .bottom-logo-img {
+            width: 120px; /* Оптимален размер за дъното на екрана */
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #00b4db;
+            box-shadow: 0 0 25px rgba(0, 180, 219, 0.4);
+            object-fit: cover;
         }
 
-        .progress-bar-bg {
-            width: 100%;
-            height: 12px;
-            background-color: #1e293b;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #00b4db, #00ffcc);
-            border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-
-        /* --- ВЪТРЕШНИ СТРАНИЦИ (ЗАДАЧИ, ПРИЯТЕЛИ, ПРОФИЛ) --- */
+        /* --- ВЪТРЕШНИ ЕКРАНИ --- */
         .screen-title {
             font-size: 24px;
             font-weight: 700;
@@ -235,13 +237,13 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar (Само синьото човече) -->
+    <!-- 1. Top Bar (Само иконата на синьото човече) -->
     <div class="top-bar" translate="no">
         <div class="user-avatar-only">👤</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
-    <!-- ТАБ 1: ГЛАВЕН ЕКРАН ЗА ЦЪКАНЕ (TAP) -->
+    <!-- ТАБ 1: ГЛАВЕН ЕКРАН (TAP) -->
     <div class="screen active" id="screen-tap" translate="no">
         <div class="balance-container">
             <div class="balance-label">Your Balance</div>
@@ -249,18 +251,16 @@
         </div>
 
         <div class="coin-container">
-            <!-- Монетата с вашето 3D лого от coin.jpg.jpg -->
-            <div class="interactive-coin" id="coin"></div>
+            <div class="interactive-coin" id="coin">
+                <div class="coin-text-top">REED TOKEN</div>
+                <div class="coin-icon">🪷</div>
+                <div class="coin-text-bottom">COMMUNITY</div>
+            </div>
         </div>
 
-        <div class="energy-container">
-            <div class="energy-text">
-                <span>⚡ Energy</span>
-                <span><strong id="energy-txt">1000</strong> / 1000</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="energy-bar"></div>
-            </div>
+        <!-- Коригирано: Вашето GitHub лого замества изцяло Енергийния бар -->
+        <div class="bottom-logo-container">
+            <img class="bottom-logo-img" src="coin.jpg.jpg" alt="Reedcom Coin Logo">
         </div>
     </div>
 
@@ -309,7 +309,7 @@
         </div>
     </div>
 
-    <!-- 5. Плаващо Долно Меню (Превключва страниците) -->
+    <!-- 5. Плаващо Долно Меню за Превключване -->
     <nav class="bottom-nav" translate="no">
         <div class="nav-item active" data-target="screen-tap">
             <span class="nav-icon">⚡</span>
@@ -330,5 +330,4 @@
     </nav>
 
     <script>
-        // Двигател на състоянието
         let balance = 788;
