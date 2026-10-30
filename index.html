@@ -34,7 +34,6 @@
             width: 100%;
         }
 
-        /* Махнат е текстът @ReedcomUser, остава само синьото човече */
         .user-avatar-only {
             font-size: 22px;
             background: rgba(255, 255, 255, 0.05);
@@ -100,7 +99,6 @@
             margin: 15px 0;
         }
 
-        /* Център: Запазена неоновата монета от снимката */
         .interactive-coin {
             width: 230px;
             height: 230px;
@@ -139,19 +137,19 @@
             color: #00b4db;
         }
 
-        /* НОВО: Вашето 3D Лого от GitHub на мястото на Енергийния бар */
+        /* ТОЧНА ПОЗИЦИЯ: Логото стои твърдо НАД плаващото меню на мястото на бара */
         .bottom-logo-container {
             width: 100%;
-            max-width: 400px;
-            margin: 15px auto 0 auto;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-top: auto;
+            margin-bottom: 15px; /* Разстояние до долното меню */
         }
 
         .bottom-logo-img {
-            width: 120px; /* Оптимален размер за дъното на екрана */
-            height: 120px;
+            width: 110px; 
+            height: 110px;
             border-radius: 50%;
             border: 3px solid #00b4db;
             box-shadow: 0 0 25px rgba(0, 180, 219, 0.4);
@@ -237,7 +235,7 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar (Само иконата на синьото човече) -->
+    <!-- 1. Top Bar -->
     <div class="top-bar" translate="no">
         <div class="user-avatar-only">👤</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
@@ -256,11 +254,6 @@
                 <div class="coin-icon">🪷</div>
                 <div class="coin-text-bottom">COMMUNITY</div>
             </div>
-        </div>
-
-        <!-- Коригирано: Вашето GitHub лого замества изцяло Енергийния бар -->
-        <div class="bottom-logo-container">
-            <img class="bottom-logo-img" src="coin.jpg.jpg" alt="Reedcom Coin Logo">
         </div>
     </div>
 
@@ -309,7 +302,12 @@
         </div>
     </div>
 
-    <!-- 5. Плаващо Долно Меню за Превключване -->
+    <!-- Коригирано позициониране: Винаги НАД долното меню, извън екраните -->
+    <div class="bottom-logo-container" translate="no">
+        <img class="bottom-logo-img" src="coin.jpg.jpg" alt="Reedcom Coin Logo">
+    </div>
+
+    <!-- 5. Плаващо Долно Меню -->
     <nav class="bottom-nav" translate="no">
         <div class="nav-item active" data-target="screen-tap">
             <span class="nav-icon">⚡</span>
@@ -331,3 +329,7 @@
 
     <script>
         let balance = 788;
+        let totalClicks = 0;
+
+        const coin = document.getElementById('coin');
+        const balanceTxt = document.getElementById('balance-txt');
