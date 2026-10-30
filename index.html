@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -18,9 +18,12 @@
             background-color: #0b0f19;
             color: #ffffff;
             padding: 16px;
-            padding-bottom: 120px; 
+            padding-bottom: 110px; 
             min-height: 100vh;
             user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         /* Top Bar */
@@ -29,12 +32,10 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 25px;
         }
 
-        /* Коригирано: Само човечето без текст */
         .user-avatar-only {
-            font-size: 24px;
+            font-size: 22px;
             background: rgba(255, 255, 255, 0.05);
             padding: 6px 10px;
             border-radius: 50%;
@@ -55,10 +56,24 @@
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
         }
 
-        /* Блок Баланс */
+        /* Screens Manager */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- SCREEN 1: TAP (HOME) --- */
         .balance-container {
             text-align: center;
-            margin-bottom: 20px;
+            margin-top: 15px;
         }
 
         .balance-label {
@@ -76,72 +91,109 @@
             text-shadow: 0 0 20px rgba(0, 180, 219, 0.4);
         }
 
-        /* Централна Зона: Монета */
         .coin-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 30px 0;
+            flex-grow: 1;
+            margin: 20px 0;
         }
 
+        /* Новият дизайн: Монетата вече зарежда вашето GitHub 3D Лого */
         .interactive-coin {
-            width: 220px;
-            height: 220px;
+            width: 230px;
+            height: 230px;
             border-radius: 50%;
-            background: radial-gradient(circle, #172237 0%, #0e1420 100%);
-            border: 5px solid #00b4db;
+            border: 4px solid #00b4db;
             box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             cursor: pointer;
             transition: transform 0.05s ease;
+            background-image: url('coin.jpg.jpg'); /* Името на вашия GitHub файл */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .interactive-coin:active {
-            transform: scale(0.92);
+            transform: scale(0.93);
         }
 
-        .coin-icon {
-            font-size: 50px;
-            margin-bottom: 5px;
+        /* Енергиен Бар */
+        .energy-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .coin-text-top {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: #88f2ff;
-        }
-
-        .coin-text-bottom {
+        .energy-text {
+            display: flex;
+            justify-content: space-between;
             font-size: 14px;
-            font-weight: 800;
-            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+
+        .energy-text span strong {
+            color: #00ffcc;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background-color: #1e293b;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00b4db, #00ffcc);
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        /* --- ВЪТРЕШНИ СТРАНИЦИ (ЗАДАЧИ, ПРИЯТЕЛИ, ПРОФИЛ) --- */
+        .screen-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
             color: #00b4db;
         }
 
-        /* Коригирано: Блок за новото GitHub Лого на мястото на Енергията */
-        .github-logo-container {
+        .list-container {
             width: 100%;
-            max-width: 400px;
-            margin: 25px auto 0 auto;
+            max-width: 360px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .list-item {
+            background: #111723;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .github-logo-img {
-            width: 100%;
-            max-width: 280px;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 180, 219, 0.2);
-            border: 1px solid rgba(0, 180, 219, 0.3);
+        .item-btn {
+            background: #1e293b;
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        /* Фиксирано Долно Меню */
+        /* Плаващо Долно Меню */
         .bottom-nav {
             position: fixed;
             bottom: 15px; 
@@ -183,67 +235,100 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar (Коригиран: Само икона) -->
+    <!-- 1. Top Bar (Само синьото човече) -->
     <div class="top-bar" translate="no">
         <div class="user-avatar-only">👤</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
-    <!-- 2. Блок Баланс -->
-    <div class="balance-container" translate="no">
-        <div class="balance-label">Your Balance</div>
-        <div class="balance-amount" id="balance-txt">788 REED</div>
-    </div>
+    <!-- ТАБ 1: ГЛАВЕН ЕКРАН ЗА ЦЪКАНЕ (TAP) -->
+    <div class="screen active" id="screen-tap" translate="no">
+        <div class="balance-container">
+            <div class="balance-label">Your Balance</div>
+            <div class="balance-amount" id="balance-txt">788 REED</div>
+        </div>
 
-    <!-- 3. Централна Зона: Монета -->
-    <div class="coin-container" translate="no">
-        <div class="interactive-coin" id="coin">
-            <div class="coin-text-top">REED TOKEN</div>
-            <div class="coin-icon">🪷</div>
-            <div class="coin-text-bottom">COMMUNITY</div>
+        <div class="coin-container">
+            <!-- Монетата с вашето 3D лого от coin.jpg.jpg -->
+            <div class="interactive-coin" id="coin"></div>
+        </div>
+
+        <div class="energy-container">
+            <div class="energy-text">
+                <span>⚡ Energy</span>
+                <span><strong id="energy-txt">1000</strong> / 1000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="energy-bar"></div>
+            </div>
         </div>
     </div>
 
-    <!-- 4. Блок за Новото Лого (На мястото на Energy Bar) -->
-    <div class="github-logo-container" translate="no">
-        <img class="github-logo-img" src="coin.jpg.jpg" alt="Reedcom Logo">
+    <!-- ТАБ 2: ЗАДАЧИ (TASKS) -->
+    <div class="screen" id="screen-tasks" translate="no">
+        <h2 class="screen-title">Tasks for Coins</h2>
+        <div class="list-container">
+            <div class="list-item">
+                <div>
+                    <div>Join Telegram Channel</div>
+                    <small style="color: #00ffcc;">+100 REED</small>
+                </div>
+                <button class="item-btn">Start</button>
+            </div>
+            <div class="list-item">
+                <div>
+                    <div>Follow X (Twitter)</div>
+                    <small style="color: #00ffcc;">+150 REED</small>
+                </div>
+                <button class="item-btn">Start</button>
+            </div>
+        </div>
     </div>
 
-    <!-- 5. Фиксирано Долно Меню -->
+    <!-- ТАБ 3: ПРИЯТЕЛИ (FRIENDS) -->
+    <div class="screen" id="screen-friends" translate="no">
+        <h2 class="screen-title">Invite Friends</h2>
+        <div class="list-container" style="text-align: center;">
+            <p style="color: #94a3b8; margin-bottom: 15px;">Earn 10% of your friends' token claims!</p>
+            <button class="connect-wallet-btn" style="width: 100%; max-width: 250px; margin: 0 auto; padding: 12px;">Copy Invite Link</button>
+        </div>
+    </div>
+
+    <!-- ТАБ 4: ПРОФИЛ (PROFILE) -->
+    <div class="screen" id="screen-profile" translate="no">
+        <h2 class="screen-title">User Profile</h2>
+        <div class="list-container">
+            <div class="list-item">
+                <span>Rank Status</span>
+                <strong style="color: #00b4db;">Bronze Member</strong>
+            </div>
+            <div class="list-item">
+                <span>Total Clicks</span>
+                <strong id="total-clicks-txt">0</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Плаващо Долно Меню (Превключва страниците) -->
     <nav class="bottom-nav" translate="no">
-        <div class="nav-item active" onclick="alert('Tap Menu Clicked')">
+        <div class="nav-item active" data-target="screen-tap">
             <span class="nav-icon">⚡</span>
             <span>Tap</span>
         </div>
-        <div class="nav-item" onclick="alert('Tasks Menu Clicked')">
+        <div class="nav-item" data-target="screen-tasks">
             <span class="nav-icon">📋</span>
             <span>Tasks</span>
         </div>
-        <div class="nav-item" onclick="alert('Friends Menu Clicked')">
+        <div class="nav-item" data-target="screen-friends">
             <span class="nav-icon">👥</span>
             <span>Friends</span>
         </div>
-        <div class="nav-item" onclick="alert('Profile Menu Clicked')">
+        <div class="nav-item" data-target="screen-profile">
             <span class="nav-icon">👤</span>
             <span>Profile</span>
         </div>
     </nav>
 
     <script>
-        const coin = document.getElementById('coin');
-        const balanceTxt = document.getElementById('balance-txt');
+        // Двигател на състоянието
         let balance = 788;
-
-        coin.addEventListener('click', () => {
-            balance += 1;
-            balanceTxt.textContent = balance + " REED";
-        });
-
-        const walletBtn = document.getElementById('wallet-btn');
-        walletBtn.addEventListener('click', () => {
-            walletBtn.textContent = "0x7a...2f";
-            walletBtn.style.background = "#10b981";
-        });
-    </script>
-</body>
-</html>
