@@ -339,27 +339,23 @@
 </head>
 <body>
 
-    <!-- Сценарий за улавяне на грешки директно на екрана -->
-    <script>
-        window.onerror = function(msg, url, line) {
-            alert("Системно съобщение: " + msg + "\nРед: " + line);
-            return false;
-        };
-    </script>
-
     <!-- Top Bar -->
     <div class="top-bar" translate="no">
         <div class="user-info">👤 @ReedcomUser</div>
-        <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
+        <button class="connect-wallet-btn" id="wallet-btn" onclick="openWalletMenu()">Connect Wallet</button>
     </div>
 
     <!-- МОДАЛЕН ПРОЗОРЕЦ ЗА ПОРТФЕЙЛИ -->
     <div class="wallet-modal" id="wallet-modal">
         <div class="modal-content">
-            <button class="close-modal" id="close-modal">&times;</button>
+            <button class="close-modal" onclick="closeWalletMenu()">&times;</button>
             <div class="modal-title">Connect Web3 Wallet</div>
             
-            <div class="wallet-option" onclick="connectWeb3Wallet('Binance', '#F3BA2F')">
+            <div class="wallet-option" onclick="triggerWeb3Connection('Binance', '#F3BA2F')">
                 <div class="wallet-logo logo-binance">BNC</div>
                 <div class="wallet-name">Binance Web3</div>
+            </div>
+            <div class="wallet-option" onclick="triggerWeb3Connection('OKX', '#10b981')">
+                <div class="wallet-logo logo-okx">OKX</div>
+                <div class="wallet-name">OKX Wallet</div>
             </div>
