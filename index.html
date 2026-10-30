@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Екрани (Табове) */
+        /* Екрани */
         .page-screen {
             display: none;
         }
@@ -82,7 +82,7 @@
             transition: all 0.3s ease;
         }
 
-        /* МОДАЛЕН ПРОЗОРЕЦ ЗА ПОРТФЕЙЛИ */
+        /* МОДАЛЕН ПРОЗОРЕЦ */
         .wallet-modal {
             display: none;
             position: fixed;
@@ -91,7 +91,6 @@
             width: 100%;
             height: 100%;
             background: rgba(5, 8, 15, 0.85);
-            backdrop-filter: blur(8px);
             z-index: 100000;
             justify-content: center;
             align-items: center;
@@ -125,7 +124,7 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            font-size: 20px;
+            font-size: 24px;
             color: #64748b;
             cursor: pointer;
             background: none;
@@ -160,13 +159,12 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        /* Цветове на логата като заместители */
-        .logo-binance { background: #F3BA2F; color: #000; }
-        .logo-okx { background: #000000; color: #fff; border: 1px solid #333; }
-        .logo-gate { background: #E84142; color: #fff; }
+        .logo-binance { background: #F3BA2F; color: #000000; }
+        .logo-okx { background: #ffffff; color: #000000; }
+        .logo-gate { background: #E84142; color: #ffffff; }
 
         .wallet-name {
             font-size: 15px;
@@ -242,7 +240,7 @@
             color: #00b4db;
         }
 
-        /* Стил за изскачащото число +1 */
+        /* Изскачащ текст */
         .floating-text {
             position: absolute;
             font-size: 28px;
@@ -303,7 +301,7 @@
             transition: width 0.1s ease-out;
         }
 
-        /* ФИКСИРАНО ДОЛНО МЕНЮ */
+        /* ДОЛНО МЕНЮ */
         .bottom-nav {
             position: fixed;
             bottom: 15px; 
@@ -331,7 +329,6 @@
             width: 25%;
             height: 100%;
             cursor: pointer;
-            transition: color 0.2s ease;
         }
 
         .nav-item.active {
@@ -346,20 +343,26 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar -->
+    <!-- Top Bar -->
     <div class="top-bar" translate="no">
         <div class="user-info">👤 @ReedcomUser</div>
         <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
-    <!-- ИЗСКАЧАЩО МЕНЮ ЗА ИЗБОР НА ПОРТФЕЙЛ -->
+    <!-- МОДАЛ ЗА ПОРТФЕЙЛИ -->
     <div class="wallet-modal" id="wallet-modal">
         <div class="modal-content">
             <button class="close-modal" id="close-modal">&times;</button>
             <div class="modal-title">Connect Web3 Wallet</div>
             
-            <div class="wallet-option" onclick="connectSpecificWallet('Binance', '#F3BA2F')">
-                <div class="wallet-logo logo-binance">🔶</div>
+            <div class="wallet-option" id="opt-binance">
+                <div class="wallet-logo logo-binance">BNC</div>
                 <div class="wallet-name">Binance Web3</div>
             </div>
 
+            <div class="wallet-option" id="opt-okx">
+                <div class="wallet-logo logo-okx">OKX</div>
+                <div class="wallet-name">OKX Wallet</div>
+            </div>
+
+            <div class="wallet-option" id="opt-gate">
