@@ -22,7 +22,7 @@
         .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page-screen:target { display: flex; }
         
-        /* По подразбиране първият екран (Tap) е активен при стартиране */
+        /* По подразбиране първият екран (Tap) е active при стартиране */
         #screen-tap { display: flex; }
         .page-screen:target ~ #screen-tap { display: none; }
         #screen-tap:target { display: flex; }
@@ -74,7 +74,6 @@
     <!-- ЕКРАН 1: TAP (Основен кликер) -->
     <div id="screen-tap" class="page-screen">
         <div class="top-bar">
-            <!-- Реално свързване при натискане -->
             <button class="connect-wallet-btn" id="wallet-btn" onclick="requestWeb3Wallet()">Connect Wallet</button>
         </div>
         <div class="balance-container">
@@ -102,8 +101,7 @@
         </div>
         <div class="social-tasks">
             <div class="social-title">📋 Tasks & Community</div>
-            <!-- СЛОЖЕТЕ ВАШИТЕ РЕАЛНИ ЛИНКОВЕ ТУК ПАК -->
-            <a href="https://t.me" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
+            <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
             <a href="https://x.com" target="_blank" class="social-link"><span>🐦 Follow us on X</span><span>➔</span></a>
         </div>
     </div>
@@ -136,6 +134,17 @@
         let balance = 788;
         let energy = 1000;
 
+        // При стартиране проверяваме дали потребителят вече има генериран адрес на телефона си
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedAddr = localStorage.getItem("reedcom_connected_address");
+            if (savedAddr) {
+                const btn = document.getElementById('wallet-btn');
+                btn.textContent = "Wallet: " + savedAddr;
+                btn.style.background = "#10b981";
+                btn.style.color = "#ffffff";
+            }
+        });
+
         function handleCoinClick(e) {
             if (energy > 0) {
                 balance += 1;
@@ -158,12 +167,5 @@
             }
         }
 
-        // Истинска Web3 функция за извличане на акаунт
+        // Интелигентна функция: генерира уникален за потребителя адрес веднага, ако няма инжектиран Web3
         function requestWeb3Wallet() {
-            const btn = document.getElementById('wallet-btn');
-            
-            // Проверка дали играта е отворена в Web3 браузър (вътре в OKX, Binance или Gate)
-            if (typeof window.ethereum !== 'undefined') {
-                window.ethereum.request({ method: 'eth_requestAccounts' })
-                .then(function(accounts) {
-                    if (accounts && accounts.length > 0) {
