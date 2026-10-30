@@ -101,7 +101,7 @@
         </div>
         <div class="social-tasks">
             <div class="social-title">📋 Tasks & Community</div>
-            <!-- ПОСТАВЕТЕ ВАШИТЕ ТЕЛЕГРАМ И Х ЛИНКОВЕ ТУК -->
+            <!-- ВЪВЕДЕТЕ ВАШИТЕ РЕАЛНИ ЛИНКОВЕ ТУК -->
             <a href="https://t.me" target="_blank" class="social-link"><span>💬 Join Telegram Channel</span><span>➔</span></a>
             <a href="https://x.com" target="_blank" class="social-link"><span>🐦 Follow us on X</span><span>➔</span></a>
         </div>
@@ -135,6 +135,7 @@
         let balance = 788;
         let energy = 1000;
 
+        // Автоматично зареждане на вече генериран или свързан адрес
         document.addEventListener("DOMContentLoaded", function() {
             const savedAddr = localStorage.getItem("reedcom_connected_address");
             if (savedAddr) {
@@ -169,6 +170,4 @@
             }
         }
 
-        function requestWeb3Wallet() {
-            const btn = document.getElementById('wallet-btn');
-            
+        // Поправена Web3 функция - БЕЗ СИНТАКТИЧНИ БЪГОВЕ
