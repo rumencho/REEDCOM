@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
     <title>Reedcom Network</title>
     <style>
         * {
@@ -21,7 +22,7 @@
             justify-content: space-between;
             min-height: 100vh;
             padding: 16px;
-            padding-bottom: 90px;
+            padding-bottom: 100px;
             overflow: hidden;
         }
 
@@ -70,16 +71,10 @@
             justify-content: center;
             flex-grow: 1;
             width: 100%;
-            animation: fadeIn 0.3s ease;
         }
 
         .screen.active {
             display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- SCREEN 1: TAP (HOME) --- */
@@ -111,10 +106,9 @@
             width: 100%;
         }
 
-        /* Напълно визуализирана и стилизирана дигитална монета */
         .interactive-coin {
-            width: 230px;
-            height: 230px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
             background: radial-gradient(circle, #172237 0%, #0e1420 100%);
             border: 5px solid #00b4db;
@@ -129,7 +123,6 @@
             user-select: none;
         }
 
-        /* Символ на лотос/цвете в монетата */
         .coin-icon {
             font-size: 55px;
             filter: drop-shadow(0 0 10px #00b4db);
@@ -189,10 +182,9 @@
             height: 100%;
             background: linear-gradient(90deg, #00b4db, #00ffcc);
             box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-            transition: width 0.1s ease;
         }
 
-        /* --- GENERIC APP CONTENT (SCREENS 2, 3, 4) --- */
+        /* --- SCREENS CONTENT --- */
         .screen-title {
             font-size: 24px;
             font-weight: 700;
@@ -254,7 +246,6 @@
             font-weight: 600;
             width: 25%;
             cursor: pointer;
-            transition: color 0.2s ease;
         }
 
         .nav-item.active {
@@ -270,13 +261,13 @@
 <body>
 
     <!-- Top Bar Component -->
-    <div class="top-bar">
-        <div class="user-info" id="username-display">👤 Loading...</div>
-        <button class="connect-wallet-btn" id="wallet-btn" onclick="toggleWallet()">Connect Wallet</button>
+    <div class="top-bar" translate="no">
+        <div class="user-info" id="username-display">👤 @ReedcomUser</div>
+        <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
     </div>
 
     <!-- SCREEN 1: TAP (HOME) -->
-    <div class="screen active" id="screen-tap">
+    <div class="screen active" id="screen-tap" translate="no">
         <div class="balance-container">
             <div class="balance-label">Your Balance</div>
             <div class="balance-amount" id="balance-txt">788 REED</div>
@@ -302,7 +293,7 @@
     </div>
 
     <!-- SCREEN 2: TASKS -->
-    <div class="screen" id="screen-tasks">
+    <div class="screen" id="screen-tasks" translate="no">
         <h2 class="screen-title">Tasks for Coins</h2>
         <div class="list-container">
             <div class="list-item">
@@ -323,7 +314,7 @@
     </div>
 
     <!-- SCREEN 3: FRIENDS -->
-    <div class="screen" id="screen-friends">
+    <div class="screen" id="screen-friends" translate="no">
         <h2 class="screen-title">Invite Friends</h2>
         <div class="list-container" style="text-align: center;">
             <p style="color: #94a3b8; margin-bottom: 15px;">Earn 10% of your friends' token claims!</p>
@@ -332,10 +323,19 @@
     </div>
 
     <!-- SCREEN 4: PROFILE -->
-    <div class="screen" id="screen-profile">
+    <div class="screen" id="screen-profile" translate="no">
         <h2 class="screen-title">User Profile</h2>
         <div class="list-container">
             <div class="list-item">
                 <span>Rank Status</span>
                 <strong style="color: #00b4db;">Bronze Member</strong>
             </div>
+            <div class="list-item">
+                <span>Total Clicks</span>
+                <strong id="total-clicks-txt">0</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav Bar -->
+    <nav class="bottom-nav" id="navigation-bar" translate="no">
