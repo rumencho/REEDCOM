@@ -23,10 +23,30 @@
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
         
-        /* Монета и изображение */
-        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; }
-        .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; position: relative; }
-        .interactive-coin:active { transform: scale(0.95); }
+        /* Монета и подобрена анимация при натискане */
+        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; perspective: 1000px; }
+        .interactive-coin { 
+            width: 220px; 
+            height: 220px; 
+            border-radius: 50%; 
+            background: radial-gradient(circle, #172237 0%, #0e1420 100%); 
+            border: 5px solid #00b4db; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            cursor: pointer; 
+            overflow: hidden; 
+            position: relative;
+            box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
+            transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
+        }
+        
+        /* Клас, който се добавя чрез JS при клик за по-силен 3D ефект */
+        .interactive-coin.clicked { 
+            transform: scale(0.90) rotateX(10deg); 
+        }
         
         .coin-image { 
             width: 90px; 
@@ -34,19 +54,23 @@
             object-fit: cover; 
             border-radius: 50%; 
             margin: 8px 0;
+            pointer-events: none;
         }
 
         .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; }
         .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
         .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); }
+        
         .page-screen { display: none; }
         .page-screen.active { display: block; }
+        
         .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
         .nav-item.active { color: #00b4db; }
+        
         .floating-text { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-70px); } }
     </style>
 </head>
 <body>
@@ -65,11 +89,11 @@
         </div>
     </div>
 
+    <!-- ТАБ 1: КЛИКЕР -->
     <div id="screen-tap" class="page-screen active">
         <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="balance-txt">788 REED</div></div>
         <div class="coin-container" id="coin-area">
-            <!-- Тук заменяме цветето с каченото изображение -->
-            <div class="interactive-coin" onclick="clickCoin(event)">
+            <div class="interactive-coin" id="main-coin" onclick="clickCoin(event)">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
                 <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
@@ -81,8 +105,13 @@
         </div>
     </div>
 
+    <!-- ТАБ 2: ЗАДАЧИ -->
     <div id="screen-tasks" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div></div>
+    
+    <!-- ТАБ 3: ПРИЯТЕЛI -->
     <div id="screen-friends" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div></div>
+    
+    <!-- ТАБ 4: ПРОФИЛ -->
     <div id="screen-profile" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;">👤 Connected: @ReedcomUser</div></div>
 
     <nav class="bottom-nav">
@@ -104,12 +133,25 @@
                 document.getElementById('energy-txt').textContent = energy;
                 document.getElementById('energy-bar').style.width = (energy / 10) + "%";
 
+                // Анимационен ефект за натискане (3D хлътване)
+                const coinEl = document.getElementById('main-coin');
+                coinEl.classList.add('clicked');
+                setTimeout(() => {
+                    coinEl.classList.remove('clicked');
+                }, 800);
+
+                // Изскачащ текст +1
                 let float = document.createElement('div');
                 float.className = 'floating-text';
                 float.textContent = '+1';
                 let rect = document.getElementById('coin-area').getBoundingClientRect();
-                float.style.left = (e.clientX - rect.left - 15) + 'px';
-                float.style.top = (e.clientY - rect.top - 20) + 'px';
+                
+                // Изчисляване на позицията на клика спрямо монетата
+                let clickX = e.clientX ? e.clientX - rect.left : rect.width / 2;
+                let clickY = e.clientY ? e.clientY - rect.top : rect.height / 2;
+                
+                float.style.left = (clickX - 15) + 'px';
+                float.style.top = (clickY - 20) + 'px';
                 document.getElementById('coin-area').appendChild(float);
                 setTimeout(() => float.remove(), 600);
             }
@@ -121,21 +163,3 @@
                 document.getElementById('energy-txt').textContent = energy;
                 document.getElementById('energy-bar').style.width = (energy / 10) + "%";
             }
-        }, 1000);
-
-        function selectWallet(name, color) {
-            document.getElementById('wallet-modal').classList.remove('open');
-            let btn = document.getElementById('wallet-btn');
-            btn.textContent = name + ": 0x7a...2f";
-            btn.style.background = color;
-        }
-
-        function switchScreen(navId, screenId) {
-            document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            document.getElementById(navId).classList.add('active');
-        }
-    </script>
-</body>
-</html>
