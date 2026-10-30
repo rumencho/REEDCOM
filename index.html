@@ -1,10 +1,14 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" content="notranslate">
     <title>Reedcom Network</title>
     <style>
+        /* ==========================================================================
+           1. ОСНОВЕН ДИЗАЙН (Глобални настройки - НЕ променяйте, освен фона)
+           ========================================================================== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,13 +18,13 @@
         }
 
         body {
-            background-color: #0b0f19;
+            background-color: #0b0f19; /* Цвят на фона на играта */
             color: #ffffff;
             padding: 16px;
             padding-bottom: 120px; 
             min-height: 100vh;
             user-select: none;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         /* Top Bar */
@@ -50,10 +54,13 @@
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
         }
 
-        /* Блок Баланс */
+        /* ==========================================================================
+           2. ДАННИ И БАЛАНС (Тук променяте размерите, ако искате)
+           ========================================================================== */
         .balance-container {
             text-align: center;
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .balance-label {
@@ -67,17 +74,20 @@
         .balance-amount {
             font-size: 44px;
             font-weight: 800;
-            color: #00b4db;
+            color: #00b4db; /* Цвят на цифрите на баланса */
             text-shadow: 0 0 20px rgba(0, 180, 219, 0.4);
         }
 
-        /* Централна Зона: Монета */
+        /* ==========================================================================
+           3. МОНЕТАТА ЗА КЛИКАНЕ (Дизайн на централния бутон)
+           ========================================================================== */
         .coin-container {
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 40px 0;
             position: relative;
+            width: 100%;
         }
 
         .interactive-coin {
@@ -85,7 +95,7 @@
             height: 220px;
             border-radius: 50%;
             background: radial-gradient(circle, #172237 0%, #0e1420 100%);
-            border: 5px solid #00b4db;
+            border: 5px solid #00b4db; /* Цвят на кръга около монетата */
             box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
             display: flex;
             flex-direction: column;
@@ -96,7 +106,7 @@
         }
 
         .interactive-coin:active {
-            transform: scale(0.92);
+            transform: scale(0.92); /* Ефект на натискане */
         }
 
         .coin-icon {
@@ -118,7 +128,7 @@
             color: #00b4db;
         }
 
-        /* Изскачащ текст +1 */
+        /* Ефект на изскачащото число +1 */
         .floating-text {
             position: absolute;
             font-size: 28px;
@@ -135,7 +145,9 @@
             100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
         }
 
-        /* Блок Енергия */
+        /* ==========================================================================
+           4. БАТЕРИЯ / ЕНЕРГИЯ
+           ========================================================================== */
         .energy-container {
             width: 100%;
             max-width: 400px;
@@ -171,10 +183,11 @@
             height: 100%;
             background: linear-gradient(90deg, #00b4db, #00ffcc);
             border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
         }
 
-        /* ДОЛНО МЕНЮ */
+        /* ==========================================================================
+           5. ДОЛНО МЕНЮ (Като на Blum)
+           ========================================================================== */
         .bottom-nav {
             position: fixed;
             bottom: 15px; 
@@ -216,28 +229,32 @@
 </head>
 <body>
 
-    <!-- 1. Top Bar -->
+    <!-- ==========================================================================
+       ХТМЛ ЕЛЕМЕНТИ (Променяйте само текстовете вътре, ако желаете)
+       ========================================================================== -->
+
+    <!-- Лента горе -->
     <div class="top-bar" translate="no">
-        <div class="user-info">👤 @ReedcomUser</div>
+        <div class="user-info">👤 @ReedcomUser</div> <!-- ИМЕ НА ПОТРЕБИТЕЛЯ -->
         <button class="connect-wallet-btn" id="wallet-btn" onclick="connectWalletMock()">Connect Wallet</button>
     </div>
 
-    <!-- 2. Блок Баланс -->
+    <!-- Текстове за баланса -->
     <div class="balance-container" translate="no">
         <div class="balance-label">Your Balance</div>
-        <div class="balance-amount" id="balance-txt">788 REED</div>
+        <div class="balance-amount" id="balance-txt">788 REED</div> <!-- НАЧАЛЕН БАЛАНС НА ЕКРАНА -->
     </div>
 
-    <!-- 3. Централна Зона: Монета -->
+    <!-- Централна зона с монетата -->
     <div class="coin-container" translate="no" id="coin-area">
         <div class="interactive-coin" id="coin">
-            <div class="coin-text-top">REED TOKEN</div>
-            <div class="coin-icon">🪷</div>
-            <div class="coin-text-bottom">COMMUNITY</div>
+            <div class="coin-text-top">REED TOKEN</div> <!-- ТЕКСТ НАД ИКОНАТА -->
+            <div class="coin-icon">🪷</div>                <!-- ИКОНА/ЕМУДЖИ НА МОНЕТАТА -->
+            <div class="coin-text-bottom">COMMUNITY</div> <!-- ТЕКСТ ПОД ИКОНАТА -->
         </div>
     </div>
 
-    <!-- 4. Блок Енергия -->
+    <!-- Индикатор за енергия -->
     <div class="energy-container" translate="no">
         <div class="energy-text">
             <span>⚡ Energy</span>
@@ -248,75 +265,33 @@
         </div>
     </div>
 
-    <!-- 5. Фиксирано Долно Меню -->
+    <!-- Долно меню с бутони -->
     <nav class="bottom-nav" translate="no">
-        <div class="nav-item active" onclick="alert('Главният екран е зареден!')">
+        <div class="nav-item active" onclick="alert('Вече сте на главния екран!')">
             <span class="nav-icon">⚡</span>
             <span>Tap</span>
         </div>
-        <div class="nav-item" onclick="alert('Куестовете ще бъдат добавени следващата стъпка!')">
+        <div class="nav-item" onclick="alert('Секцията Tasks се разработва!')">
             <span class="nav-icon">📋</span>
             <span>Tasks</span>
         </div>
-        <div class="nav-item" onclick="alert('Рефералите ще бъдат добавени следващата стъпка!')">
+        <div class="nav-item" onclick="alert('Секцията Friends се разработва!')">
             <span class="nav-icon">👥</span>
             <span>Friends</span>
         </div>
-        <div class="nav-item" onclick="alert('Профилът ще бъде добавен следващата стъпка!')">
+        <div class="nav-item" onclick="alert('Профилът се разработва!')">
             <span class="nav-icon">👤</span>
             <span>Profile</span>
         </div>
     </nav>
 
+
+    <!-- ==========================================================================
+       ЛОГИКА И НАСТРОЙКИ (Тук сменяте основните цифри на играта)
+       ========================================================================== -->
     <script>
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        const coin = document.getElementById('coin');
-        const balanceTxt = document.getElementById('balance-txt');
-        const energyTxt = document.getElementById('energy-txt');
-        const energyBar = document.getElementById('energy-bar');
-        const coinArea = document.getElementById('coin-area');
-
-        // Клик върху монетата
-        if(coin) {
-            coin.addEventListener('click', (e) => {
-                if (energy > 0) {
-                    balance += 1;
-                    balanceTxt.textContent = balance + " REED";
-                    energy -= 1;
-                    energyTxt.textContent = energy;
-                    energyBar.style.width = (energy / maxEnergy * 100) + "%";
-
-                    // Изскачащ ефект +1
-                    const float = document.createElement('div');
-                    float.className = 'floating-text';
-                    float.textContent = '+1';
-                    const rect = coinArea.getBoundingClientRect();
-                    let x = e.clientX ? e.clientX - rect.left : rect.width / 2;
-                    let y = e.clientY ? e.clientY - rect.top : rect.height / 2;
-                    float.style.left = (x - 15) + 'px';
-                    float.style.top = (y - 20) + 'px';
-                    coinArea.appendChild(float);
-                    setTimeout(() => float.remove(), 600);
-                }
-            });
-        }
-
-        // Възстановяване на енергията
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy = Math.min(energy + 3, maxEnergy);
-                energyTxt.textContent = energy;
-                energyBar.style.width = (energy / maxEnergy * 100) + "%";
-            }
-        }, 1000);
-
-        // Прост тест за бутона за портфейл
-        function connectWalletMock() {
-            const btn = document.getElementById('wallet-btn');
-            btn.textContent = "OKX: 0x7a...2f";
-            btn.style.background = "#10b981";
-        }
-    </script>
+        // --- ТУК СА ВАШИТЕ НАСТРОЙКИ (КОИТО МОЖЕТЕ ДА СМЕНЯТЕ) ---
+        let userBalance = 788;         // Колко токена да има играчът в началото
+        let tokensPerClick = 1;       // По колко токена да добавя на всяко цъкане (+1)
+        let currentEnergy = 1000;     // Начална енергия
+        const maxEnergyLimit = 1000;  // Максимален лимит на батерията
