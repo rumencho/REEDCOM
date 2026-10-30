@@ -3,295 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="google" content="notranslate">
     <title>Reedcom Network</title>
     <style>
-        /* ==========================================================================
-           1. ОСНОВЕН ДИЗАЙН (Глобални настройки - НЕ променяйте, освен фона)
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #0b0f19; /* Цвят на фона на играта */
-            color: #ffffff;
-            padding: 16px;
-            padding-bottom: 120px; 
-            min-height: 100vh;
-            user-select: none;
-            overflow: hidden;
-        }
-
-        /* Top Bar */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 25px;
-        }
-
-        .user-info {
-            font-size: 15px;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-
-        .connect-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-        }
-
-        /* ==========================================================================
-           2. ДАННИ И БАЛАНС (Тук променяте размерите, ако искате)
-           ========================================================================== */
-        .balance-container {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        .balance-label {
-            font-size: 13px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 4px;
-        }
-
-        .balance-amount {
-            font-size: 44px;
-            font-weight: 800;
-            color: #00b4db; /* Цвят на цифрите на баланса */
-            text-shadow: 0 0 20px rgba(0, 180, 219, 0.4);
-        }
-
-        /* ==========================================================================
-           3. МОНЕТАТА ЗА КЛИКАНЕ (Дизайн на централния бутон)
-           ========================================================================== */
-        .coin-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 40px 0;
-            position: relative;
-            width: 100%;
-        }
-
-        .interactive-coin {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #172237 0%, #0e1420 100%);
-            border: 5px solid #00b4db; /* Цвят на кръга около монетата */
-            box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.05s ease;
-        }
-
-        .interactive-coin:active {
-            transform: scale(0.92); /* Ефект на натискане */
-        }
-
-        .coin-icon {
-            font-size: 50px;
-            margin-bottom: 5px;
-        }
-
-        .coin-text-top {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: #88f2ff;
-        }
-
-        .coin-text-bottom {
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: #00b4db;
-        }
-
-        /* Ефект на изскачащото число +1 */
-        .floating-text {
-            position: absolute;
-            font-size: 28px;
-            font-weight: bold;
-            color: #00ffcc;
-            pointer-events: none;
-            animation: floatUp 0.6s ease-out forwards;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
-            z-index: 1000;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
-        }
-
-        /* ==========================================================================
-           4. БАТЕРИЯ / ЕНЕРГИЯ
-           ========================================================================== */
-        .energy-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 30px auto 0 auto;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .energy-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #94a3b8;
-        }
-
-        .energy-text span strong {
-            color: #00ffcc;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 12px;
-            background-color: #1e293b;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #00b4db, #00ffcc);
-            border-radius: 6px;
-        }
-
-        /* ==========================================================================
-           5. ДОЛНО МЕНЮ (Като на Blum)
-           ========================================================================== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 15px; 
-            left: 5%;
-            width: 90%; 
-            height: 65px;
-            background-color: #111723;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 99999;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 600;
-            width: 25%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .nav-item.active {
-            color: #00b4db;
-        }
-
-        .nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 16px; padding-bottom: 120px; min-height: 100vh; user-select: none; }
+        .top-bar { display: flex; justify-content: center; margin-bottom: 30px; }
+        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; text-align: center; }
+        .wallet-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 15, 0.9); z-index: 100000; justify-content: center; align-items: center; }
+        .wallet-modal.open { display: flex; }
+        .modal-content { background: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; width: 90%; max-width: 340px; padding: 24px; text-align: center; position: relative; }
+        .close-modal { position: absolute; top: 16px; right: 16px; font-size: 24px; color: #64748b; background: none; border: none; cursor: pointer; }
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .wallet-option { display: flex; align-items: center; width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; margin-bottom: 12px; cursor: pointer; text-align: left; }
+        .wallet-logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
+        .logo-binance { background: #F3BA2F; color: #000; }
+        .logo-okx { background: #fff; color: #000; }
+        .logo-gate { background: #E84142; color: #fff; }
+        .balance-container { text-align: center; margin-bottom: 25px; }
+        .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
+        .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
+        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; }
+        .interactive-coin { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
+        .interactive-coin:active { transform: scale(0.95); }
+        .coin-icon { font-size: 50px; margin: 5px 0; }
+        .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; }
+        .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
+        .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
+        .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); }
+        .page-screen { display: none; }
+        .page-screen.active { display: block; }
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
+        .nav-item.active { color: #00b4db; }
+        .floating-text { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================================================
-       ХТМЛ ЕЛЕМЕНТИ (Променяйте само текстовете вътре, ако желаете)
-       ========================================================================== -->
-
-    <!-- Лента горе -->
-    <div class="top-bar" translate="no">
-        <div class="user-info">👤 @ReedcomUser</div> <!-- ИМЕ НА ПОТРЕБИТЕЛЯ -->
-        <button class="connect-wallet-btn" id="wallet-btn" onclick="connectWalletMock()">Connect Wallet</button>
+    <div class="top-bar">
+        <button class="connect-wallet-btn" id="wallet-btn" onclick="document.getElementById('wallet-modal').classList.add('open')">Connect Wallet</button>
     </div>
 
-    <!-- Текстове за баланса -->
-    <div class="balance-container" translate="no">
-        <div class="balance-label">Your Balance</div>
-        <div class="balance-amount" id="balance-txt">788 REED</div> <!-- НАЧАЛЕН БАЛАНС НА ЕКРАНА -->
-    </div>
-
-    <!-- Централна зона с монетата -->
-    <div class="coin-container" translate="no" id="coin-area">
-        <div class="interactive-coin" id="coin">
-            <div class="coin-text-top">REED TOKEN</div> <!-- ТЕКСТ НАД ИКОНАТА -->
-            <div class="coin-icon">🪷</div>                <!-- ИКОНА/ЕМУДЖИ НА МОНЕТАТА -->
-            <div class="coin-text-bottom">COMMUNITY</div> <!-- ТЕКСТ ПОД ИКОНАТА -->
+    <div class="wallet-modal" id="wallet-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="document.getElementById('wallet-modal').classList.remove('open')">&times;</button>
+            <div class="modal-title">Connect Web3 Wallet</div>
+            <div class="wallet-option" onclick="selectWallet('Binance', '#F3BA2F')"><div class="wallet-logo logo-binance">BNC</div><div>Binance Web3</div></div>
+            <div class="wallet-option" onclick="selectWallet('OKX', '#10b981')"><div class="wallet-logo logo-okx">OKX</div><div>OKX Wallet</div></div>
+            <div class="wallet-option" onclick="selectWallet('Gate.io', '#ef4444')"><div class="wallet-logo logo-gate">GATE</div><div>Gate.io Wallet</div></div>
         </div>
     </div>
 
-    <!-- Индикатор за енергия -->
-    <div class="energy-container" translate="no">
-        <div class="energy-text">
-            <span>⚡ Energy</span>
-            <span><strong id="energy-txt">1000</strong> / 1000</span>
+    <div id="screen-tap" class="page-screen active">
+        <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="balance-txt">788 REED</div></div>
+        <div class="coin-container" id="coin-area">
+            <div class="interactive-coin" onclick="clickCoin(event)">
+                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff;">REED TOKEN</div>
+                <div class="coin-icon">🌸</div>
+                <div style="font-size:13px; color:#00b4db;">COMMUNITY</div>
+            </div>
         </div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="energy-bar"></div>
+        <div class="energy-container">
+            <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
         </div>
     </div>
 
-    <!-- Долно меню с бутони -->
-    <nav class="bottom-nav" translate="no">
-        <div class="nav-item active" onclick="alert('Вече сте на главния екран!')">
-            <span class="nav-icon">⚡</span>
-            <span>Tap</span>
-        </div>
-        <div class="nav-item" onclick="alert('Секцията Tasks се разработва!')">
-            <span class="nav-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="nav-item" onclick="alert('Секцията Friends се разработва!')">
-            <span class="nav-icon">👥</span>
-            <span>Friends</span>
-        </div>
-        <div class="nav-item" onclick="alert('Профилът се разработва!')">
-            <span class="nav-icon">👤</span>
-            <span>Profile</span>
-        </div>
+    <div id="screen-tasks" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div></div>
+    <div id="screen-friends" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div></div>
+    <div id="screen-profile" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;">👤 Connected: @ReedcomUser</div></div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-tap" onclick="switchScreen('nav-tap', 'screen-tap')"><span>⚡</span><span>Tap</span></div>
+        <div class="nav-item" id="nav-tasks" onclick="switchScreen('nav-tasks', 'screen-tasks')"><span>📋</span><span>Tasks</span></div>
+        <div class="nav-item" id="nav-friends" onclick="switchScreen('nav-friends', 'screen-friends')"><span>👥</span><span>Friends</span></div>
+        <div class="nav-item" id="nav-profile" onclick="switchScreen('nav-profile', 'screen-profile')"><span>👤</span><span>Profile</span></div>
     </nav>
 
-
-    <!-- ==========================================================================
-       ЛОГИКА И НАСТРОЙКИ (Тук сменяте основните цифри на играта)
-       ========================================================================== -->
     <script>
-        // --- ТУК СА ВАШИТЕ НАСТРОЙКИ (КОИТО МОЖЕТЕ ДА СМЕНЯТЕ) ---
-        let userBalance = 788;         // Колко токена да има играчът в началото
-        let tokensPerClick = 1;       // По колко токена да добавя на всяко цъкане (+1)
-        let currentEnergy = 1000;     // Начална енергия
-        const maxEnergyLimit = 1000;  // Максимален лимит на батерията
+        let balance = 788;
+        let energy = 1000;
+
+        function clickCoin(e) {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                document.getElementById('balance-txt').textContent = balance + " REED";
+                document.getElementById('energy-txt').textContent = energy;
+                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
+
+                let float = document.createElement('div');
+                float.className = 'floating-text';
+                float.textContent = '+1';
+                let rect = document.getElementById('coin-area').getBoundingClientRect();
+                float.style.left = (e.clientX - rect.left - 15) + 'px';
+                float.style.top = (e.clientY - rect.top - 20) + 'px';
+                document.getElementById('coin-area').appendChild(float);
+                setTimeout(() => float.remove(), 600);
+            }
+        }
+
+        setInterval(() => {
+            if (energy < 1000) {
+                energy = Math.min(energy + 3, 1000);
+                document.getElementById('energy-txt').textContent = energy;
+                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
+            }
+        }, 1000);
+
+        function selectWallet(name, color) {
+            document.getElementById('wallet-modal').classList.remove('open');
+            let btn = document.getElementById('wallet-btn');
+            btn.textContent = name + ": 0x7a...2f";
+            btn.style.background = color;
+        }
+
+        function switchScreen(navId, screenId) {
+            document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById(navId).classList.add('active');
+        }
+    </script>
+</body>
