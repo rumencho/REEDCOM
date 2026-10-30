@@ -24,22 +24,7 @@
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
         
         .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; }
-        .interactive-coin { 
-            width: 220px; 
-            height: 220px; 
-            border-radius: 50%; 
-            background: radial-gradient(circle, #172237 0%, #0e1420 100%); 
-            border: 5px solid #00b4db; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            cursor: pointer; 
-            overflow: hidden; 
-            position: relative;
-            box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
-            transition: transform 0.05s ease;
-        }
+        .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; position: relative; box-shadow: 0 0 35px rgba(0, 180, 219, 0.5); transition: transform 0.05s ease; }
         .interactive-coin:active { transform: scale(0.92); }
         .coin-image { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
 
@@ -51,7 +36,18 @@
         .page-screen { display: none; }
         .page-screen.active { display: block; }
         
-        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
+        /* СТИЛОВЕ ЗА СЕКЦИЯ ЗАДАЧИ (TASKS) */
+        .tasks-container { width: 100%; max-width: 400px; margin: 10px auto; display: flex; flex-direction: column; gap: 14px; }
+        .task-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .task-info { display: flex; flex-direction: column; gap: 4px; }
+        .task-title { font-size: 15px; font-weight: bold; color: #ffffff; }
+        .task-reward { font-size: 13px; color: #00ffcc; font-weight: 600; }
+        .task-actions { display: flex; gap: 8px; align-items: center; }
+        .task-btn { background: #1e293b; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .task-btn.claim { background: linear-gradient(135deg, #00b4db, #0083b0); border: none; }
+        .task-btn.done { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); pointer-events: none; }
+
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
         .nav-item.active { color: #00b4db; }
         
@@ -62,7 +58,6 @@
 <body>
 
     <div class="top-bar">
-        <!-- Използваме мобилно докосване за отваряне на портфейла -->
         <button class="connect-wallet-btn" id="wallet-btn" ontouchstart="openWalletModal()">Connect Wallet</button>
     </div>
 
@@ -80,7 +75,6 @@
     <div id="screen-tap" class="page-screen active">
         <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="balance-txt">788 REED</div></div>
         <div class="coin-container" id="coin-area">
-            <!-- Хардуерно докосване за монетата -->
             <div class="interactive-coin" ontouchstart="clickCoin(event)">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
                 <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
@@ -93,63 +87,45 @@
         </div>
     </div>
 
-    <div id="screen-tasks" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div></div>
+    <!-- ТАБ 2: ЗАДАЧИ (С ЛИНКОВЕ КЪМ ТЕЛЕГРАМ И Х) -->
+    <div id="screen-tasks" class="page-screen">
+        <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="tasks-balance-txt">788 REED</div></div>
+        
+        <div class="tasks-container">
+            <!-- Задача 1: Telegram -->
+            <div class="task-card">
+                <div class="task-info">
+                    <span class="task-title">💬 Join Telegram Channel</span>
+                    <span class="task-reward">+100 REED</span>
+                </div>
+                <div class="task-actions">
+                    <!-- ЗАМЕНЕТЕ ТОВА С ВАШИЯ ТЕЛЕГРАМ ЛИНК -->
+                    <a href="https://t.me/+1H6v9c3U3lM3ZTBk" target="_blank" class="task-btn" id="btn-go-tg" ontouchstart="startTask('tg')">Join</a>
+                    <button class="task-btn claim" id="btn-claim-tg" style="display:none;" ontouchstart="claimTask('tg', 100)">Claim</button>
+                    <span class="task-btn done" id="btn-done-tg" style="display:none;">✔ Done</span>
+                </div>
+            </div>
+
+            <!-- Задача 2: X (Twitter) -->
+            <div class="task-card">
+                <div class="task-info">
+                    <span class="task-title">🐦 Follow us on X</span>
+                    <span class="task-reward">+100 REED</span>
+                </div>
+                <div class="task-actions">
+                    <!-- ЗАМЕНЕТЕ ТОВА С ВАШИЯ Х (TWITTER) ЛИНК -->
+                    <a href="https://x.com/REEDCOMapp" target="_blank" class="task-btn" id="btn-go-x" ontouchstart="startTask('x')">Follow</a>
+                    <button class="task-btn claim" id="btn-claim-x" style="display:none;" ontouchstart="claimTask('x', 100)">Claim</button>
+                    <span class="task-btn done" id="btn-done-x" style="display:none;">✔ Done</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ТАБ 3: ПРИЯТЕЛI -->
     <div id="screen-friends" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div></div>
+    
+    <!-- ТАБ 4: ПРОФИЛ -->
     <div id="screen-profile" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;">👤 Connected: @ReedcomUser</div></div>
 
-    <!-- Навигация с хардуерно докосване -->
     <nav class="bottom-nav">
-        <div class="nav-item active" id="nav-tap" ontouchstart="switchScreen('nav-tap', 'screen-tap')"><span>⚡</span><span>Tap</span></div>
-        <div class="nav-item" id="nav-tasks" ontouchstart="switchScreen('nav-tasks', 'screen-tasks')"><span>📋</span><span>Tasks</span></div>
-        <div class="nav-item" id="nav-friends" ontouchstart="switchScreen('nav-friends', 'screen-friends')"><span>👥</span><span>Friends</span></div>
-        <div class="nav-item" id="nav-profile" ontouchstart="switchScreen('nav-profile', 'screen-profile')"><span>👤</span><span>Profile</span></div>
-    </nav>
-
-    <script>
-        let balance = 788;
-        let energy = 1000;
-
-        // Всички функции са дефинирани като глобални обекти (Напълно имунизирани срещу блокове)
-        window.clickCoin = function(e) {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                document.getElementById('balance-txt').textContent = balance + " REED";
-                document.getElementById('energy-txt').textContent = energy;
-                document.getElementById('energy-bar').style.width = (energy / 10) + "%";
-
-                // Ефект +1
-                let float = document.createElement('div');
-                float.className = 'floating-text';
-                float.textContent = '+1';
-                let rect = document.getElementById('coin-area').getBoundingClientRect();
-                
-                let touch = e.touches ? e.touches[0] : e;
-                let clickX = touch.clientX ? touch.clientX - rect.left : rect.width / 2;
-                let clickY = touch.clientY ? touch.clientY - rect.top : rect.height / 2;
-                
-                float.style.left = (clickX - 15) + 'px';
-                float.style.top = (clickY - 20) + 'px';
-                document.getElementById('coin-area').appendChild(float);
-                setTimeout(() => float.remove(), 600);
-            }
-        };
-
-        window.openWalletModal = function() {
-            document.getElementById('wallet-modal').classList.add('open');
-        };
-
-        window.closeWalletModal = function() {
-            document.getElementById('wallet-modal').classList.remove('open');
-        };
-
-        window.selectWallet = function(name, color) {
-            window.closeWalletModal();
-            let btn = document.getElementById('wallet-btn');
-            btn.textContent = name + ": 0x7a...2f";
-            btn.style.background = color;
-        };
-
-        window.switchScreen = function(navId, screenId) {
-            document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
