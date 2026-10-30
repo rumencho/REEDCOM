@@ -22,10 +22,20 @@
         .balance-container { text-align: center; margin-bottom: 25px; }
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
+        
+        /* Монета и изображение */
         .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; }
-        .interactive-coin { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
+        .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; position: relative; }
         .interactive-coin:active { transform: scale(0.95); }
-        .coin-icon { font-size: 50px; margin: 5px 0; }
+        
+        .coin-image { 
+            width: 90px; 
+            height: 90px; 
+            object-fit: cover; 
+            border-radius: 50%; 
+            margin: 8px 0;
+        }
+
         .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; }
         .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
@@ -58,10 +68,11 @@
     <div id="screen-tap" class="page-screen active">
         <div class="balance-container"><div class="balance-label">Your Balance</div><div class="balance-amount" id="balance-txt">788 REED</div></div>
         <div class="coin-container" id="coin-area">
+            <!-- Тук заменяме цветето с каченото изображение -->
             <div class="interactive-coin" onclick="clickCoin(event)">
-                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff;">REED TOKEN</div>
-                <div class="coin-icon">🌸</div>
-                <div style="font-size:13px; color:#00b4db;">COMMUNITY</div>
+                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                <img src="coin.jpg.jpg" alt="Coin" class="coin-image">
+                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
         <div class="energy-container">
@@ -127,3 +138,4 @@
         }
     </script>
 </body>
+</html>
