@@ -2,172 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reedcom Network</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reedcom App</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; }
         
-        .top-bar { display: flex; justify-content: center; margin-bottom: 30px; }
-        .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; text-align: center; }
+        .view-screen { display: none; padding-bottom: 90px; text-align: center; }
+        .view-screen.visible { display: block; }
         
-        .wallet-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 15, 0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .wallet-modal.open { display: flex; }
-        .modal-content { background: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; width: 90%; max-width: 340px; padding: 24px; text-align: center; position: relative; }
-        .close-modal { position: absolute; top: 16px; right: 16px; font-size: 24px; color: #64748b; background: none; border: none; cursor: pointer; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        /* Стил за Профила и Портфейла */
+        .profile-container { padding: 40px 20px; text-align: center; }
+        .profile-username { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #00b4db; }
+        .wallet-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 20px; border-radius: 20px; margin-top: 20px; }
+        .wallet-status-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .wallet-address-text { font-size: 15px; font-weight: bold; color: #ffffff; margin-bottom: 15px; word-break: break-all; }
+        .btn-ton-connect { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 28px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; max-width: 260px; box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3); transition: background 0.2s ease; }
+        .btn-ton-connect.connected { background: #ef4444; }
+
+        /* Кликер дизайн */
+        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
+        .coin-btn:active { transform: scale(0.95); }
+        .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
-        .wallet-option { display: flex; align-items: center; width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; margin-bottom: 12px; cursor: pointer; text-align: left; }
-        .wallet-logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
-        .logo-binance { background: #F3BA2F; color: #000; }
-        .logo-okx { background: #fff; color: #000; }
-        .logo-gate { background: #E84142; color: #fff; }
+        .bar-bg { width: 100%; max-width: 400px; height: 12px; background-color: #1e293b; border-radius: 6px; margin: 10px auto; overflow: hidden; }
+        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
         
-        .balance-container { text-align: center; margin-bottom: 25px; }
-        .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
-        .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
+        /* Долна лента (Таскбар) */
+        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
+        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
+        .tab-btn.active-tab { color: #00b4db; }
         
-        .coin-container { display: flex; justify-content: center; margin: 30px 0; }
-        .interactive-coin { 
-            width: 220px; 
-            height: 220px; 
-            border-radius: 50%; 
-            background: radial-gradient(circle, #172237 0%, #0e1420 100%); 
-            border: 5px solid #00b4db; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            cursor: pointer; 
-            box-shadow: 0 0 25px rgba(0, 180, 219, 0.4);
-        }
-        .interactive-coin:active { transform: scale(0.95); }
-        
-        .coin-image { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; }
-        
-        .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; }
-        .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
-        .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
-        .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
-        
-        .page-screen { display: none; padding-bottom: 90px; }
-        .page-screen.active { display: block; }
-        
-        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-align: center; }
-        .nav-item.active { color: #00b4db; }
-        
-        .floating-text { position: absolute; font-size: 30px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.5s ease-out forwards; left: 50%; top: 40%; transform: translate(-50%, -50%); }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+        /* Изскачащ текст +1 */
+        .text-plus { position: absolute; font-size: 30px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 40%; transform: translate(-50%, -50%); }
+        @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <button class="connect-wallet-btn" id="wallet-btn" onclick="openModal()">Connect Wallet</button>
-    </div>
-
-    <div class="wallet-modal" id="wallet-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal()">&times;</button>
-            <div class="modal-title">Connect Web3 Wallet</div>
-            <div class="wallet-option" onclick="selectWallet('Binance Web3')"><div class="wallet-logo logo-binance">BNC</div><div>Binance Web3</div></div>
-            <div class="wallet-option" onclick="selectWallet('OKX Wallet')"><div class="wallet-logo logo-okx">OKX</div><div>OKX Wallet</div></div>
-            <div class="wallet-option" onclick="selectWallet('Gate.io Wallet')"><div class="wallet-logo logo-gate">GATE</div><div>Gate.io Wallet</div></div>
-        </div>
-    </div>
-
-    <!-- ТАБ 1 -->
-    <div id="screen-tap" class="page-screen active">
-        <div class="balance-container">
-            <div class="balance-label">Your Balance</div>
-            <div class="balance-amount" id="balance-txt">788 REED</div>
-        </div>
+    <!-- ТАБ 1: КЛИКЕР -->
+    <div id="tab1" class="view-screen visible">
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
+        <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
-        <div class="coin-container" style="position: relative;" id="coin-area">
-            <div class="interactive-coin" id="main-coin" onclick="clickCoin()">
+        <div style="position: relative;" id="clickZone">
+            <div class="coin-btn" onclick="hitCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="coin.jpg" alt="Coin" class="coin-image">
+                <img src="coin.jpg" alt="Coin" class="coin-img">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
 
-        <div class="energy-container">
-            <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
+        <div style="width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8;">
+                <span>⚡ Energy</span><span><strong id="valEnergy">1000</strong> / 1000</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
         </div>
     </div>
 
-    <!-- ТАБ 2 -->
-    <div id="screen-tasks" class="page-screen">
-        <div style="text-align:center; padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div>
+    <!-- ТАБ 2: ЗАДАЧИ -->
+    <div id="tab2" class="view-screen">
+        <div style="padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div>
     </div>
 
-    <!-- ТАБ 3 -->
-    <div id="screen-friends" class="page-screen">
-        <div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div>
+    <!-- ТАБ 3: ПРИЯТЕЛИ -->
+    <div id="tab3" class="view-screen">
+        <div style="padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div>
     </div>
 
-    <!-- ТАБ 4 -->
-    <div id="screen-profile" class="page-screen">
-        <div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;">👤 Connected: @ReedcomUser</div>
+    <!-- ТАБ 4: ПРОФИЛ -->
+    <div id="tab4" class="view-screen">
+        <div class="profile-container">
+            <div class="profile-username">👤 @ReedcomUser</div>
+            
+            <div class="wallet-box">
+                <div class="wallet-status-label">Web3 Wallet Status</div>
+                <div class="wallet-address-text" id="walletStatusText">Not Connected</div>
+                <button class="btn-ton-connect" id="customWalletBtn" onclick="handleWalletAction()">Connect TON Wallet</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ДОЛНА ЛЕНТА -->
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('screen-tap', this)">
+    <!-- ДОЛНА ЛЕНТА (ТАСКБАР) -->
+    <nav class="footer-tabs">
+        <div class="tab-btn active-tab" onclick="changeScreen('tab1', this)">
             <span style="font-size: 20px;">🔘</span><span>Tap</span>
         </div>
-        <div class="nav-item" onclick="switchTab('screen-tasks', this)">
+        <div class="tab-btn" onclick="changeScreen('tab2', this)">
             <span style="font-size: 20px;">📋</span><span>Tasks</span>
         </div>
-        <div class="nav-item" onclick="switchTab('screen-friends', this)">
+        <div class="tab-btn" onclick="changeScreen('tab3', this)">
             <span style="font-size: 20px;">👥</span><span>Friends</span>
         </div>
-        <div class="nav-item" onclick="switchTab('screen-profile', this)">
+        <div class="tab-btn" onclick="changeScreen('tab4', this)">
             <span style="font-size: 20px;">👤</span><span>Profile</span>
         </div>
     </nav>
 
     <script>
-        var balance = 788;
-        var energy = 1000;
-        var maxEnergy = 1000;
+        // Чисти локални променливи
+        var gamePoints = 788;
+        var gameEnergy = 1000;
+        var gameMax = 1000;
+        var isConnected = false;
 
-        function switchTab(screenId, element) {
-            var screens = document.getElementsByClassName('page-screen');
-            for (var i = 0; i < screens.length; i++) { screens[i].classList.remove('active'); }
-            var items = document.getElementsByClassName('nav-item');
-            for (var i = 0; i < items.length; i++) { items[i].classList.remove('active'); }
-            document.getElementById(screenId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        function openModal() { document.getElementById('wallet-modal').classList.add('open'); }
-        function closeModal() { document.getElementById('wallet-modal').classList.remove('open'); }
-        function selectWallet(name) { document.getElementById('wallet-btn').innerText = name + " Connected"; closeModal(); }
-
-        function clickCoin() {
-            if (energy <= 0) return;
-            balance += 1;
-            energy -= 1;
-            document.getElementById('balance-txt').innerText = balance + " REED";
-            document.getElementById('energy-txt').innerText = energy;
-            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+        // Превключване на страниците
+        function changeScreen(scrId, btnEl) {
+            var allScrs = document.getElementsByClassName('view-screen');
+            for(var i=0; i<allScrs.length; i++){ allScrs[i].classList.remove('visible'); }
             
-            var area = document.getElementById('coin-area');
-            var txt = document.createElement('div');
-            txt.className = 'floating-text';
-            txt.innerText = '+1';
-            area.appendChild(txt);
-            setTimeout(function() { txt.remove(); }, 500);
+            var allBtns = document.getElementsByClassName('tab-btn');
+            for(var i=0; i<allBtns.length; i++){ allBtns[i].classList.remove('active-tab'); }
+            
+            document.getElementById(scrId).classList.add('visible');
+            btnEl.classList.add('active-tab');
         }
 
+        // Локално симулирано свързване в Профила (стабилно и безопасно)
+        function handleWalletAction() {
+            var btn = document.getElementById('customWalletBtn');
+            var statusText = document.getElementById('walletStatusText');
+            
+            if (!isConnected) {
+                // Симулираме успешно свързване с реален TON формат адрес
+                var mockAddress = "UQAnR_oX...7b3A9z";
+                statusText.innerText = "Connected: " + mockAddress;
+                btn.innerText = "Disconnect";
+                btn.style.background = "#ef4444"; // Променя цвета на червен за Дисънект
+                isConnected = true;
+            } else {
+                statusText.innerText = "Not Connected";
+                btn.innerText = "Connect TON Wallet";
+                btn.style.background = "linear-gradient(135deg, #00b4db, #0083b0)";
+                isConnected = false;
+            }
+        }
+
+        // Кликер логика
+        function hitCoin() {
+            if (gameEnergy <= 0) return;
+            gamePoints++;
+            gameEnergy--;
+            
+            document.getElementById('valBalance').innerText = gamePoints + " REED";
+            document.getElementById('valEnergy').innerText = gameEnergy;
+            document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
+            
+            // Създаване на +1 ефекта
+            var zone = document.getElementById('clickZone');
+            var p = document.createElement('div');
+            p.className = 'text-plus';
+            p.innerText = '+1';
+            zone.appendChild(p);
+            
+            setTimeout(function(){ p.remove(); }, 500);
+        }
+
+        // Автоматично пълнене на енергията
         setInterval(function() {
-            if (energy < maxEnergy) {
-                energy += 1;
-                document.getElementById('energy-txt').innerText = energy;
-                document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            if (gameEnergy < gameMax) {
+                gameEnergy++;
+                document.getElementById('valEnergy').innerText = gameEnergy;
+                document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
             }
         }, 1000);
     </script>
