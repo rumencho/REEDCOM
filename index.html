@@ -136,11 +136,12 @@
         let energy = 1000;
         const maxEnergy = 1000;
 
-        // Инициализиране на TON Connect UI
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com', // Замени с твоя реален манифест линк
-            buttonRootId: 'ton-connect-btn'
-        });
+       // Инициализиране на TON Connect UI
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: './tonconnect-manifest.json', // Слагаш файла директно в твоята папка
+    buttonRootId: 'ton-connect-btn'
+  });
+
 
         // Навигация между екраните
         function switchScreen(screenId, element) {
