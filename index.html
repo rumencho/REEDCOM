@@ -1,69 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
-    
-    <!-- ОФИЦИАЛНА БИБЛИОТЕКА TON CONNECT UI -->
+    <!-- Официално SDK на TON Connect за истинска връзка с портфейли -->
     <script src="https://unpkg.com"></script>
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background-color: #0b0f19; 
-            color: #ffffff; 
-            min-height: 100vh; 
-            user-select: none; 
-            text-align: center;
-            padding: 16px;
-            padding-bottom: 110px;
-            position: relative;
-            overflow-x: hidden;
-        }
+        body { background-color: #0b0f19; color: #ffffff; min-height: 100vh; user-select: none; text-align: center; padding: 16px; padding-bottom: 110px; }
         
         .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page-screen.active { display: flex; }
-
-        .top-bar { 
-            display: flex; 
-            justify-content: center; 
-            width: 100%; 
-            margin-bottom: 25px; 
-            margin-top: 10px; 
-        }
+        
+        .top-bar { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; margin-top: 10px; }
+        
+        /* Стил за контейнера на истинския TON бутон */
+        #ton-connect-btn { width: 85%; min-height: 44px; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         
         .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
-        .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; margin-top: 5px; }
         
-        .coin-container { display: flex; justify-content: center; margin: 25px 0; position: relative; width: 100%; }
-        .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); transition: transform 0.1s; }
-        .interactive-coin:active { transform: scale(0.94); }
-        .coin-image { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
+        .coin-container { display: flex; justify-content: center; margin: 25px 0; width: 100%; }
+        .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); }
+        .interactive-coin:active { transform: scale(0.95); }
         
-        .energy-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 20px; }
-        .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
+        .energy-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; margin-top: 20px; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; transition: width 0.2s; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
         
-        .social-tasks { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 20px; background: rgba(255, 255, 255, 0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .social-title { font-size: 18px; font-weight: bold; color: #00b4db; text-align: left; margin-bottom: 8px; }
-        .social-link { display: flex; align-items: center; justify-content: space-between; background: #111723; border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 12px; text-decoration: none; color: white; font-weight: bold; font-size: 14px; }
-        .social-link:active { background: rgba(0, 180, 219, 0.1); border-color: #00b4db; }
-        
-        .payment-box { background: rgba(0, 180, 219, 0.05); border: 1px solid rgba(0, 180, 219, 0.2); padding: 16px; border-radius: 16px; margin-top: 15px; width: 100%; max-width: 400px; }
-        .payment-btn { background: #0083b0; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
-        .payment-btn:active { background: #00b4db; }
-
-        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 50%; text-decoration: none; justify-content: center; height: 100%; }
-        .nav-item.active { color: #00b4db; }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-
-        .floating-text { position: absolute; font-size: 28px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 10; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
+        .nav-item.active-nav { color: #00b4db; }
     </style>
 </head>
 <body>
@@ -71,123 +39,104 @@
     <!-- ЕКРАН 1: TAP -->
     <div id="screen-tap" class="page-screen active">
         <div class="top-bar">
+            <!-- Официален ТОН бутон. Библиотеката сама ще го създаде тук -->
             <div id="ton-connect-btn"></div>
         </div>
         <div class="balance-container">
-            <div class="balance-label">Your Balance</div>
-            <div class="balance-amount class-balance">788 REED</div>
+            <div style="color: #94a3b8; font-size: 13px;">YOUR BALANCE</div>
+            <div class="balance-amount" id="balance-txt">788 REED</div>
         </div>
-        <div class="coin-container" id="coin-area">
-            <div class="interactive-coin" onclick="handleCoinClick(event)">
-                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="coin.jpg" alt="Coin" class="coin-image">
+        <div class="coin-container">
+            <div class="interactive-coin" onclick="clickCoin()">
+                <div style="font-size:11px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                <div style="font-size:45px; margin: 10px 0;">🪙</div>
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
         <div class="energy-container">
-            <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8;">
+                <span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span>
+            </div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar" style="width: 100%;"></div></div>
         </div>
     </div>
 
-    <!-- ЕКРАН 2: TASKS -->
-    <div id="screen-tasks" class="page-screen">
-        <div class="balance-container" style="margin-top: 20px;">
-            <div class="balance-label">Your Balance</div>
-            <div class="balance-amount class-balance">788 REED</div>
-        </div>
-        
-        <div class="payment-box">
-            <div style="font-weight: bold; color: #00b4db;">⚡ Buy 1,000 REED Tokens</div>
-            <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Price: 0.1 TON</div>
-            <button class="payment-btn" onclick="sendTonPayment()">Buy with Wallet</button>
-        </div>
-
-        <div class="social-tasks" style="margin-top: 15px;">
-            <div class="social-title">📋 Tasks & Community</div>
-            <a href="https://t.me" target="_blank" class="social-link"><span>💬 Join Telegram Group</span><span>➔</span></a>
-            <a href="https://x.com" target="_blank" class="social-link"><span>🐦 Follow on X</span><span>➔</span></a>
+    <!-- ЕКРАН 2: PROFILE -->
+    <div id="screen-profile" class="page-screen">
+        <div style="background: rgba(255, 255, 255, 0.02); padding: 30px; border-radius: 20px; margin-top: 40px; width: 100%; max-width: 400px;">
+            <div style="font-size: 22px; color: #00b4db; font-weight: bold; margin-bottom: 10px;">👤 Профил</div>
+            <div id="profile-wallet-status" style="font-size: 14px; color: #94a3b8; word-break: break-all;">Портфейл: Не е свързан</div>
         </div>
     </div>
 
-    <!-- ФИКСИРАНО ДОЛНО МЕНЮ -->
+    <!-- МЕНЮ -->
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchScreen('screen-tap', this)">
-            <span class="nav-icon">🪙</span>
-            <span>Tap</span>
-        </div>
-        <div class="nav-item" onclick="switchScreen('screen-tasks', this)">
-            <span class="nav-icon">📋</span>
-            <span>Tasks</span>
-        </div>
+        <div onclick="changeTab('screen-tap', this)" class="nav-item active-nav"><span>⚡</span><span>Tap</span></div>
+        <div onclick="changeTab('screen-profile', this)" class="nav-item"><span>👤</span><span>Profile</span></div>
     </nav>
 
     <script>
-        // Деклариране на променливи
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-        let tonConnectUI = null;
+        let score = 788;
+        let pwr = 1000;
 
-        // Безопасно инициализиране на TON Connect, за да не чупи приложението локално
-        try {
-            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: window.location.origin + '/tonconnect-manifest.json',
-                buttonRootId: 'ton-connect-btn'
-            });
-        } catch (e) {
-            console.log("TON Connect се зарежда в тестов режим.");
-        }
-
-        // Превключване на екрани
-        function switchScreen(screenId, element) {
+        function changeTab(id, el) {
             document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            
-            document.getElementById(screenId).classList.add('active');
-            element.classList.add('active');
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active-nav'));
+            el.classList.add('active-nav');
         }
 
-        // Кликер функция
-        function handleCoinClick(event) {
-            if (energy <= 0) return;
-
-            energy -= 1;
-            balance += 1;
-
-            document.querySelectorAll('.class-balance').forEach(el => el.innerText = balance + " REED");
-            document.getElementById('energy-txt').innerText = energy;
-            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
-
-            // Анимация +1
-            const coinArea = document.getElementById('coin-area');
-            const floatingText = document.createElement('div');
-            floatingText.className = 'floating-text';
-            floatingText.innerText = '+1';
-
-            const rect = coinArea.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            
-            floatingText.style.left = x + 'px';
-            floatingText.style.top = y + 'px';
-
-            coinArea.appendChild(floatingText);
-
-            setTimeout(() => { floatingText.remove(); }, 600);
+        function clickCoin() {
+            if (pwr > 0) {
+                score++;
+                pwr--;
+                document.getElementById('balance-txt').textContent = score + " REED";
+                document.getElementById('energy-txt').textContent = pwr;
+                document.getElementById('energy-bar').style.width = (pwr / 10) + "%";
+            }
         }
 
-        // Регенерация на енергия
+        // Автоматично регенериране на енергия
         setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                document.getElementById('energy-txt').innerText = energy;
-                document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            if (pwr < 1000) {
+                pwr = Math.min(pwr + 5, 1000);
+                document.getElementById('energy-txt').textContent = pwr;
+                document.getElementById('energy-bar').style.width = (pwr / 10) + "%";
             }
         }, 1000);
 
-        // Функция за плащане
-        async function sendTonPayment() {
-            if (!tonConnectUI || !tonConnectUI.connected) {
-                alert("Please connect your TON Wallet first!");
-                return;
+        // ИНИЦИАЛИЗАЦИЯ НА РЕАЛЕН TON CONNECT (Защитен метод)
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (typeof TON_CONNECT_UI !== 'undefined') {
+                    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                        manifestUrl: 'https://github.io',
+                        buttonRootId: 'ton-connect-btn'
+                    });
+
+                    // Слушател: Прикача реалния адрес в Профила при успешно свързване
+                    tonConnectUI.onStatusChange(wallet => {
+                        const statusText = document.getElementById('profile-wallet-status');
+                        if (wallet) {
+                            const rawAddr = wallet.account.address;
+                            // Форматиране за четимост
+                            const shortAddr = rawAddr.substring(0, 6) + "..." + rawAddr.substring(rawAddr.length - 4);
+                            if (statusText) {
+                                statusText.textContent = "Свързан TON портфейл: " + shortAddr;
+                                statusText.style.color = "#10b981";
+                            }
+                        } else {
+                            if (statusText) {
+                                statusText.textContent = "Портфейл: Не е свързан";
+                                statusText.style.color = "#94a3b8";
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Грешка при зареждане на TON:", e);
+            }
+        });
+    </script>
+</body>
+</html>
