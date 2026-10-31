@@ -4,38 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
+    <!-- Официално SDK на TON Connect за истинска връзка с портфейли -->
+    <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; min-height: 100vh; user-select: none; text-align: center; padding: 16px; padding-bottom: 110px; }
         
-        /* Стабилна навигация */
         .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page-screen.active { display: flex; }
         
         .top-bar { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; margin-top: 10px; }
         
-        /* Супер стабилен бутон */
-        .custom-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            color: white; border: none; padding: 12px 24px; border-radius: 25px;
-            font-size: 14px; font-weight: bold; cursor: pointer; width: 85%;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-        }
+        /* Стил за контейнера на истинския TON бутон */
+        #ton-connect-btn { width: 85%; min-height: 44px; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         
         .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; margin-top: 5px; }
         
-        /* Кликер */
         .coin-container { display: flex; justify-content: center; margin: 25px 0; width: 100%; }
         .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); }
         .interactive-coin:active { transform: scale(0.95); }
         
-        /* Енергия */
         .energy-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; margin-top: 20px; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
         
-        /* Долно меню */
         .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
         .nav-item.active-nav { color: #00b4db; }
@@ -46,7 +39,8 @@
     <!-- ЕКРАН 1: TAP -->
     <div id="screen-tap" class="page-screen active">
         <div class="top-bar">
-            <button class="custom-wallet-btn" id="main-wallet-btn" onclick="executeConnect()">Connect Wallet</button>
+            <!-- Официален ТОН бутон. Библиотеката сама ще го създаде тук -->
+            <div id="ton-connect-btn"></div>
         </div>
         <div class="balance-container">
             <div style="color: #94a3b8; font-size: 13px;">YOUR BALANCE</div>
@@ -63,7 +57,7 @@
             <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8;">
                 <span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span>
             </div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar" style="width: 100%;"></div></div>
         </div>
     </div>
 
@@ -71,7 +65,7 @@
     <div id="screen-profile" class="page-screen">
         <div style="background: rgba(255, 255, 255, 0.02); padding: 30px; border-radius: 20px; margin-top: 40px; width: 100%; max-width: 400px;">
             <div style="font-size: 22px; color: #00b4db; font-weight: bold; margin-bottom: 10px;">👤 Профил</div>
-            <div id="profile-wallet-status" style="font-size: 14px; color: #94a3b8;">Портфейл: Не е свързан</div>
+            <div id="profile-wallet-status" style="font-size: 14px; color: #94a3b8; word-break: break-all;">Портфейл: Не е свързан</div>
         </div>
     </div>
 
@@ -102,20 +96,7 @@
             }
         }
 
-        function executeConnect() {
-            const btn = document.getElementById('main-wallet-btn');
-            const status = document.getElementById('profile-wallet-status');
-            
-            btn.textContent = "Свързване...";
-            setTimeout(() => {
-                const activeWallet = "UQBs...789x_Reed";
-                btn.textContent = "Свързан";
-                btn.style.background = "#10b981";
-                if(status) status.textContent = "Портфейл: " + activeWallet;
-                alert("Успешно тестване на Web3 модула!");
-            }, 600);
-        }
-
+        // Автоматично регенериране на енергия
         setInterval(() => {
             if (pwr < 1000) {
                 pwr = Math.min(pwr + 5, 1000);
@@ -123,6 +104,39 @@
                 document.getElementById('energy-bar').style.width = (pwr / 10) + "%";
             }
         }, 1000);
+
+        // ИНИЦИАЛИЗАЦИЯ НА РЕАЛЕН TON CONNECT (Защитен метод)
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (typeof TON_CONNECT_UI !== 'undefined') {
+                    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                        manifestUrl: 'https://github.io',
+                        buttonRootId: 'ton-connect-btn'
+                    });
+
+                    // Слушател: Прикача реалния адрес в Профила при успешно свързване
+                    tonConnectUI.onStatusChange(wallet => {
+                        const statusText = document.getElementById('profile-wallet-status');
+                        if (wallet) {
+                            const rawAddr = wallet.account.address;
+                            // Форматиране за четимост
+                            const shortAddr = rawAddr.substring(0, 6) + "..." + rawAddr.substring(rawAddr.length - 4);
+                            if (statusText) {
+                                statusText.textContent = "Свързан TON портфейл: " + shortAddr;
+                                statusText.style.color = "#10b981";
+                            }
+                        } else {
+                            if (statusText) {
+                                statusText.textContent = "Портфейл: Не е свързан";
+                                statusText.style.color = "#94a3b8";
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Грешка при зареждане на TON:", e);
+            }
+        });
     </script>
 </body>
 </html>
