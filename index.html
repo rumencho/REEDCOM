@@ -2,194 +2,169 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reedcom Network</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REED Community Mini App</title>
+    <!-- Tailwind CSS за стилизиране -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Telegram Web Apps Telegram SDK -->
+    <script src="https://telegram.org"></script>
     <style>
-        /* ЧИСТ БЛУМ СТИЛ - БЕЗ ВЪНШНИ ФАЙЛОВЕ */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #000000; color: #ffffff; text-align: center; padding: 16px; padding-bottom: 100px; min-height: 100vh; user-select: none; }
-
-        /* ГОРНА ЛЕНТА С БУТОН */
-        .top-bar { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 20px; min-height: 45px; }
-        
-        .wallet-btn {
-            background-color: #a3e635; color: #000000; border: none; 
-            padding: 10px 18px; border-radius: 20px; font-weight: bold; 
-            font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 4px 12px rgba(163, 230, 53, 0.15);
-        }
-        .wallet-btn.connected { background-color: #111827; color: #a3e635; border: 1px solid #1f2937; }
-
-        /* ЕКРАНИ */
-        .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
-        .page-screen.active { display: flex; }
-
-        /* БАЛАНС И МОНЕТА */
-        .balance-container { margin-top: 15px; margin-bottom: 25px; }
-        .balance-label { color: #9ca3af; font-size: 12px; letter-spacing: 1px; }
-        .balance-amount { font-size: 46px; font-weight: bold; }
-        .balance-amount span { color: #a3e635; }
-
-        .coin-area { position: relative; display: inline-block; margin: 20px auto; }
-        .coin { 
-            width: 220px; height: 220px; border-radius: 50%; 
-            background: radial-gradient(circle, #111827 0%, #030712 100%); border: 3px solid #1f2937;
-            display: flex; align-items: center; justify-content: center; font-size: 75px; cursor: pointer;
-        }
-        .coin:active { transform: scale(0.95); }
-
-        .floating-text { position: absolute; font-size: 26px; font-weight: bold; color: #a3e635; pointer-events: none; animation: floatUp 0.5s ease-out forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
-
-        /* КАРТИ */
-        .blum-card { background: #111827; padding: 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: left; margin-top: 20px; border: 1px solid #1f2937; }
-        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ffffff; }
-        
-        .task-item { display: flex; justify-content: space-between; align-items: center; background: #030712; padding: 14px; border-radius: 12px; margin-bottom: 10px; }
-        .task-btn { background: #1f2937; color: white; border: none; padding: 8px 16px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .task-btn.completed { background: rgba(163, 230, 53, 0.1); color: #a3e635; cursor: default; }
-
-        /* ДОЛНО МЕНЮ */
-        .bottom-nav { 
-            position: fixed; bottom: 15px; left: 5%; width: 90%; height: 66px; 
-            background-color: rgba(17, 24, 39, 0.98); border: 1px solid #1f2937; border-radius: 22px; 
-            display: flex; justify-content: space-around; align-items: center; z-index: 9999;
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #9ca3af; font-size: 11px; cursor: pointer; width: 25%; gap: 2px; }
-        .nav-item.active-nav { color: #a3e635; font-weight: bold; }
-        .nav-icon { font-size: 22px; }
+        .neon-glow { text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+        .neon-border { box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-white font-sans flex flex-col h-screen justify-between overflow-hidden">
 
-    <!-- БУТОН ЗА СВЪРЗВАНЕ -->
-    <div class="top-bar">
-        <button class="wallet-btn" id="main-wallet-btn" onclick="connectWallet()">
-            <span>💎</span> <span id="btn-text">Connect Wallet</span>
+    <!-- ЕКРАН 1: HOME (ФАРМЕНЕ И БАЛАНС) -->
+    <main id="home-screen" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
+        <h1 class="text-2xl font-bold tracking-wider text-cyan-400 neon-glow">REED TOKEN</h1>
+        
+        <!-- Светещото Лого на монетата (тук може да сложите вашата снимка) -->
+        <div class="w-48 h-48 rounded-full border-4 border-cyan-400 bg-slate-900 flex items-center justify-center neon-border animate-pulse">
+            <span class="text-6xl text-cyan-400">🪷</span>
+        </div>
+
+        <div class="text-center">
+            <p class="text-gray-400 text-sm uppercase tracking-widest">Вашият Баланс</p>
+            <p id="balance-display" class="text-4xl font-extrabold text-white mt-1">0 REED</p>
+        </div>
+
+        <button class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold py-3 px-12 rounded-full text-lg transition neon-border w-full max-w-xs">
+            Start Farming
         </button>
-    </div>
+    </main>
 
-    <!-- ЕКРАН 1: HOME -->
-    <div id="screen-home" class="page-screen active">
-        <div class="balance-container">
-            <div class="balance-label">YOUR BALANCE</div>
-            <div class="balance-amount"><span id="balance-txt">788</span> REED</div>
-        </div>
-        <div class="coin-area" id="coin-container">
-            <div class="coin" onclick="handleTap(event)">🌿</div>
-        </div>
-    </div>
-
-    <!-- ЕКРАН 2: TASKS -->
-    <div id="screen-tasks" class="page-screen">
-        <div class="blum-card">
-            <div class="card-title">📋 Social Tasks</div>
-            <div class="task-item">
-                <div>
-                    <div style="font-size: 14px; font-weight: bold;">Follow our X</div>
-                    <div style="color: #a3e635; font-size: 12px;">+250 REED</div>
-                </div>
-                <button class="task-btn" id="task1" onclick="doTask('task1', 250)">Start</button>
+    <!-- ЕКРАН 2: TASKS (СКРИТ ПО ПОДРАЗБИРАНЕ) -->
+    <main id="tasks-screen" class="flex-1 flex flex-col p-6 space-y-4 hidden overflow-y-auto">
+        <h2 class="text-xl font-bold text-cyan-400 mb-2 neon-glow">Задачи за изпълнение</h2>
+        
+        <!-- Задача 1: Telegram -->
+        <div class="bg-slate-900 p-4 rounded-xl flex items-center justify-between border border-slate-800">
+            <div>
+                <p class="font-semibold text-sm">Присъедини се в Telegram</p>
+                <p class="text-xs text-cyan-400">+500 REED</p>
             </div>
+            <button id="btn-tg" onclick="doTelegramTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg">Claim</button>
         </div>
-    </div>
 
-    <!-- ЕКРАН 3: FRENS -->
-    <div id="screen-frens" class="page-screen">
-        <div class="blum-card">
-            <div class="card-title">👥 Invite Frens</div>
-            <p style="color: #9ca3af; font-size: 14px; margin-bottom: 15px;">Earn +1000 REED instantly!</p>
-            <button class="wallet-btn" style="width: 100%; justify-content: center; padding: 12px;" onclick="alert('Линкът е копиран!')">Invite a fren</button>
+        <!-- Задача 2: Twitter (X) -->
+        <div class="bg-slate-900 p-4 rounded-xl flex items-center justify-between border border-slate-800">
+            <div>
+                <p class="font-semibold text-sm">Последвай ни в X (Twitter)</p>
+                <p class="text-xs text-cyan-400">+300 REED</p>
+            </div>
+            <button id="btn-x" onclick="doTwitterTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg">Claim</button>
         </div>
-    </div>
+    </main>
 
-    <!-- ЕКРАН 4: PROFILE -->
-    <div id="screen-profile" class="page-screen">
-        <div class="blum-card">
-            <div class="card-title">👤 Profile</div>
-            <p id="profile-wallet" style="color: #ef4444;">Wallet: Disconnected</p>
-        </div>
-    </div>
+    <!-- НАВИГАЦИОНЕН ТАСК БАР (МЕНЮ) -->
+    <nav class="bg-slate-900 border-t border-slate-800 px-6 py-4 flex justify-around items-center">
+        <button onclick="switchScreen('home')" class="flex flex-col items-center space-y-1 focus:outline-none">
+            <span class="text-xl">🏠</span>
+            <span class="text-xs text-cyan-400">Home</span>
+        </button>
+        <button onclick="switchScreen('tasks')" class="flex flex-col items-center space-y-1 focus:outline-none">
+            <span class="text-xl">📋</span>
+            <span class="text-xs text-gray-400">Tasks</span>
+        </button>
+    </nav>
 
-    <!-- ДОЛНО МЕНЮ -->
-    <div class="bottom-nav">
-        <div class="nav-item active-nav" onclick="navigateTo('screen-home', this)">
-            <div class="nav-icon">🏠</div>
-            <div>Home</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('screen-tasks', this)">
-            <div class="nav-icon">📋</div>
-            <div>Tasks</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('screen-frens', this)">
-            <div class="nav-icon">👥</div>
-            <div>Frens</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('screen-profile', this)">
-            <div class="nav-icon">👤</div>
-            <div>Profile</div>
-        </div>
-    </div>
-
+    <!-- СКРИПТ ЗА ЛОГИКА И СВЪРЗВАНЕ С БЕКЕНДА -->
     <script>
-        let score = 788;
-        let isConnected = false;
+        // Инициализация на Telegram WebApp API
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Отваря приложението на цял екран
 
-        function navigateTo(screenId, element) {
-            document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active-nav'));
-            element.classList.add('active-nav');
-        }
+        // Вземане на реалния ID на потребителя от Telegram
+        const userId = tg.initDataUnsafe?.user?.id || 12345; // Стойност по подразбиране, ако се тества в браузър
+        const BACKEND_URL = 'https://ВАШИЯТ-БЕКЕНД-URL.com'; // Сменете го с адреса на вашия качен бекенд
 
-        function handleTap(e) {
-            score++;
-            document.getElementById('balance-txt').textContent = score;
+        let currentBalance = 0;
 
-            if (e && e.clientX) {
-                let float = document.createElement('div');
-                float.className = 'floating-text';
-                float.textContent = '+1';
-                let rect = document.getElementById('coin-container').getBoundingClientRect();
-                float.style.left = (e.clientX - rect.left - 10) + 'px';
-                float.style.top = (e.clientY - rect.top - 20) + 'px';
-                document.getElementById('coin-container').appendChild(float);
-                setTimeout(() => float.remove(), 500);
-            }
-        }
-
-        function connectWallet() {
-            const btn = document.getElementById('main-wallet-btn');
-            const txt = document.getElementById('btn-text');
-            const pText = document.getElementById('profile-wallet');
-
-            if (!isConnected) {
-                isConnected = true;
-                txt.textContent = "UQBs...Reed";
-                btn.classList.add('connected');
-                pText.innerHTML = "Wallet: <span style='color:#a3e635'>Connected (UQBsA1Xy...Reed3R)</span>";
+        // Зареждане на първоначалните данни при стартиране
+        async function loadUserData() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/user-data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await res.json();
+                currentBalance = data.balance;
+                document.getElementById('balance-display').innerText = `${currentBalance} REED`;
                 
-                // РЕАЛНО ИЗВИКВАНЕ НА TELEGRAM WALLET ИЗВЪТРЕ
-                window.open('https://t.me', '_blank');
+                // Промяна на бутоните, ако задачите вече са изпълнени
+                if(data.tasks.telegram === 'claimed') updateButton('btn-tg');
+                if(data.tasks.twitter === 'claimed') updateButton('btn-x');
+            } catch (e) { console.error("Грешка при зареждане на данните"); }
+        }
+
+        // Превключване между екраните (Меню)
+        function switchScreen(screen) {
+            if (screen === 'home') {
+                document.getElementById('home-screen').classList.remove('hidden');
+                document.getElementById('tasks-screen').classList.add('hidden');
             } else {
-                isConnected = false;
-                txt.textContent = "Connect Wallet";
-                btn.classList.remove('connected');
-                pText.innerHTML = "<span style='color:#ef4444'>Wallet: Disconnected</span>";
+                document.getElementById('home-screen').classList.add('hidden');
+                document.getElementById('tasks-screen').classList.remove('hidden');
             }
         }
 
-        function doTask(id, reward) {
-            const btn = document.getElementById(id);
-            window.open('https://x.com', '_blank');
-            btn.textContent = "Checking...";
-            setTimeout(() => {
-                score += reward;
-                document.getElementById('balance-txt').textContent = score;
-                btn.textContent = "Claimed ✓";
-                btn.className = "task-btn completed";
+        // Изпълнение на Telegram задачата
+        async function doTelegramTask() {
+            // Първо го изпращаме да се присъедини
+            tg.openTelegramLink('https://t.me');
+            
+            // Проверяваме след кратко забавяне
+            setTimeout(async () => {
+                const res = await fetch(`${BACKEND_URL}/api/verify-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('balance-display').innerText = `${data.newBalance} REED`;
+                    updateButton('btn-tg');
+                    alert("Успешно взехте 500 REED!");
+                } else {
+                    alert(data.message);
+                }
             }, 2000);
         }
+
+        // Изпълнение на Twitter (X) задачата
+        function doTwitterTask() {
+            tg.openLink('https://x.com'); // Линк към вашия X
+            
+            // Симулираме таймер/проверка
+            let btn = document.getElementById('btn-x');
+            btn.innerText = "Checking...";
+            
+            setTimeout(async () => {
+                const res = await fetch(`${BACKEND_URL}/api/verify-twitter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('balance-display').innerText = `${data.newBalance} REED`;
+                    updateButton('btn-x');
+                    alert("Успешно взехте 300 REED!");
+                }
+            }, 5000); // Проверка след 5 секунди
+        }
+
+        function updateButton(id) {
+            const btn = document.getElementById(id);
+            btn.innerText = "Claimed ✓";
+            btn.disabled = true;
+            btn.className = "bg-gray-700 text-gray-400 text-xs font-bold py-2 px-4 rounded-lg cursor-not-allowed";
+        }
+
+        // Стартиране на приложението
+        loadUserData();
     </script>
 </body>
 </html>
