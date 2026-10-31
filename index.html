@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REED Community Mini App</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (Play CDN) -->
     <script src="https://jsdelivr.net"></script>
     <!-- Telegram Web Apps SDK -->
     <script src="https://telegram.org"></script>
-    <!-- КОРИГИРАНО: Сигурен и стабилен CDN за TON Connect UI -->
+    <!-- TON Connect UI SDK -->
     <script src="https://unpkg.com"></script>
     
     <style>
@@ -124,11 +124,11 @@
         let currentBalance = parseInt(localStorage.getItem('reed_balance')) || 0;
         let tasksState = JSON.parse(localStorage.getItem('reed_tasks')) || { telegram: 'open', twitter: 'open' };
 
-        // КОРИГИРАНО: Извикване на обекта през новия формат на библиотеката TonConnectSDK
         let tonConnectUI;
         try {
-            tonConnectUI = new TonConnectSDK.TonConnectUI({
-                manifestUrl: './tonconnect-manifest.json', 
+            // Зареждане през глобалния обект TonConnectUI
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://githubusercontent.com', // Сменете с истинския URL към вашия файл в GitHub
                 buttonRootId: 'ton-connect-btn'
             });
 
@@ -155,33 +155,38 @@
 
             if(user) {
                 document.getElementById('profile-name').innerText = `${user.first_name} ${user.last_name || ''}`;
-                document.getElementById('profile-username').innerText = user.username ? `@${user.username}` : 'Няма @username';
+                document.getElementById('profile-username').innerText = user.username ? `@${user.username}` : '';
                 document.getElementById('profile-id').innerText = `ID: ${user.id}`;
-                if(user.first_name) {
-                    document.getElementById('profile-avatar').innerText = user.first_name.charAt(0).toUpperCase();
-                }
-            } else {
-                document.getElementById('profile-name').innerText = "Тестов Акаунт";
-                document.getElementById('profile-username').innerText = "@test_user";
-                document.getElementById('profile-id').innerText = "ID: 123456789";
             }
         }
 
         function switchScreen(screenId) {
             document.querySelectorAll('.app-screen').forEach(screen => screen.classList.add('hidden'));
-            const targetScreen = document.getElementById(`screen-${screenId}`);
-            if (targetScreen) targetScreen.classList.remove('hidden');
-
-            const tabs = ['home', 'tasks', 'wallet', 'profile'];
-            tabs.forEach(tab => {
-                const textEl = document.getElementById(`nav-text-${tab}`);
-                if(textEl) {
-                    textEl.className = tab === screenId ? "text-[11px] text-cyan-400 font-medium transition" : "text-[11px] text-gray-400 font-medium transition";
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+            
+            // Промяна на активния текст в навигацията
+            ['home', 'tasks', 'wallet', 'profile'].forEach(id => {
+                const el = document.getElementById(`nav-text-${id}`);
+                if (id === screenId) {
+                    el.classList.replace('text-gray-400', 'text-cyan-400');
+                } else {
+                    el.classList.replace('text-cyan-400', 'text-gray-400');
                 }
             });
         }
 
-        function startFarming() {
-            const btn = document.getElementById('btn-farming');
-            btn.disabled = true;
-            btn.innerText = "Farming... +10 REED";
+        function updateButton(btnId) {
+            const btn = document.getElementById(btnId);
+            if(btn) {
+                btn.innerText = 'Claimed';
+                btn.disabled = true;
+                btn.classList.replace('bg-cyan-500', 'bg-slate-800');
+                btn.classList.add('text-gray-500', 'cursor-not-allowed');
+            }
+        }
+
+        // Стартиране при зареждане
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
