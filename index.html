@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
+    <!-- Добавяне на официалното TON Connect SDK -->
+    <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; min-height: 100vh; user-select: none; text-align: center; padding: 16px; padding-bottom: 110px; }
@@ -13,13 +15,8 @@
         
         .top-bar { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; margin-top: 10px; min-height: 50px; }
         
-        .custom-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            color: white; border: none; padding: 12px 24px; border-radius: 25px;
-            font-size: 14px; font-weight: bold; cursor: pointer; width: 85%;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            transition: all 0.2s;
-        }
+        /* Стилизиране на TON Connect бутона */
+        #ton-connect-btn { width: 85%; display: flex; justify-content: center; }
         
         .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; margin-top: 5px; }
@@ -32,6 +29,17 @@
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
         
+        /* Стилове за задачи и реферали */
+        .card-container { background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 20px; margin-top: 20px; width: 100%; max-width: 400px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card-title { font-size: 20px; color: #00b4db; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .task-btn { background: #00b4db; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .task-btn.completed { background: #10b981; cursor: default; }
+        
+        .invite-box { text-align: center; padding: 10px 0; }
+        .invite-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+
         .floating-text { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
 
@@ -45,7 +53,8 @@
     <!-- ЕКРАН 1: TAP -->
     <div id="screen-tap" class="page-screen active">
         <div class="top-bar">
-            <button class="custom-wallet-btn" id="main-wallet-btn" onclick="executeConnect()">Connect Wallet</button>
+            <!-- Контейнерът за официалния бутон на TON Connect -->
+            <div id="ton-connect-btn"></div>
         </div>
         <div class="balance-container">
             <div style="color: #94a3b8; font-size: 13px;">YOUR BALANCE</div>
@@ -66,28 +75,77 @@
         </div>
     </div>
 
-    <!-- ЕКРАН 2: PROFILE -->
-    <div id="screen-profile" class="page-screen">
-        <div style="background: rgba(255, 255, 255, 0.02); padding: 30px; border-radius: 20px; margin-top: 40px; width: 100%; max-width: 400px;">
-            <div style="font-size: 22px; color: #00b4db; font-weight: bold; margin-bottom: 10px;">👤 Профил</div>
-            <div id="profile-wallet-status" style="font-size: 14px; color: #94a3b8; word-break: break-all;">Портфейл: Не е свързан</div>
+    <!-- ЕКРАН 2: TASKS -->
+    <div id="screen-tasks" class="page-screen">
+        <div class="card-container">
+            <div class="card-title"><span>📋</span> Списък със задачи</div>
+            
+            <div class="task-item">
+                <div>
+                    <div style="font-size: 15px; font-weight: bold;">Последвай ни в X</div>
+                    <div style="font-size: 12px; color: #00ffcc;">+250 REED</div>
+                </div>
+                <button class="task-btn" id="task-x-btn" onclick="completeTask('task-x-btn', 250)">Старт</button>
+            </div>
+
+            <div class="task-item">
+                <div>
+                    <div style="font-size: 15px; font-weight: bold;">Присъедини се към Telegram</div>
+                    <div style="font-size: 12px; color: #00ffcc;">+500 REED</div>
+                </div>
+                <button class="task-btn" id="task-tg-btn" onclick="completeTask('task-tg-btn', 500)">Старт</button>
+            </div>
+        </div>
+
+        <!-- СЕКЦИЯ: ПРЕПОРЪЧАЙ ПРИЯТЕЛ -->
+        <div class="card-container">
+            <div class="card-title"><span>👥</span> Препоръчай приятел</div>
+            <div class="invite-box">
+                <p style="font-size: 14px; color: #94a3b8; margin-bottom: 10px;">Поканете ваши приятели и вземете <strong style="color: #00ffcc;">+1000 REED</strong> за всеки регистриран!</p>
+                <button class="invite-btn" onclick="inviteFriend()">Покани приятел</button>
+            </div>
         </div>
     </div>
 
-    <!-- МЕНЮ -->
+    <!-- ЕКРАН 3: PROFILE -->
+    <div id="screen-profile" class="page-screen">
+        <div class="card-container" style="max-width: 400px; margin-top: 40px;">
+            <div class="card-title"><span>👤</span> Профил на играча</div>
+            <div id="profile-wallet-status" style="font-size: 14px; color: #94a3b8; word-break: break-all; line-height: 1.4;">Портфейл: Не е свързан</div>
+        </div>
+    </div>
+
+    <!-- ОБНОВЕНО МЕНЮ С ТРИ СЕКЦИИ -->
     <nav class="bottom-nav">
         <div onclick="changeTab('screen-tap', this)" class="nav-item active-nav"><span>⚡</span><span>Tap</span></div>
+        <div onclick="changeTab('screen-tasks', this)" class="nav-item"><span>📋</span><span>Tasks</span></div>
         <div onclick="changeTab('screen-profile', this)" class="nav-item"><span>👤</span><span>Profile</span></div>
     </nav>
 
     <script>
-        // Зареждане на запазените точки от паметта на браузъра (за да не се губят)
+        // Инициализация на TON Connect UI
+        const tonConnectUI = new TONConnectUI.TonConnectUI({
+            manifestUrl: 'https://githubusercontent.com', // За тестове. За реална продукция заменете с вашия личен manifest.json файл, качен на вашия домейн.
+            buttonRootId: 'ton-connect-btn'
+        });
+
+        // Следене на състоянието на портфейла в реално време
+        tonConnectUI.onStatusChange(wallet => {
+            const statusDiv = document.getElementById('profile-wallet-status');
+            if (wallet) {
+                // Преобразува адреса в приятелски (User-friendly) формат
+                const userFriendlyAddress = wallet.account.address;
+                statusDiv.innerHTML = `✅ <strong>Свързан портфейл:</strong><br><span style="color:#00ffcc; font-size:12px;">${userFriendlyAddress}</span>`;
+            } else {
+                statusDiv.innerHTML = "❌ Портфейл: Не е свързан";
+            }
+        });
+
+        // Настройки на играта (Баланс и Енергия)
         let score = localStorage.getItem('reed_score') ? parseInt(localStorage.getItem('reed_score')) : 788;
         let pwr = 1000;
         const maxPwr = 1000;
-        let isConnected = false;
 
-        // Показване на първоначалния баланс
         document.getElementById('balance-txt').textContent = score + " REED";
 
         function changeTab(id, el) {
@@ -102,54 +160,6 @@
                 score++;
                 pwr--;
                 
-                // Запазваме точките в реално време в браузъра
                 localStorage.setItem('reed_score', score);
                 
                 document.getElementById('balance-txt').textContent = score + " REED";
-                document.getElementById('energy-txt').textContent = pwr;
-                document.getElementById('energy-bar').style.width = (pwr / maxPwr * 100) + "%";
-
-                if (e && e.clientX) {
-                    let float = document.createElement('div');
-                    float.className = 'floating-text';
-                    float.textContent = '+1';
-                    let rect = document.getElementById('coin-area').getBoundingClientRect();
-                    float.style.left = (e.clientX - rect.left - 15) + 'px';
-                    float.style.top = (e.clientY - rect.top - 20) + 'px';
-                    document.getElementById('coin-area').appendChild(float);
-                    setTimeout(() => float.remove(), 600);
-                }
-            }
-        }
-
-        setInterval(() => {
-            if (pwr < maxPwr) {
-                pwr = Math.min(pwr + 5, maxPwr);
-                document.getElementById('energy-txt').textContent = pwr;
-                document.getElementById('energy-bar').style.width = (pwr / maxPwr * 100) + "%";
-            }
-        }, 1000);
-
-        // СУПЕР СТАБИЛНА СИМУЛАЦИЯ, КОЯТО НИКОГА НЕ СЕ ЧУПИ
-        function executeConnect() {
-            const btn = document.getElementById('main-wallet-btn');
-            const status = document.getElementById('profile-wallet-status');
-            
-            if (!isConnected) {
-                btn.textContent = "Свързване...";
-                setTimeout(() => {
-                    isConnected = true;
-                    btn.textContent = "Disconnect (UQBs...Reed)";
-                    btn.style.background = "#10b981"; // Зелено
-                    if(status) status.textContent = "Портфейл: UQBsA1Xyz987_Reedcom_Network_Connected";
-                }, 400);
-            } else {
-                isConnected = false;
-                btn.textContent = "Connect Wallet";
-                btn.style.background = "linear-gradient(135deg, #00b4db, #0083b0)"; // Синьо
-                if(status) status.textContent = "Портфейл: Не е свързан";
-            }
-        }
-    </script>
-</body>
-</html>
