@@ -4,167 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REED Community Mini App</title>
-    <!-- Tailwind CSS за стилизиране -->
+    <!-- Tailwind CSS -->
     <script src="https://jsdelivr.net"></script>
-    <!-- Telegram Web Apps Telegram SDK -->
+    <!-- Telegram Web Apps SDK -->
     <script src="https://telegram.org"></script>
+    <!-- TON Connect SDK за Уеб Портфейли -->
+    <script src="https://unpkg.com"></script>
+    
     <style>
         .neon-glow { text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
         .neon-border { box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
     </style>
 </head>
-<body class="bg-slate-950 text-white font-sans flex flex-col h-screen justify-between overflow-hidden">
+<body class="bg-slate-950 text-white font-sans flex flex-col h-screen justify-between overflow-hidden selective-none">
 
-    <!-- ЕКРАН 1: HOME (ФАРМЕНЕ И БАЛАНС) -->
-    <main id="home-screen" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
+    <!-- ЕКРАН 1: HOME (ФАРМЕНЕ) -->
+    <main id="screen-home" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6 app-screen">
         <h1 class="text-2xl font-bold tracking-wider text-cyan-400 neon-glow">REED TOKEN</h1>
         
-        <!-- Светещото Лого на монетата (тук може да сложите вашата снимка) -->
-        <div class="w-48 h-48 rounded-full border-4 border-cyan-400 bg-slate-900 flex items-center justify-center neon-border animate-pulse">
+        <div class="w-44 h-44 rounded-full border-4 border-cyan-400 bg-slate-900 flex items-center justify-center neon-border animate-pulse">
             <span class="text-6xl text-cyan-400">🪷</span>
         </div>
 
         <div class="text-center">
-            <p class="text-gray-400 text-sm uppercase tracking-widest">Вашият Баланс</p>
+            <p class="text-gray-400 text-xs uppercase tracking-widest">Вашият Баланс</p>
             <p id="balance-display" class="text-4xl font-extrabold text-white mt-1">0 REED</p>
         </div>
 
-        <button class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold py-3 px-12 rounded-full text-lg transition neon-border w-full max-w-xs">
+        <button onclick="startFarming()" id="btn-farming" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold py-3 px-12 rounded-full text-lg transition neon-border w-full max-w-xs cursor-pointer">
             Start Farming
         </button>
     </main>
 
-    <!-- ЕКРАН 2: TASKS (СКРИТ ПО ПОДРАЗБИРАНЕ) -->
-    <main id="tasks-screen" class="flex-1 flex flex-col p-6 space-y-4 hidden overflow-y-auto">
+    <!-- ЕКРАН 2: TASKS (ЗАДАЧИ) -->
+    <main id="screen-tasks" class="flex-1 flex flex-col p-6 space-y-4 hidden overflow-y-auto app-screen">
         <h2 class="text-xl font-bold text-cyan-400 mb-2 neon-glow">Задачи за изпълнение</h2>
         
-        <!-- Задача 1: Telegram -->
         <div class="bg-slate-900 p-4 rounded-xl flex items-center justify-between border border-slate-800">
             <div>
                 <p class="font-semibold text-sm">Присъедини се в Telegram</p>
                 <p class="text-xs text-cyan-400">+500 REED</p>
             </div>
-            <button id="btn-tg" onclick="doTelegramTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg">Claim</button>
+            <button id="btn-tg" onclick="doTelegramTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg cursor-pointer">Claim</button>
         </div>
 
-        <!-- Задача 2: Twitter (X) -->
         <div class="bg-slate-900 p-4 rounded-xl flex items-center justify-between border border-slate-800">
             <div>
                 <p class="font-semibold text-sm">Последвай ни в X (Twitter)</p>
                 <p class="text-xs text-cyan-400">+300 REED</p>
             </div>
-            <button id="btn-x" onclick="doTwitterTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg">Claim</button>
+            <button id="btn-x" onclick="doTwitterTask()" class="bg-cyan-500 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg cursor-pointer">Claim</button>
+        </div>
+    </main>
+
+    <!-- ЕКРАН 3: WALLET (ПОРТФЕЙЛ) -->
+    <main id="screen-wallet" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6 hidden app-screen">
+        <h2 class="text-xl font-bold text-cyan-400 neon-glow">Web3 Портфейл</h2>
+        <p class="text-gray-400 text-sm text-center max-w-xs">Свържете вашия TON портфейл, за да получавате бъдещи airdrop награди.</p>
+        
+        <!-- Контейнер за бутона на TON Connect -->
+        <div id="ton-connect-btn" class="my-4"></div>
+        
+        <div id="wallet-info" class="text-center text-xs text-gray-500 hidden">
+            <p>Статус: <span class="text-green-400">Свързан</span></p>
+            <p id="wallet-address" class="font-mono mt-1 break-all bg-slate-900 p-2 rounded border border-slate-800 text-gray-300"></p>
+        </div>
+    </main>
+
+    <!-- ЕКРАН 4: PROFILE (ПРОФИЛ) -->
+    <main id="screen-profile" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6 hidden app-screen">
+        <h2 class="text-xl font-bold text-cyan-400 neon-glow">Вашият Профил</h2>
+        
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 w-full max-w-xs flex flex-col items-center space-y-4">
+            <div id="profile-avatar" class="w-20 h-20 bg-cyan-500 rounded-full flex items-center justify-center text-3xl font-bold text-slate-950">
+                U
+            </div>
+            <div class="text-center space-y-1">
+                <p id="profile-name" class="font-bold text-lg">Зареждане...</p>
+                <p id="profile-username" class="text-xs text-cyan-400">@username</p>
+                <p id="profile-id" class="text-[10px] text-gray-500 font-mono pt-2">ID: -----</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full max-w-xs flex justify-between items-center text-sm">
+            <span class="text-gray-400">Ранг в общността:</span>
+            <span class="text-cyan-400 font-bold">Няма (Ранен)</span>
         </div>
     </main>
 
     <!-- НАВИГАЦИОНЕН ТАСК БАР (МЕНЮ) -->
-    <nav class="bg-slate-900 border-t border-slate-800 px-6 py-4 flex justify-around items-center">
-        <button onclick="switchScreen('home')" class="flex flex-col items-center space-y-1 focus:outline-none">
+    <nav class="bg-slate-900 border-t border-slate-800 px-2 py-3 flex justify-around items-center">
+        <button onclick="switchScreen('home')" class="nav-btn flex flex-col items-center space-y-1 focus:outline-none cursor-pointer flex-1">
             <span class="text-xl">🏠</span>
-            <span class="text-xs text-cyan-400">Home</span>
+            <span id="nav-text-home" class="text-[11px] text-cyan-400 font-medium transition">Home</span>
         </button>
-        <button onclick="switchScreen('tasks')" class="flex flex-col items-center space-y-1 focus:outline-none">
+        <button onclick="switchScreen('tasks')" class="nav-btn flex flex-col items-center space-y-1 focus:outline-none cursor-pointer flex-1">
             <span class="text-xl">📋</span>
-            <span class="text-xs text-gray-400">Tasks</span>
+            <span id="nav-text-tasks" class="text-[11px] text-gray-400 font-medium transition">Tasks</span>
+        </button>
+        <button onclick="switchScreen('wallet')" class="nav-btn flex flex-col items-center space-y-1 focus:outline-none cursor-pointer flex-1">
+            <span class="text-xl">👛</span>
+            <span id="nav-text-wallet" class="text-[11px] text-gray-400 font-medium transition">Wallet</span>
+        </button>
+        <button onclick="switchScreen('profile')" class="nav-btn flex flex-col items-center space-y-1 focus:outline-none cursor-pointer flex-1">
+            <span class="text-xl">👤</span>
+            <span id="nav-text-profile" class="text-[11px] text-gray-400 font-medium transition">Profile</span>
         </button>
     </nav>
 
-    <!-- СКРИПТ ЗА ЛОГИКА И СВЪРЗВАНЕ С БЕКЕНДА -->
+    <!-- ЛОГИКА НА ПРИЛОЖЕНИЕТО -->
     <script>
-        // Инициализация на Telegram WebApp API
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Отваря приложението на цял екран
+        tg.expand();
 
-        // Вземане на реалния ID на потребителя от Telegram
-        const userId = tg.initDataUnsafe?.user?.id || 12345; // Стойност по подразбиране, ако се тества в браузър
-        const BACKEND_URL = 'https://ВАШИЯТ-БЕКЕНД-URL.com'; // Сменете го с адреса на вашия качен бекенд
+        // Данни за потребителя от Telegram
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id || 123456789;
+        const BACKEND_URL = 'https://ВАШИЯТ-БЕКЕНД-URL.com'; // Замени, ако имаш качен сървър
 
-        let currentBalance = 0;
+        // Локално състояние (за работа без бекенд)
+        let currentBalance = parseInt(localStorage.getItem('reed_balance')) || 0;
+        let tasksState = JSON.parse(localStorage.getItem('reed_tasks')) || { telegram: 'open', twitter: 'open' };
 
-        // Зареждане на първоначалните данни при стартиране
-        async function loadUserData() {
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/user-data`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                const data = await res.json();
-                currentBalance = data.balance;
-                document.getElementById('balance-display').innerText = `${currentBalance} REED`;
-                
-                // Промяна на бутоните, ако задачите вече са изпълнени
-                if(data.tasks.telegram === 'claimed') updateButton('btn-tg');
-                if(data.tasks.twitter === 'claimed') updateButton('btn-x');
-            } catch (e) { console.error("Грешка при зареждане на данните"); }
-        }
+        // Инициализиране на TON Connect бутон за портфейл
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://githubusercontent.com', // Задължителен публичен манифест файл
+            buttonRootId: 'ton-connect-btn'
+        });
 
-        // Превключване между екраните (Меню)
-        function switchScreen(screen) {
-            if (screen === 'home') {
-                document.getElementById('home-screen').classList.remove('hidden');
-                document.getElementById('tasks-screen').classList.add('hidden');
+        // Следене на състоянието на портфейла
+        tonConnectUI.onStatusChange(wallet => {
+            const walletInfo = document.getElementById('wallet-info');
+            const walletAddress = document.getElementById('wallet-address');
+            if (wallet) {
+                walletInfo.classList.remove('hidden');
+                // Преобразува адреса в съкратен четим формат
+                const rawAddress = wallet.account.address;
+                walletAddress.innerText = rawAddress.substring(0, 6) + "..." + rawAddress.substring(rawAddress.length - 6);
             } else {
-                document.getElementById('home-screen').classList.add('hidden');
-                document.getElementById('tasks-screen').classList.remove('hidden');
+                walletInfo.classList.add('hidden');
+            }
+        });
+
+        // Зареждане на данни
+        function initializeApp() {
+            // Показване на баланса
+            document.getElementById('balance-display').innerText = `${currentBalance} REED`;
+            
+            // Смяна на статуса на бутоните за таскове
+            if(tasksState.telegram === 'claimed') updateButton('btn-tg');
+            if(tasksState.twitter === 'claimed') updateButton('btn-x');
+
+            // Попълване на профила от Telegram данните
+            if(user) {
+                document.getElementById('profile-name').innerText = `${user.first_name} ${user.last_name || ''}`;
+                document.getElementById('profile-username').innerText = user.username ? `@${user.username}` : 'Няма потребителско име';
+                document.getElementById('profile-id').innerText = `ID: ${user.id}`;
+                if(user.first_name) {
+                    document.getElementById('profile-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+                }
+            } else {
+                document.getElementById('profile-name').innerText = "Тестов Потребител";
+                document.getElementById('profile-username').innerText = "@test_user";
             }
         }
 
-        // Изпълнение на Telegram задачата
-        async function doTelegramTask() {
-            // Първо го изпращаме да се присъедини
-            tg.openTelegramLink('https://t.me');
-            
-            // Проверяваме след кратко забавяне
-            setTimeout(async () => {
-                const res = await fetch(`${BACKEND_URL}/api/verify-telegram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('balance-display').innerText = `${data.newBalance} REED`;
-                    updateButton('btn-tg');
-                    alert("Успешно взехте 500 REED!");
-                } else {
-                    alert(data.message);
-                }
-            }, 2000);
-        }
+        // Навигация (Смяна на екрани)
+        function switchScreen(screenId) {
+            // Скрива всички екрани
+            document.querySelectorAll('.app-screen').forEach(screen => screen.classList.add('hidden'));
+            // Показва избрания екран
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
 
-        // Изпълнение на Twitter (X) задачата
-        function doTwitterTask() {
-            tg.openLink('https://x.com'); // Линк към вашия X
-            
-            // Симулираме таймер/проверка
-            let btn = document.getElementById('btn-x');
-            btn.innerText = "Checking...";
-            
-            setTimeout(async () => {
-                const res = await fetch(`${BACKEND_URL}/api/verify-twitter`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    document.getElementById('balance-display').innerText = `${data.newBalance} REED`;
-                    updateButton('btn-x');
-                    alert("Успешно взехте 300 REED!");
-                }
-            }, 5000); // Проверка след 5 секунди
-        }
-
-        function updateButton(id) {
-            const btn = document.getElementById(id);
-            btn.innerText = "Claimed ✓";
-            btn.disabled = true;
-            btn.className = "bg-gray-700 text-gray-400 text-xs font-bold py-2 px-4 rounded-lg cursor-not-allowed";
-        }
-
-        // Стартиране на приложението
-        loadUserData();
-    </script>
-</body>
-</html>
+            // Ресет на цветовете на навигационния бар
+            const tabs = ['home', 'tasks', 'wallet', 'profile'];
+            tabs.forEach(tab => {
+                const textEl = document.getElementById(`nav-text-${tab}`);
+                if(tab === screenId) {
