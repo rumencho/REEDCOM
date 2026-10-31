@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
     
-    <!-- ОФИЦИАЛНА БИБЛИОТЕКА TON CONNECT UI (Коригиран линк) -->
+    <!-- ОФИЦИАЛНА БИБЛИОТЕКА TON CONNECT UI -->
     <script src="https://unpkg.com"></script>
 
     <style>
@@ -23,7 +23,6 @@
             overflow-x: hidden;
         }
         
-        /* Управление на екрани чрез класове за по-гладка работа */
         .page-screen { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page-screen.active { display: flex; }
 
@@ -35,41 +34,34 @@
             margin-top: 10px; 
         }
         
-        /* Баланс */
         .balance-container { text-align: center; margin-bottom: 20px; width: 100%; }
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; margin-top: 5px; }
         
-        /* Монета */
         .coin-container { display: flex; justify-content: center; margin: 25px 0; position: relative; width: 100%; }
         .interactive-coin { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); transition: transform 0.1s; }
         .interactive-coin:active { transform: scale(0.94); }
         .coin-image { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
-        /* Енергия */
         .energy-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 20px; }
         .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; transition: width 0.2s; }
         
-        /* Задачи */
         .social-tasks { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 20px; background: rgba(255, 255, 255, 0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
         .social-title { font-size: 18px; font-weight: bold; color: #00b4db; text-align: left; margin-bottom: 8px; }
         .social-link { display: flex; align-items: center; justify-content: space-between; background: #111723; border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 12px; text-decoration: none; color: white; font-weight: bold; font-size: 14px; }
         .social-link:active { background: rgba(0, 180, 219, 0.1); border-color: #00b4db; }
         
-        /* Плащане */
         .payment-box { background: rgba(0, 180, 219, 0.05); border: 1px solid rgba(0, 180, 219, 0.2); padding: 16px; border-radius: 16px; margin-top: 15px; width: 100%; max-width: 400px; }
         .payment-btn { background: #0083b0; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
         .payment-btn:active { background: #00b4db; }
 
-        /* Долно меню */
         .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 50%; text-decoration: none; justify-content: center; height: 100%; }
         .nav-item.active { color: #00b4db; }
         .nav-icon { font-size: 20px; margin-bottom: 2px; }
 
-        /* Изскачащ текст (+1) */
         .floating-text { position: absolute; font-size: 28px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 10; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
     </style>
@@ -121,7 +113,7 @@
     <!-- ФИКСИРАНО ДОЛНО МЕНЮ -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="switchScreen('screen-tap', this)">
-            <span class="coin.jpg.jpg"></span>
+            <span class="nav-icon">🪙</span>
             <span>Tap</span>
         </div>
         <div class="nav-item" onclick="switchScreen('screen-tasks', this)">
@@ -131,61 +123,71 @@
     </nav>
 
     <script>
-        // Инициализиране на логика за баланс и енергия
+        // Деклариране на променливи
         let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
+        let tonConnectUI = null;
 
-       // Инициализиране на TON Connect UI
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: './tonconnect-manifest.json', // Слагаш файла директно в твоята папка
-    buttonRootId: 'ton-connect-btn'
-  });
+        // Безопасно инициализиране на TON Connect, за да не чупи приложението локално
+        try {
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: window.location.origin + '/tonconnect-manifest.json',
+                buttonRootId: 'ton-connect-btn'
+            });
+        } catch (e) {
+            console.log("TON Connect се зарежда в тестов режим.");
+        }
 
-
-        // Навигация между екраните
+        // Превключване на екрани
         function switchScreen(screenId, element) {
-            document.querySelectorAll('.page-screen').forEach(screen => screen.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.page-screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             
             document.getElementById(screenId).classList.add('active');
             element.classList.add('active');
         }
 
-        // Логика при клик върху монетата
+        // Кликер функция
         function handleCoinClick(event) {
             if (energy <= 0) return;
 
-            // Намаляване на енергията и увеличаване на баланса
             energy -= 1;
             balance += 1;
 
-            // Обновяване на UI елементите
             document.querySelectorAll('.class-balance').forEach(el => el.innerText = balance + " REED");
             document.getElementById('energy-txt').innerText = energy;
             document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
 
-            // Създаване на анимацията +1
+            // Анимация +1
             const coinArea = document.getElementById('coin-area');
             const floatingText = document.createElement('div');
             floatingText.className = 'floating-text';
             floatingText.innerText = '+1';
 
-            // Позициониране спрямо клика
             const rect = coinArea.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
             
-            floatingText.style.left = `${x}px`;
-            floatingText.style.top = `${y}px`;
+            floatingText.style.left = x + 'px';
+            floatingText.style.top = y + 'px';
 
             coinArea.appendChild(floatingText);
 
-            setTimeout(() => {
-                floatingText.remove();
-            }, 600);
+            setTimeout(() => { floatingText.remove(); }, 600);
         }
 
-        // Автоматично възстановяване на енергия (+1 енергия на секунда)
+        // Регенерация на енергия
         setInterval(() => {
             if (energy < maxEnergy) {
+                energy += 1;
+                document.getElementById('energy-txt').innerText = energy;
+                document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            }
+        }, 1000);
+
+        // Функция за плащане
+        async function sendTonPayment() {
+            if (!tonConnectUI || !tonConnectUI.connected) {
+                alert("Please connect your TON Wallet first!");
+                return;
