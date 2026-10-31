@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" translate="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reedcom Network</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 16px; padding-bottom: 120px; min-height: 100vh; user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; }
         
         .top-bar { display: flex; justify-content: center; margin-bottom: 30px; }
         .connect-wallet-btn { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 85%; text-align: center; }
         
-        .wallet-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 15, 0.9); z-index: 100000; justify-content: center; align-items: center; }
+        .wallet-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 15, 0.9); z-index: 1000; justify-content: center; align-items: center; }
         .wallet-modal.open { display: flex; }
         .modal-content { background: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; width: 90%; max-width: 340px; padding: 24px; text-align: center; position: relative; }
         .close-modal { position: absolute; top: 16px; right: 16px; font-size: 24px; color: #64748b; background: none; border: none; cursor: pointer; }
@@ -27,7 +27,7 @@
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
         .balance-amount { font-size: 44px; font-weight: bold; color: #00b4db; }
         
-        .coin-container { display: flex; justify-content: center; margin: 30px 0; position: relative; perspective: 1000px; }
+        .coin-container { display: flex; justify-content: center; margin: 30px 0; }
         .interactive-coin { 
             width: 220px; 
             height: 220px; 
@@ -39,154 +39,137 @@
             justify-content: center; 
             align-items: center; 
             cursor: pointer; 
-            overflow: hidden; 
-            position: relative;
-            box-shadow: 0 0 35px rgba(0, 180, 219, 0.5);
-            transition: transform 0.05s linear;
+            box-shadow: 0 0 25px rgba(0, 180, 219, 0.4);
         }
+        .interactive-coin:active { transform: scale(0.95); }
         
-        .interactive-coin:active { 
-            transform: scale(0.92); 
-        }
-        
-        .coin-image { 
-            width: 90px; 
-            height: 90px; 
-            object-fit: cover; 
-            border-radius: 50%; 
-            margin: 8px 0;
-            pointer-events: none;
-        }
+        .coin-image { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; }
         
         .energy-container { width: 100%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 12px; }
         .energy-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #94a3b8; }
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; overflow: hidden; }
-        .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); }
+        .progress-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); width: 100%; }
         
-        .page-screen { display: none; }
+        .page-screen { display: none; padding-bottom: 90px; }
         .page-screen.active { display: block; }
         
-        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 99999; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-align: center; justify-content: center; gap: 4px; }
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-align: center; }
         .nav-item.active { color: #00b4db; }
         
-        .floating-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 50; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
+        .floating-text { position: absolute; font-size: 30px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: floatUp 0.5s ease-out forwards; left: 50%; top: 40%; transform: translate(-50%, -50%); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
     </style>
-
-    <script>
-        // Деклариране на променливите глобално
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        // Изчакваме пълното зареждане на страницата, преди да обвържем бутоните
-        document.addEventListener("DOMContentLoaded", function() {
-            
-            // Настройка на Копчето за Портфейл
-            const walletBtn = document.getElementById('wallet-btn');
-            const walletModal = document.getElementById('wallet-modal');
-            const closeModalBtn = document.querySelector('.close-modal');
-            
-            if(walletBtn) {
-                walletBtn.addEventListener('click', function() {
-                    walletModal.classList.add('open');
-                });
-            }
-            
-            if(closeModalBtn) {
-                closeModalBtn.addEventListener('click', function() {
-                    walletModal.classList.remove('open');
-                });
-            }
-
-            // Настройка на избора на Портфейли
-            const options = document.querySelectorAll('.wallet-option');
-            options.forEach(option => {
-                option.addEventListener('click', function() {
-                    const walletName = this.querySelector('div:last-child').innerText;
-                    if(walletBtn) walletBtn.innerText = walletName + " Connected";
-                    walletModal.classList.remove('open');
-                });
-            });
-
-            // Настройка на Кликъра (Монетата)
-            const mainCoin = document.getElementById('main-coin');
-            if(mainCoin) {
-                mainCoin.addEventListener('click', function() {
-                    if (energy <= 0) return;
-
-                    balance += 1;
-                    energy -= 1;
-                    
-                    document.getElementById('balance-txt').innerText = balance + " REED";
-                    document.getElementById('energy-txt').innerText = energy;
-                    
-                    let energyPercentage = (energy / maxEnergy) * 100;
-                    document.getElementById('energy-bar').style.width = energyPercentage + '%';
-
-                    // Създаване на изскачащ текст +1
-                    const coinArea = document.getElementById('coin-area');
-                    const num = document.createElement('div');
-                    num.className = 'floating-text';
-                    num.innerText = '+1';
-                    coinArea.appendChild(num);
-                    
-                    setTimeout(function() {
-                        num.remove();
-                    }, 600);
-                });
-            }
-
-            // Автоматично пълнене на Енергия на всяка секунда
-            setInterval(function() {
-                if (energy < maxEnergy) {
-                    energy += 1;
-                    document.getElementById('energy-txt').innerText = energy;
-                    let energyPercentage = (energy / maxEnergy) * 100;
-                    document.getElementById('energy-bar').style.width = energyPercentage + '%';
-                }
-            }, 1000);
-        });
-
-        // Функция за Таскбара (остава видима директно за улеснение)
-        function switchTab(screenId, element) {
-            var screens = document.getElementsByClassName('page-screen');
-            for (var i = 0; i < screens.length; i++) {
-                screens[i].classList.remove('active');
-            }
-            var items = document.getElementsByClassName('nav-item');
-            for (var i = 0; i < items.length; i++) {
-                items[i].classList.remove('active');
-            }
-            document.getElementById(screenId).classList.add('active');
-            element.classList.add('active');
-        }
-    </script>
 </head>
 <body>
 
     <div class="top-bar">
-        <button class="connect-wallet-btn" id="wallet-btn">Connect Wallet</button>
+        <button class="connect-wallet-btn" id="wallet-btn" onclick="openModal()">Connect Wallet</button>
     </div>
 
     <div class="wallet-modal" id="wallet-modal">
         <div class="modal-content">
-            <button class="close-modal">&times;</button>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
             <div class="modal-title">Connect Web3 Wallet</div>
-            <div class="wallet-option"><div class="wallet-logo logo-binance">BNC</div><div>Binance Web3</div></div>
-            <div class="wallet-option"><div class="wallet-logo logo-okx">OKX</div><div>OKX Wallet</div></div>
-            <div class="wallet-option"><div class="wallet-logo logo-gate">GATE</div><div>Gate.io Wallet</div></div>
+            <div class="wallet-option" onclick="selectWallet('Binance Web3')"><div class="wallet-logo logo-binance">BNC</div><div>Binance Web3</div></div>
+            <div class="wallet-option" onclick="selectWallet('OKX Wallet')"><div class="wallet-logo logo-okx">OKX</div><div>OKX Wallet</div></div>
+            <div class="wallet-option" onclick="selectWallet('Gate.io Wallet')"><div class="wallet-logo logo-gate">GATE</div><div>Gate.io Wallet</div></div>
         </div>
     </div>
 
-    <!-- ТАБ 1: КЛИКЕР -->
+    <!-- ТАБ 1 -->
     <div id="screen-tap" class="page-screen active">
         <div class="balance-container">
             <div class="balance-label">Your Balance</div>
             <div class="balance-amount" id="balance-txt">788 REED</div>
         </div>
         
-        <div class="coin-container" id="coin-area">
-            <div class="interactive-coin" id="main-coin">
+        <div class="coin-container" style="position: relative;" id="coin-area">
+            <div class="interactive-coin" id="main-coin" onclick="clickCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                <img src="coin.jpg" alt="Coin" class="coin-image">
+                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
+            </div>
+        </div>
+
+        <div class="energy-container">
+            <div class="energy-text"><span>⚡ Energy</span><span><strong id="energy-txt">1000</strong> / 1000</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="energy-bar"></div></div>
+        </div>
+    </div>
+
+    <!-- ТАБ 2 -->
+    <div id="screen-tasks" class="page-screen">
+        <div style="text-align:center; padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div>
+    </div>
+
+    <!-- ТАБ 3 -->
+    <div id="screen-friends" class="page-screen">
+        <div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div>
+    </div>
+
+    <!-- ТАБ 4 -->
+    <div id="screen-profile" class="page-screen">
+        <div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;">👤 Connected: @ReedcomUser</div>
+    </div>
+
+    <!-- ДОЛНА ЛЕНТА -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('screen-tap', this)">
+            <span style="font-size: 20px;">🔘</span><span>Tap</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('screen-tasks', this)">
+            <span style="font-size: 20px;">📋</span><span>Tasks</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('screen-friends', this)">
+            <span style="font-size: 20px;">👥</span><span>Friends</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('screen-profile', this)">
+            <span style="font-size: 20px;">👤</span><span>Profile</span>
+        </div>
+    </nav>
+
+    <script>
+        var balance = 788;
+        var energy = 1000;
+        var maxEnergy = 1000;
+
+        function switchTab(screenId, element) {
+            var screens = document.getElementsByClassName('page-screen');
+            for (var i = 0; i < screens.length; i++) { screens[i].classList.remove('active'); }
+            var items = document.getElementsByClassName('nav-item');
+            for (var i = 0; i < items.length; i++) { items[i].classList.remove('active'); }
+            document.getElementById(screenId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function openModal() { document.getElementById('wallet-modal').classList.add('open'); }
+        function closeModal() { document.getElementById('wallet-modal').classList.remove('open'); }
+        function selectWallet(name) { document.getElementById('wallet-btn').innerText = name + " Connected"; closeModal(); }
+
+        function clickCoin() {
+            if (energy <= 0) return;
+            balance += 1;
+            energy -= 1;
+            document.getElementById('balance-txt').innerText = balance + " REED";
+            document.getElementById('energy-txt').innerText = energy;
+            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            
+            var area = document.getElementById('coin-area');
+            var txt = document.createElement('div');
+            txt.className = 'floating-text';
+            txt.innerText = '+1';
+            area.appendChild(txt);
+            setTimeout(function() { txt.remove(); }, 500);
+        }
+
+        setInterval(function() {
+            if (energy < maxEnergy) {
+                energy += 1;
+                document.getElementById('energy-txt').innerText = energy;
+                document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
