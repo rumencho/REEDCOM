@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom Network</title>
     
-    <!-- ОФИЦИАЛЕН СКРИПТ ЗА TON CONNECT UI -->
+    <!-- Официален скрипт за TON Connect UI -->
     <script src="https://unpkg.com"></script>
 
     <style>
@@ -19,12 +19,7 @@
         .close-modal { position: absolute; top: 16px; right: 16px; font-size: 24px; color: #64748b; background: none; border: none; cursor: pointer; }
         .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; }
         .wallet-option { display: flex; align-items: center; width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; margin-bottom: 12px; cursor: pointer; text-align: left; }
-        .wallet-logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: white; }
-        
-        /* Стилизиране на логата за TON мрежата */
-        .logo-tonkeeper { background: #0098EA; }
-        .logo-telegram { background: #24A1DE; }
-        .logo-myton { background: #0054ff; }
+        .wallet-logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: white; background: #0098EA; }
         
         .balance-container { text-align: center; margin-bottom: 25px; }
         .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; }
@@ -53,13 +48,16 @@
         <button class="connect-wallet-btn" id="wallet-btn" onclick="openWalletModal()">Connect Wallet</button>
     </div>
 
-    <!-- Твоето модифицирано Web3 модално прозорче -->
+    <!-- Модален прозорец за портфейли -->
     <div class="wallet-modal" id="wallet-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeWalletModal()">&times;</button>
-            <div class="modal-title" id="modal-status-title">Connect TON Wallet</div>
+            <div class="modal-title">Connect TON Wallet</div>
             <div id="wallet-options-container">
-                <div class="wallet-option" onclick="connectTonWallet()"><div class="wallet-logo logo-tonkeeper">💎</div><div>Tonkeeper / Wallet</div></div>
+                <div class="wallet-option" onclick="connectTonWallet()">
+                    <div class="wallet-logo">💎</div>
+                    <div>Open Wallet Options</div>
+                </div>
             </div>
         </div>
     </div>
@@ -84,7 +82,7 @@
     <div id="screen-friends" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div></div>
     <div id="screen-profile" class="page-screen"><div style="text-align:center; padding:50px 20px; color:#00b4db; font-weight:bold;" id="profile-user-txt">👤 Connected: @ReedcomUser</div></div>
 
-    <!-- НАВИГАЦИЯ -->
+    <!-- ДОЛНО МЕНЮ -->
     <nav class="bottom-nav">
         <div class="nav-item active" id="nav-tap" onclick="switchScreen('nav-tap', 'screen-tap')"><span>⚡</span><span>Tap</span></div>
         <div class="nav-item" id="nav-tasks" onclick="switchScreen('nav-tasks', 'screen-tasks')"><span>📋</span><span>Tasks</span></div>
@@ -97,7 +95,6 @@
         let energy = 1000;
         const maxEnergy = 1000;
 
-        // 1. ПОПРАВКА НА КЛИКЕРА И ЕНЕРГИЯТА
         function clickCoin(e) {
             if (energy > 0) {
                 balance += 1;
@@ -117,7 +114,6 @@
             }
         }
 
-        // ЗАВЪРШВАНЕ НА ТАЙМЕРА ЗА ВЪЗСТАНОВЯВАНЕ (прекъснатия ти ред)
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -126,7 +122,6 @@
             }
         }, 1000);
 
-        // КЛИК ФУНКЦИЯ ЗА СМЯНА НА ЕКРАНИТЕ
         function switchScreen(navId, screenId) {
             document.querySelectorAll('.page-screen').forEach(screen => screen.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -134,17 +129,28 @@
             document.getElementById(navId).classList.add('active');
         }
 
-        // 2. ИНТЕГРАЦИЯ НА ПОРТФЕЙЛА (БЕЗОПАСНА ЗА GITHUB)
-        let tonConnectUI;
+        // Чисто TON Connect UI инициализиране, без твърди линкове
+        let tonConnectUI = null;
         try {
             tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: 'https://github.io', // Сигурен тестов манифест, който GitHub пропуска без проблем
-                buttonRootId: 'none' // Крием стандартния грозен бутон и ползваме твоя дизайн
+                manifestUrl: 'https://ton.org', // Ползваме глобалния официален манифест, защитен и сигурен за GitHub
+                buttonRootId: 'none'
             });
 
-            // Слушаме дали потребителят е свързал портфейл
             tonConnectUI.onStatusChange(wallet => {
                 if (wallet) {
                     const address = wallet.account.address;
-                    // Съкращаваме адреса за бутона (напр. EQBl...4f3a)
                     const shortAddress = address.slice(0, 4) + '...' + address.slice(-4);
+                    document.getElementById('wallet-btn').innerText = shortAddress;
+                    document.getElementById('profile-user-txt').innerText = "Connected Wallet: " + shortAddress;
+                    closeWalletModal();
+                } else {
+                    document.getElementById('wallet-btn').innerText = "Connect Wallet";
+                }
+            });
+        } catch(err) {
+            console.log(err);
+        }
+
+        function openWalletModal() {
+            if (tonConnectUI && tonConnectUI.connected) {
