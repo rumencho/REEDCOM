@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за портфейла през CDN -->
-    <script src="https://unpkg.com"></script>
+    <!-- Официалното TON Connect SDK за портфейла -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
@@ -13,7 +13,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Изчистен контейнер за бутоните без конфликтни CSS правила */
+        /* Контейнер за TON Connect бутоните */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -21,6 +21,21 @@
             display: flex;
             justify-content: center;
         }
+        
+        /* Стилизиране на вградените бутони на TON Connect, за да паснат на вашия дизайн */
+        .wallet-container button {
+            background: linear-gradient(135deg, #00b4db, #0083b0) !important;
+            color: white !important;
+            border-radius: 25px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3) !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            transition: transform 0.1s ease !important;
+        }
+        .wallet-container button:active { transform: scale(0.98); }
+        .wallet-container svg { fill: white !important; }
+        .wallet-container div { color: white !important; }
 
         /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
@@ -56,7 +71,7 @@
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <!-- Първи бутон за портфейл -->
+            <!-- Бутон за портфейл на началния екран -->
             <div id="ton-connect-tap"></div>
         </div>
 
@@ -101,7 +116,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Втори бутон за портфейл в екрана на профила -->
+            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -149,13 +164,14 @@
             tg.expand();
         }
 
-        // Чиста инициализация директно през глобалния обект TON_CONNECT_UI
-        const tonConnectUI1 = new TON_CONNECT_UI.TonConnectUI({
+        // Инициализираме първия бутон в екрана за цъкане (Tap)
+        const tonConnectTap = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-tap'
         });
 
-        const tonConnectUI2 = new TON_CONNECT_UI.TonConnectUI({
+        // Инициализираме втория бутон в екрана за профил (Profile)
+        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-profile'
         });
