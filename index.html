@@ -13,16 +13,16 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect бутона */
+        /* Контейнер за TON Connect бутоните */
         .wallet-container {
             width: 100%;
             max-width: 400px;
-            margin: 20px auto;
+            margin: 10px auto 20px auto;
             display: flex;
             justify-content: center;
         }
         
-        /* Стилизиране на вградените бутони на TON Connect */
+        /* Стилизиране на вградените бутони на TON Connect, за да паснат на вашия дизайн */
         .wallet-container button {
             background: linear-gradient(135deg, #00b4db, #0083b0) !important;
             color: white !important;
@@ -70,7 +70,7 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
         <div style="position: relative;" id="clickZone">
@@ -111,7 +111,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Единственият и правилно инициализиран бутон за портфейл -->
+            <!-- Бутонът за портфейл е оставен само тук в Профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -151,7 +151,7 @@
         }
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT И КЛИКЕР -->
+    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -159,62 +159,10 @@
             tg.expand();
         }
 
-        // Инициализиране на точно ЕДИН бутон в приложението (на екрана Profile)
-        // ВАЖНО: 'https://yourdomain.com' ТРЯБВА да бъде заменен с реален уеб линк!
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://yourdomain.com',
+            manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-profile'
         });
-
-        // Логика за играта (баланс и енергия)
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        function hitCoin() {
-            if (energy <= 0) {
-                if(tg) tg.showAlert("Нямате достатъчно енергия!");
-                else alert("Нямате достатъчно енергия!");
-                return;
-            }
-
-            balance += 1;
-            energy -= 10; 
-            if (energy < 0) energy = 0;
-
-            document.getElementById('valBalance').innerText = balance + " REED";
-            document.getElementById('valEnergy').innerText = energy;
-            
-            const percentage = (energy / maxEnergy) * 100;
-            document.getElementById('valBar').style.width = percentage + "%";
-
-            createPlusOneEffect();
-        }
-
-        function createPlusOneEffect() {
-            const clickZone = document.getElementById('clickZone');
-            const plusText = document.createElement('div');
-            plusText.classList.add('text-plus');
-            plusText.innerText = '+1';
-            
-            clickZone.appendChild(plusText);
-
-            setTimeout(() => {
-                plusText.remove();
-            }, 500);
-        }
-
-        // Пасивно възстановяване на енергията (по 1 на секунда)
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                if (energy > maxEnergy) energy = maxEnergy;
-                
-                document.getElementById('valEnergy').innerText = energy;
-                const percentage = (energy / maxEnergy) * 100;
-                document.getElementById('valBar').style.width = percentage + "%";
-            }
-        }, 1000);
     </script>
 </body>
 </html>
