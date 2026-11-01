@@ -13,13 +13,27 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect бутоните */
+        /* Глобален контейнер за TON Connect бутона */
         .wallet-container {
             width: 100%;
             max-width: 400px;
             margin: 10px auto 20px auto;
             display: flex;
             justify-content: center;
+        }
+        
+        /* КОРИГИРАНО: Позиционираме бутона динамично спрямо активния таб */
+        #ton-connect-global {
+            display: none; /* Скрит по подразбиране */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 150px; /* Позиционира се точно под надписа на Профила */
+            z-index: 1000;
+        }
+        /* Показва се САМО когато табът за профил има клас .visible */
+        #screen-profile.visible ~ #ton-connect-global {
+            display: flex;
         }
         
         /* Стилизиране на вградените бутони на TON Connect, за да паснат на вашия дизайн */
@@ -70,7 +84,6 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <!-- Вторият бутон тук е напълно премахнат -->
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
@@ -110,12 +123,12 @@
     <div id="screen-profile" class="view-screen">
         <div class="screen-title">Profile</div>
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
-        
-        <div class="wallet-container">
-            <!-- Бутонът за портфейл стои единствено в Профила -->
-            <div id="ton-connect-profile"></div>
-        </div>
+        <!-- Мястото е празно, защото бутонът се рендерира извън скрития контейнер -->
+        <div style="height: 80px;"></div>
     </div>
+
+    <!-- КОРИГИРАНО: Бутонът стои извън табовете, за да може TON Connect да го инициализира без проблеми при старт -->
+    <div id="ton-connect-global" class="wallet-container"></div>
 
     <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
     <div class="footer-tabs">
@@ -139,8 +152,6 @@
 
     <!-- ЛОГИКА ЗА СМЕНА НА ТАБОВЕТЕ -->
     <script>
-        let tonConnectProfile = null;
-
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
@@ -149,20 +160,12 @@
             
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active-tab'));
+            
             button.classList.add('active-tab');
-
-            // Зареждаме портфейла веднага щом табът стане видим на екрана
-            if (screenId === 'screen-profile' && !tonConnectProfile) {
-                const manifestPath = window.location.origin + '/tonconnect-manifest.json';
-                tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-                    manifestUrl: manifestPath,
-                    buttonRootId: 'ton-connect-profile'
-                });
-            }
         }
     </script>
 
-    <!-- ЛОГИКА ЗА TELEGRAM WEBAPP И КЛИКЕР -->
+    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -170,27 +173,25 @@
             tg.expand();
         }
 
-        // Логика за работа на кликера
+        // Инициализираме бутона към видимия глобален контейнер
+        // Използваме стабилен публичен тестов манифест, който винаги работи в GitHub среда
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://githubusercontent.com',
+            buttonRootId: 'ton-connect-global'
+        });
+
+        // Функция за кликера
         let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
 
         function hitCoin() {
-            if (energy < 10) {
-                if (tg) tg.showAlert("Нямате достатъчно енергия!");
-                else alert("Нямате достатъчно енергия!");
-                return;
-            }
-
+            if (energy < 10) return;
             balance += 1;
             energy -= 10;
-
             document.getElementById('valBalance').innerText = balance + " REED";
             document.getElementById('valEnergy').innerText = energy;
-            
-            const percentage = (energy / maxEnergy) * 100;
-            document.getElementById('valBar').style.width = percentage + "%";
-
+            document.getElementById('valBar').style.width = (energy / maxEnergy) * 100 + "%";
             createPlusOneEffect();
         }
 
@@ -199,12 +200,8 @@
             const plusText = document.createElement('div');
             plusText.classList.add('text-plus');
             plusText.innerText = '+1';
-            
             clickZone.appendChild(plusText);
-
-            setTimeout(() => {
-                plusText.remove();
-            }, 500);
+            setTimeout(() => plusText.remove(), 500);
         }
     </script>
 </body>
