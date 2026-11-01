@@ -13,7 +13,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Изчистен контейнер за бутоните, който не генерира CSS грешки */
+        /* Изчистен контейнер за бутоните без конфликтни CSS правила */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -101,7 +101,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Втори бутон за портфейл специално в екрана на профила -->
+            <!-- Втори бутон за портфейл в екрана на профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -149,7 +149,7 @@
             tg.expand();
         }
 
-        // Правилно извикване на класа от CDN без софтуерни конфликти
+        // Чиста инициализация директно през глобалния обект TON_CONNECT_UI
         const tonConnectUI1 = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-tap'
