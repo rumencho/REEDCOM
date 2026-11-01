@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
+    <!-- Официалното TON Connect SDK за чист JavaScript (Vanilla JS) -->
+    <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; }
@@ -11,14 +13,34 @@
         .view-screen { display: none; padding-bottom: 90px; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Стил за Профила и Портфейла */
-        .profile-container { padding: 40px 20px; text-align: center; }
-        .profile-username { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #00b4db; }
-        .wallet-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 20px; border-radius: 20px; margin-top: 20px; }
-        .wallet-status-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .wallet-address-text { font-size: 15px; font-weight: bold; color: #ffffff; margin-bottom: 15px; word-break: break-all; }
-        .btn-ton-connect { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; padding: 12px 28px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; max-width: 260px; box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3); transition: background 0.2s ease; }
-        .btn-ton-connect.connected { background: #ef4444; }
+        /* Стил за бутона на портфейла (Интегрира се с TON Connect) */
+        .wallet-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto 20px auto;
+            display: flex;
+            justify-content: center;
+        }
+        /* Пренаписваме стиловете на TON Connect бутона, за да съвпада с вашия дизайн */
+        #ton-connect-btn-container button {
+            background: linear-gradient(135deg, #00b4db, #0083b0) !important;
+            color: white !important;
+            border-radius: 25px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3) !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            transition: transform 0.1s ease !important;
+        }
+        #ton-connect-btn-container button:active {
+            transform: scale(0.98);
+        }
+        #ton-connect-btn-container svg {
+            fill: white !important;
+        }
+        #ton-connect-btn-container div {
+            color: white !important;
+        }
 
         /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
@@ -42,6 +64,12 @@
 
     <!-- ТАБ 1: КЛИКЕР -->
     <div id="tab1" class="view-screen visible">
+        
+        <!-- Контейнер за TON Connect бутона (Позициониран най-отгоре) -->
+        <div class="wallet-container">
+            <div id="ton-connect-btn-container"></div>
+        </div>
+
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
@@ -60,6 +88,62 @@
             <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
         </div>
     </div>
+
+    <!-- 1. ЛОГИКА ЗА TON CONNECT (ПОРТФЕЙЛ) -->
+    <script>
+        const tonConnectUI = new TONConnectUI.TonConnectUI({
+            manifestUrl: 'https://xn----7sbfkfpkwlg5b8dye.com', // ⚠️ СМЕНЕТЕ С ВАШИЯ HTTPS URL ДО МАНИФЕСТА
+            buttonRootId: 'ton-connect-btn-container',
+            actionsConfiguration: {
+                // Автоматично връща потребителя в Telegram след потвърждение в Tonkeeper/MyTonWallet
+                twaReturnUrl: 'https://t.me' // ⚠️ СМЕНЕТЕ С ЛИНКА НА ВАШИЯ БОТ
+            }
+        });
+
+        // Следене на състоянието на портфейла в реално време
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                console.log("Портфейлът е свързан успешно. Адрес:", wallet.account.address);
+                // ТУК: Добавете fetch() заявка към вашия бекенд, за да запишете адреса на потребителя
+            } else {
+                console.log("Портфейлът не е свързан или връзката е прекъсната.");
+            }
+        });
+    </script>
+
+    <!-- 2. ЛОГИКА ЗА КЛИКЕРА И ЕНЕРГИЯТА -->
+    <script>
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                
+                // Обновяване на интерфейса
+                document.getElementById('valBalance').innerText = balance + " REED";
+                document.getElementById('valEnergy').innerText = energy;
+                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+                
+                // Създаване на изскачащия текст +1 на мястото на кликането
+                const clickZone = document.getElementById('clickZone');
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                
+                // Премахване на елемента след края на анимацията
+                setTimeout(() => {
+                    plus.remove();
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
+
 
     <!-- ТАБ 2: ЗАДАЧИ -->
     <div id="tab2" class="view-screen">
