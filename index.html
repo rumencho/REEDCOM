@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
@@ -116,7 +116,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
+            <!-- Втори бутон за портфейл вътре в ПРОФИЛА -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -156,7 +156,7 @@
         }
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
+    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT И КЛИКЕР -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -164,43 +164,55 @@
             tg.expand();
         }
 
-        // Инициализираме първия бутон в екрана за цъкане (Tap)
-        const tonConnectTap = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com',
+        // 1. Инициализиране на главния инстанс за TON Connect
+        // ВАЖНО: Заменете долния линк с реалния път до вашия tonconnect-manifest.json файл!
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://yourdomain.com',
             buttonRootId: 'ton-connect-tap'
         });
 
-        // Инициализираме втория бутон в екрана за профил (Profile)
-        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com',
+        // 2. Свързваме същия инстанс към бутона в профила за синхронизация
+        tonConnectUI.uiOptions = {
             buttonRootId: 'ton-connect-profile'
-        });
-    </script>
+        };
 
-    <!-- ЛОГИКА ЗА КЛИКЕРА -->
-    <script>
+        // 3. Логика за кликане на монетата (баланс и енергия)
         let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
 
         function hitCoin() {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                
-                document.getElementById('valBalance').innerText = balance + " REED";
-                document.getElementById('valEnergy').innerText = energy;
-                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
-                
-                const clickZone = document.getElementById('clickZone');
-                const plus = document.createElement('div');
-                plus.className = 'text-plus';
-                plus.innerText = '+1';
-                clickZone.appendChild(plus);
-                
-                setTimeout(() => { plus.remove(); }, 500);
+            if (energy <= 0) {
+                if(tg) tg.showAlert("Нямате достатъчно енергия!");
+                else alert("Нямате достатъчно енергия!");
+                return;
             }
+
+            // Промяна на стойностите
+            balance += 1;
+            energy -= 10; // Всеки клик взема по 10 енергия
+            if (energy < 0) energy = 0;
+
+            // Обновяване на текстовете в интерфейса
+            document.getElementById('valBalance').innerText = balance + " REED";
+            document.getElementById('valEnergy').innerText = energy;
+            
+            // Промяна на ширината на енергийния бар
+            const percentage = (energy / maxEnergy) * 100;
+            document.getElementById('valBar').style.width = percentage + "%";
+
+            // Ефект за изскачащо "+1"
+            createPlusOneEffect();
         }
-    </script>
-</body>
-</html>
+
+        function createPlusOneEffect() {
+            const clickZone = document.getElementById('clickZone');
+            const plusText = document.createElement('div');
+            plusText.classList.add('text-plus');
+            plusText.innerText = '+1';
+            
+            clickZone.appendChild(plusText);
+
+            // Автоматично изтриване на текста след края на анимацията
+            setTimeout(() => {
+                plusText.remove();
