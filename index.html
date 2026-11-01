@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com"></script>
+    <!-- Официалното TON Connect SDK за портфейла през CDN -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
@@ -71,7 +71,7 @@
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <!-- Бутон за портфейл на началния екран -->
+            <!-- Първи бутон за портфейл -->
             <div id="ton-connect-tap"></div>
         </div>
 
@@ -116,7 +116,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Единствен чист контейнер за портфейла в профила -->
+            <!-- Втори бутон за портфейл специално в екрана на профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -164,7 +164,7 @@
             tg.expand();
         }
 
-        // Правилна инициализация – създаваме ЕДНА инстанция на UI обекта, посочвайки съответните ID-та отделно
+        // Правилно извикване на класа от CDN без софтуерни конфликти
         const tonConnectUI1 = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-tap'
