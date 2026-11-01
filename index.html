@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за чист JavaScript (Vanilla JS) -->
+    <!-- Официалното TON Connect SDK за чист JavaScript -->
     <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -13,7 +13,7 @@
         .view-screen { display: none; padding-bottom: 90px; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Стил за бутона на портфейла (Интегрира се с TON Connect) */
+        /* Стил за бутона на портфейла */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -21,7 +21,7 @@
             display: flex;
             justify-content: center;
         }
-        /* Пренаписваме стиловете на TON Connect бутона, за да съвпада с вашия дизайн */
+        /* Стилизиране на вградения бутон на TON Connect, за да пасне на вашия дизайн */
         #ton-connect-btn-container button {
             background: linear-gradient(135deg, #00b4db, #0083b0) !important;
             color: white !important;
@@ -47,13 +47,14 @@
         .coin-btn:active { transform: scale(0.95); }
         .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
-        .bar-bg { width: 100%; max-width: 400px; height: 12px; background-color: #1e293b; border-radius: 6px; margin: 10px auto; overflow: hidden; }
-        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
+        /* Енергиен бар със светкавица */
+        .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+        .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
+        .energy-label { display: flex; align-items: center; gap: 6px; }
+        .energy-icon { color: #f59e0b; font-size: 16px; } /* Жълта светкавица за логото */
         
-        /* Долна лента (Таскбар) */
-        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
-        .tab-btn.active-tab { color: #00b4db; }
+        .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
+        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
         
         /* Изскачащ текст +1 */
         .text-plus { position: absolute; font-size: 30px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 40%; transform: translate(-50%, -50%); }
@@ -65,7 +66,7 @@
     <!-- ТАБ 1: КЛИКЕР -->
     <div id="tab1" class="view-screen visible">
         
-        <!-- Контейнер за TON Connect бутона (Позициониран най-отгоре) -->
+        <!-- Контейнер за TON Connect бутона (Connect Wallet) -->
         <div class="wallet-container">
             <div id="ton-connect-btn-container"></div>
         </div>
@@ -81,32 +82,70 @@
             </div>
         </div>
 
-        <div style="width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px;">
-            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8;">
-                <span>⚡ Energy</span><span><strong id="valEnergy">1000</strong> / 1000</span>
+        <!-- Енергиен бар със светкавица -->
+        <div class="energy-wrapper">
+            <div class="energy-header">
+                <div class="energy-label">
+                    <span class="energy-icon">⚡</span>
+                    <span>Energy</span>
+                </div>
+                <span><strong id="valEnergy">1000</strong> / 1000</span>
             </div>
             <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
         </div>
     </div>
 
-    <!-- 1. ЛОГИКА ЗА TON CONNECT (ПОРТФЕЙЛ) -->
+    <!-- 1. ЛОГИКА ЗА TON CONNECT И СЪРВЪРНИ ЗАЯВКИ -->
     <script>
+        // Инициализираме Telegram WebApp SDK, за да вземем данните на играча
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand(); // Разпъва приложението на цял екран
+        }
+
         const tonConnectUI = new TONConnectUI.TonConnectUI({
-            manifestUrl: 'https://xn----7sbfkfpkwlg5b8dye.com', // ⚠️ СМЕНЕТЕ С ВАШИЯ HTTPS URL ДО МАНИФЕСТА
+            manifestUrl: 'https://xn----7sbfkfpkwlg5b8dye.com', // ⚠️ СМЕНЕТЕ С ВАШИЯ ИСТИНСКИ HTTPS URL КЪМ МАНИФЕСТА
             buttonRootId: 'ton-connect-btn-container',
             actionsConfiguration: {
-                // Автоматично връща потребителя в Telegram след потвърждение в Tonkeeper/MyTonWallet
-                twaReturnUrl: 'https://t.me' // ⚠️ СМЕНЕТЕ С ЛИНКА НА ВАШИЯ БОТ
+                twaReturnUrl: 'https://t.me' // ⚠️ СМЕНЕТЕ С ЛИНКА НА ВАШИЯ БОТ В TELEGRAM
             }
         });
 
-        // Следене на състоянието на портфейла в реално време
-        tonConnectUI.onStatusChange(wallet => {
+        // Следене в реално време кога играчът подава заявка и се свързва успешно
+        tonConnectUI.onStatusChange(async (wallet) => {
             if (wallet) {
-                console.log("Портфейлът е свързан успешно. Адрес:", wallet.account.address);
-                // ТУК: Добавете fetch() заявка към вашия бекенд, за да запишете адреса на потребителя
+                const walletAddress = wallet.account.address; // Вземаме публичния TON адрес на играча
+                const rawTelegramData = tg?.initData || "";    // Вземаме сигурните данни от Telegram за бекенд проверка
+
+                console.log("Играчът се свърза! Изпращане на заявка към сървъра...");
+
+                try {
+                    // Изпращане на POST заявка към вашия бекенд
+                    const response = await fetch('https://xn----7sbfc2a3cbfh2d0ac2d.com', { // ⚠️ СМЕНЕТЕ С ВАШИЯ РЕАЛЕН API URL ЗА СВЪРЗВАНЕ
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            address: walletAddress,
+                            telegramData: rawTelegramData
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        console.log("Успешно записан портфейл в базата данни:", data);
+                    } else {
+                        console.error("Сървърът върна грешка:", data.message);
+                    }
+
+                } catch (error) {
+                    console.error("Грешка при изпращането на заявката към бекенда:", error);
+                }
             } else {
-                console.log("Портфейлът не е свързан или връзката е прекъсната.");
+                console.log("Портфейлът е разкачен.");
             }
         });
     </script>
@@ -140,117 +179,6 @@
                 }, 500);
             }
         }
-    </script>
-</body>
-</html>
-
-
-    <!-- ТАБ 2: ЗАДАЧИ -->
-    <div id="tab2" class="view-screen">
-        <div style="padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div>
-    </div>
-
-    <!-- ТАБ 3: ПРИЯТЕЛИ -->
-    <div id="tab3" class="view-screen">
-        <div style="padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div>
-    </div>
-
-    <!-- ТАБ 4: ПРОФИЛ -->
-    <div id="tab4" class="view-screen">
-        <div class="profile-container">
-            <div class="profile-username">👤 @ReedcomUser</div>
-            
-            <div class="wallet-box">
-                <div class="wallet-status-label">Web3 Wallet Status</div>
-                <div class="wallet-address-text" id="walletStatusText">Not Connected</div>
-                <button class="btn-ton-connect" id="customWalletBtn" onclick="handleWalletAction()">Connect TON Wallet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ДОЛНА ЛЕНТА (ТАСКБАР) -->
-    <nav class="footer-tabs">
-        <div class="tab-btn active-tab" onclick="changeScreen('tab1', this)">
-            <span style="font-size: 20px;">🔘</span><span>Tap</span>
-        </div>
-        <div class="tab-btn" onclick="changeScreen('tab2', this)">
-            <span style="font-size: 20px;">📋</span><span>Tasks</span>
-        </div>
-        <div class="tab-btn" onclick="changeScreen('tab3', this)">
-            <span style="font-size: 20px;">👥</span><span>Friends</span>
-        </div>
-        <div class="tab-btn" onclick="changeScreen('tab4', this)">
-            <span style="font-size: 20px;">👤</span><span>Profile</span>
-        </div>
-    </nav>
-
-    <script>
-        // Чисти локални променливи
-        var gamePoints = 788;
-        var gameEnergy = 1000;
-        var gameMax = 1000;
-        var isConnected = false;
-
-        // Превключване на страниците
-        function changeScreen(scrId, btnEl) {
-            var allScrs = document.getElementsByClassName('view-screen');
-            for(var i=0; i<allScrs.length; i++){ allScrs[i].classList.remove('visible'); }
-            
-            var allBtns = document.getElementsByClassName('tab-btn');
-            for(var i=0; i<allBtns.length; i++){ allBtns[i].classList.remove('active-tab'); }
-            
-            document.getElementById(scrId).classList.add('visible');
-            btnEl.classList.add('active-tab');
-        }
-
-        // Локално симулирано свързване в Профила (стабилно и безопасно)
-        function handleWalletAction() {
-            var btn = document.getElementById('customWalletBtn');
-            var statusText = document.getElementById('walletStatusText');
-            
-            if (!isConnected) {
-                // Симулираме успешно свързване с реален TON формат адрес
-                var mockAddress = "UQAnR_oX...7b3A9z";
-                statusText.innerText = "Connected: " + mockAddress;
-                btn.innerText = "Disconnect";
-                btn.style.background = "#ef4444"; // Променя цвета на червен за Дисънект
-                isConnected = true;
-            } else {
-                statusText.innerText = "Not Connected";
-                btn.innerText = "Connect TON Wallet";
-                btn.style.background = "linear-gradient(135deg, #00b4db, #0083b0)";
-                isConnected = false;
-            }
-        }
-
-        // Кликер логика
-        function hitCoin() {
-            if (gameEnergy <= 0) return;
-            gamePoints++;
-            gameEnergy--;
-            
-            document.getElementById('valBalance').innerText = gamePoints + " REED";
-            document.getElementById('valEnergy').innerText = gameEnergy;
-            document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
-            
-            // Създаване на +1 ефекта
-            var zone = document.getElementById('clickZone');
-            var p = document.createElement('div');
-            p.className = 'text-plus';
-            p.innerText = '+1';
-            zone.appendChild(p);
-            
-            setTimeout(function(){ p.remove(); }, 500);
-        }
-
-        // Автоматично пълнене на енергията
-        setInterval(function() {
-            if (gameEnergy < gameMax) {
-                gameEnergy++;
-                document.getElementById('valEnergy').innerText = gameEnergy;
-                document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
-            }
-        }, 1000);
     </script>
 </body>
 </html>
