@@ -10,35 +10,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
         
-        /* КОРИГИРАНО: Скриване без display: none, за да не се чупи TON Connect */
-        .view-screen { 
-            visibility: hidden; 
-            position: absolute; 
-            width: 0; 
-            height: 0; 
-            overflow: hidden; 
-            text-align: center; 
-            left: -9999px;
-        }
-        .view-screen.visible { 
-            visibility: visible; 
-            position: relative; 
-            width: 100%; 
-            height: auto; 
-            left: 0;
-        }
+        .view-screen { display: none; text-align: center; }
+        .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect бутона */
+        /* Контейнер за TON Connect бутоните */
         .wallet-container {
             width: 100%;
             max-width: 400px;
             margin: 10px auto 20px auto;
             display: flex;
             justify-content: center;
-            min-height: 44px; /* Коригирано: подсигурява място за рендериране */
         }
         
-        /* Стилизиране на вградените бутони на TON Connect */
+        /* Стилизиране на вградените бутони на TON Connect, за да паснат на вашия дизайн */
         .wallet-container button {
             background: linear-gradient(135deg, #00b4db, #0083b0) !important;
             color: white !important;
@@ -86,6 +70,8 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
+        <!-- Вторият бутон оттук е премахнат -->
+
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
@@ -127,7 +113,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл в Профила -->
+            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -167,7 +153,7 @@
         }
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT, КЛИКОВЕ И ЕНЕРГИЯ -->
+    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -175,48 +161,11 @@
             tg.expand();
         }
 
-        // Инициализация на TON Connect към бутона в Профила
-        // ЗАБЕЛЕЖКА: Задължително сменете демонстрационния линк (://githubusercontent.com) с вашия истински манифест, когато качите проекта.
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://://githubusercontent.com/ton-connect/demo-dapp-manifest/main/tonconnect-manifest.json',
+        // Инициализираме бутона в екрана за профил (Profile)
+        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-profile'
         });
-
-        // Логика за играта (баланс и разход на енергия)
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        function hitCoin() {
-            if (energy < 10) {
-                if (tg) tg.showAlert("Нямате достатъчно енергия!");
-                else alert("Нямате достатъчно енергия!");
-                return;
-            }
-
-            balance += 1;
-            energy -= 10; 
-
-            document.getElementById('valBalance').innerText = balance + " REED";
-            document.getElementById('valEnergy').innerText = energy;
-            
-            const percentage = (energy / maxEnergy) * 100;
-            document.getElementById('valBar').style.width = percentage + "%";
-
-            createPlusOneEffect();
-        }
-
-        function createPlusOneEffect() {
-            const clickZone = document.getElementById('clickZone');
-            const plusText = document.createElement('div');
-            plusText.classList.add('text-plus');
-            plusText.innerText = '+1';
-            
-            clickZone.appendChild(plusText);
-
-            setTimeout(() => {
-                plusText.remove();
-            }, 500);
-        }
-
-        // Пасивно възстановяване на енергията (по +1 точка на секунда)
+    </script>
+</body>
+</html>
