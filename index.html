@@ -13,7 +13,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect бутоните */
+        /* Контейнер за TON Connect бутона */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -70,7 +70,9 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
+        <!-- Вторият бутон (wallet-container) оттук е успешно премахнат -->
+
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
         <div style="position: relative;" id="clickZone">
@@ -111,7 +113,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл е оставен само тук в Профила -->
+            <!-- Бутонът за портфейл остава ЕДИНСТВЕНО тук в профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -151,7 +153,7 @@
         }
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
+    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT, КЛИКОВЕ И ЕНЕРГИЯ -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -159,10 +161,56 @@
             tg.expand();
         }
 
+        // 1. Инициализиране на единствения бутон за портфейл в Профила
+        // ЗАБЕЛЕЖКА: Сменете адреса на вашия манифест, когато сте готови за качване онлайн
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-profile'
         });
-    </script>
-</body>
-</html>
+
+        // 2. Логика за работа на кликера, баланса и разхода на енергия
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
+        function hitCoin() {
+            if (energy < 10) {
+                if (tg) tg.showAlert("Нямате достатъчно енергия!");
+                else alert("Нямате достатъчно енергия!");
+                return;
+            }
+
+            // Увеличаване на баланса и намаляване на енергията
+            balance += 1;
+            energy -= 10; 
+
+            // Обновяване на DOM елементите в страницата
+            document.getElementById('valBalance').innerText = balance + " REED";
+            document.getElementById('valEnergy').innerText = energy;
+            
+            // Намаляване на визуализацията на прогрес бара
+            const percentage = (energy / maxEnergy) * 100;
+            document.getElementById('valBar').style.width = percentage + "%";
+
+            // Генериране на визуалния изскачащ ефект "+1"
+            createPlusOneEffect();
+        }
+
+        function createPlusOneEffect() {
+            const clickZone = document.getElementById('clickZone');
+            const plusText = document.createElement('div');
+            plusText.classList.add('text-plus');
+            plusText.innerText = '+1';
+            
+            clickZone.appendChild(plusText);
+
+            // Премахване на текстовия елемент от паметта след приключване на анимацията
+            setTimeout(() => {
+                plusText.remove();
+            }, 500);
+        }
+
+        // Пасивно възстановяване на енергията (по +1 точка на всяка секунда)
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy += 1;
