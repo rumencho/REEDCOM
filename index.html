@@ -10,7 +10,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
         
-        /* ВАШИЯТ ОРИГИНАЛЕН CSS (Display: none) */
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
@@ -113,7 +112,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл стои единствено тук в Профила -->
+            <!-- Бутонът за портфейл стои единствено в Профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -143,23 +142,20 @@
         let tonConnectProfile = null;
 
         function switchTab(screenId, button) {
-            // 1. Първо скриваме всички табове
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
             
-            // 2. Правим избрания таб видим (display: block се задейства)
             document.getElementById(screenId).classList.add('visible');
             
-            // 3. Сменяме активния бутон в менюто
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active-tab'));
             button.classList.add('active-tab');
 
-            // 4. КОРИГИРАНО: Инициализираме портфейла САМО СЛЕД КАТО профилът вече е напълно зареден на екрана!
+            // Зареждаме портфейла веднага щом табът стане видим на екрана
             if (screenId === 'screen-profile' && !tonConnectProfile) {
-                // Използваме тестов работещ демонстрационен манифест, за да зареди сигурно бутона
+                const manifestPath = window.location.origin + '/tonconnect-manifest.json';
                 tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-                    manifestUrl: 'https://githubusercontent.com',
+                    manifestUrl: manifestPath,
                     buttonRootId: 'ton-connect-profile'
                 });
             }
@@ -174,11 +170,41 @@
             tg.expand();
         }
 
-        // ВАШАТА ФУНКЦИЯ ЗА КЛИКАНЕ (hitCoin)
+        // Логика за работа на кликера
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
         function hitCoin() {
-            // Тъй като не бяхте добавили код за нея в първия файл, 
-            // ето базов пример, за да тествате, че работи без грешки:
-            console.log("Coin clicked!");
+            if (energy < 10) {
+                if (tg) tg.showAlert("Нямате достатъчно енергия!");
+                else alert("Нямате достатъчно енергия!");
+                return;
+            }
+
+            balance += 1;
+            energy -= 10;
+
+            document.getElementById('valBalance').innerText = balance + " REED";
+            document.getElementById('valEnergy').innerText = energy;
+            
+            const percentage = (energy / maxEnergy) * 100;
+            document.getElementById('valBar').style.width = percentage + "%";
+
+            createPlusOneEffect();
+        }
+
+        function createPlusOneEffect() {
+            const clickZone = document.getElementById('clickZone');
+            const plusText = document.createElement('div');
+            plusText.classList.add('text-plus');
+            plusText.innerText = '+1';
+            
+            clickZone.appendChild(plusText);
+
+            setTimeout(() => {
+                plusText.remove();
+            }, 500);
         }
     </script>
 </body>
