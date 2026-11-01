@@ -164,6 +164,7 @@
             tg.expand();
         }
 
+
         // Инициализираме втория бутон в екрана за профил (Profile)
         const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
@@ -171,36 +172,30 @@
         });
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
+    <!-- ЛОГИКА ЗА КЛИКЕРА -->
     <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        }
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
 
-        // Инициализираме ОКОНЧАТЕЛНО единствения бутон в екрана за профил (Profile)
-        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-            // Променяме към автоматично намиране на вашия манифест
-            manifestUrl: window.location.origin + '/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-profile',
-            
-            // Задължително филтрираме уеб разширенията за чиста мобилна връзка в Telegram
-            walletsListConfiguration: {
-                includeWallets: [
-                    {
-                        appName: "telegram-wallet",
-                        platforms: ["ios", "android"]
-                    },
-                    {
-                        appName: "tonkeeper",
-                        platforms: ["ios", "android"]
-                    }
-                ]
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                
+                document.getElementById('valBalance').innerText = balance + " REED";
+                document.getElementById('valEnergy').innerText = energy;
+                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+                
+                const clickZone = document.getElementById('clickZone');
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                
+                setTimeout(() => { plus.remove(); }, 500);
             }
-        });
+        }
     </script>
 </body>
 </html>
-
-   
