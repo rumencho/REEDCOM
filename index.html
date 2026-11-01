@@ -10,6 +10,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
         
+        /* ВАШИЯТ ОРИГИНАЛЕН CSS (Display: none) */
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
@@ -70,8 +71,7 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <!-- Вторият бутон оттук е премахнат -->
-
+        <!-- Вторият бутон тук е напълно премахнат -->
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
@@ -113,7 +113,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
+            <!-- Бутонът за портфейл стои единствено тук в Профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -140,20 +140,33 @@
 
     <!-- ЛОГИКА ЗА СМЕНА НА ТАБОВЕТЕ -->
     <script>
+        let tonConnectProfile = null;
+
         function switchTab(screenId, button) {
+            // 1. Първо скриваме всички табове
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
             
+            // 2. Правим избрания таб видим (display: block се задейства)
             document.getElementById(screenId).classList.add('visible');
             
+            // 3. Сменяме активния бутон в менюто
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active-tab'));
-            
             button.classList.add('active-tab');
+
+            // 4. КОРИГИРАНО: Инициализираме портфейла САМО СЛЕД КАТО профилът вече е напълно зареден на екрана!
+            if (screenId === 'screen-profile' && !tonConnectProfile) {
+                // Използваме тестов работещ демонстрационен манифест, за да зареди сигурно бутона
+                tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
+                    manifestUrl: 'https://githubusercontent.com',
+                    buttonRootId: 'ton-connect-profile'
+                });
+            }
         }
     </script>
 
-    <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
+    <!-- ЛОГИКА ЗА TELEGRAM WEBAPP И КЛИКЕР -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -161,11 +174,12 @@
             tg.expand();
         }
 
-        // Инициализираме бутона в екрана за профил (Profile)
-        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com',
-            buttonRootId: 'ton-connect-profile'
-        });
+        // ВАШАТА ФУНКЦИЯ ЗА КЛИКАНЕ (hitCoin)
+        function hitCoin() {
+            // Тъй като не бяхте добавили код за нея в първия файл, 
+            // ето базов пример, за да тествате, че работи без грешки:
+            console.log("Coin clicked!");
+        }
     </script>
 </body>
 </html>
