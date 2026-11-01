@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
@@ -70,7 +70,10 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <!-- Вторият бутон тук е напълно премахнат -->
+        <div class="wallet-container">
+            <!-- Бутон за портфейл на началния екран -->
+            <div id="ton-connect-tap"></div>
+        </div>
 
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
@@ -113,7 +116,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл вътре в ПРОФИЛА -->
+            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -150,11 +153,6 @@
             buttons.forEach(btn => btn.classList.remove('active-tab'));
             
             button.classList.add('active-tab');
-
-            // Ако превключваме на Профил, принудително казваме на TON Connect да опресни бутона в DOM
-            if (screenId === 'screen-profile' && typeof tonConnectUI !== 'undefined') {
-                tonConnectUI.uiOptions = { buttonRootId: 'ton-connect-profile' };
-            }
         }
     </script>
 
@@ -166,34 +164,36 @@
             tg.expand();
         }
 
-        // Използваме стабилен тестов манифест, който да зареди правилно бутона в GitHub среда
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        // Инициализираме втория бутон в екрана за профил (Profile)
+        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://githubusercontent.com',
             buttonRootId: 'ton-connect-profile'
         });
+    </script>
 
-        // Функция за кликера, която липсваше първоначално в кода Ви
+    <!-- ЛОГИКА ЗА КЛИКЕРА -->
+    <script>
         let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
 
         function hitCoin() {
-            if (energy < 10) return;
-            balance += 1;
-            energy -= 10;
-            document.getElementById('valBalance').innerText = balance + " REED";
-            document.getElementById('valEnergy').innerText = energy;
-            document.getElementById('valBar').style.width = (energy / maxEnergy) * 100 + "%";
-            createPlusOneEffect();
-        }
-
-        function createPlusOneEffect() {
-            const clickZone = document.getElementById('clickZone');
-            const plusText = document.createElement('div');
-            plusText.classList.add('text-plus');
-            plusText.innerText = '+1';
-            clickZone.appendChild(plusText);
-            setTimeout(() => plusText.remove(), 500);
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                
+                document.getElementById('valBalance').innerText = balance + " REED";
+                document.getElementById('valEnergy').innerText = energy;
+                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+                
+                const clickZone = document.getElementById('clickZone');
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                
+                setTimeout(() => { plus.remove(); }, 500);
+            }
         }
     </script>
 </body>
