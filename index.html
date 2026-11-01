@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
@@ -70,6 +70,11 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
+        <div class="wallet-container">
+            <!-- Бутон за портфейл на началния екран -->
+            <div id="ton-connect-tap"></div>
+        </div>
+
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
@@ -111,7 +116,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл се намира само тук в профила -->
+            <!-- Втори независим бутон за портфейл вътре в ПРОФИЛА -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -149,48 +154,50 @@
             
             button.classList.add('active-tab');
         }
-
-        // Ръчна функция за кликане, за да няма JS грешки, докато добавим баланса
-        function hitCoin() {
-            console.log("Coin clicked!");
-        }
     </script>
 
     <!-- ЛОГИКА ЗА ИНИЦИАЛИЗАЦИЯ НА TON CONNECT -->
     <script>
-        window.addEventListener('load', function() {
-            const tg = window.Telegram?.WebApp;
-            if (tg) {
-                tg.ready();
-                tg.expand();
-            }
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
 
-            try {
-                // Използваме директния суров линк от GitHub, за да няма проблеми с CORS сигурността
-                const rawManifestUrl = 'https://githubusercontent.com';
-
-                const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-                    manifestUrl: rawManifestUrl,
-                    buttonRootId: 'ton-connect-profile',
-                    
-                    // Блокира уеб разширенията и десктоп приложенията
-                    walletsListConfiguration: {
-                        includeWallets: [
-                            {
-                                appName: "telegram-wallet",
-                                platforms: ["ios", "android"]
-                            },
-                            {
-                                appName: "tonkeeper",
-                                platforms: ["ios", "android"]
-                            }
-                        ]
-                    }
-                });
-            } catch (error) {
-                console.error("TON Connect Error:", error);
-            }
+    
         });
+
+        // Инициализираме втория бутон в екрана за профил (Profile)
+        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://githubusercontent.com',
+            buttonRootId: 'ton-connect-profile'
+        });
+    </script>
+
+    <!-- ЛОГИКА ЗА КЛИКЕРА -->
+    <script>
+        let balance = 788;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                
+                document.getElementById('valBalance').innerText = balance + " REED";
+                document.getElementById('valEnergy').innerText = energy;
+                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+                
+                const clickZone = document.getElementById('clickZone');
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                
+                setTimeout(() => { plus.remove(); }, 500);
+            }
+        }
     </script>
 </body>
 </html>
