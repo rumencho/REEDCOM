@@ -164,20 +164,6 @@
             tg.expand();
         }
 
-
-        // Инициализираме втория бутон в екрана за профил (Profile)
-        const tonConnectProfile = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com',
-            buttonRootId: 'ton-connect-profile'
-        });
-    </script>
-
-    <!-- ЛОГИКА ЗА КЛИКЕРА -->
-    <script>
-        let balance = 788;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
         function hitCoin() {
             if (energy > 0) {
                 balance += 1;
