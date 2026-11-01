@@ -10,8 +10,23 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; }
         
-        .view-screen { display: none; text-align: center; }
-        .view-screen.visible { display: block; }
+        /* КОРИГИРАНО: Скриване без display: none, за да не се чупи TON Connect */
+        .view-screen { 
+            visibility: hidden; 
+            position: absolute; 
+            width: 0; 
+            height: 0; 
+            overflow: hidden; 
+            text-align: center; 
+            left: -9999px;
+        }
+        .view-screen.visible { 
+            visibility: visible; 
+            position: relative; 
+            width: 100%; 
+            height: auto; 
+            left: 0;
+        }
         
         /* Контейнер за TON Connect бутона */
         .wallet-container {
@@ -20,9 +35,10 @@
             margin: 10px auto 20px auto;
             display: flex;
             justify-content: center;
+            min-height: 44px; /* Коригирано: подсигурява място за рендериране */
         }
         
-        /* Стилизиране на вградените бутони на TON Connect, за да паснат на вашия дизайн */
+        /* Стилизиране на вградените бутони на TON Connect */
         .wallet-container button {
             background: linear-gradient(135deg, #00b4db, #0083b0) !important;
             color: white !important;
@@ -70,9 +86,7 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <!-- Вторият бутон (wallet-container) оттук е успешно премахнат -->
-
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
         
         <div style="position: relative;" id="clickZone">
@@ -113,7 +127,7 @@
         <div class="screen-desc">Manage your account and connect your wallet below:</div>
         
         <div class="wallet-container">
-            <!-- Бутонът за портфейл остава ЕДИНСТВЕНО тук в профила -->
+            <!-- Бутонът за портфейл в Профила -->
             <div id="ton-connect-profile"></div>
         </div>
     </div>
@@ -161,14 +175,14 @@
             tg.expand();
         }
 
-        // 1. Инициализиране на единствения бутон за портфейл в Профила
-        // ЗАБЕЛЕЖКА: Сменете адреса на вашия манифест, когато сте готови за качване онлайн
+        // Инициализация на TON Connect към бутона в Профила
+        // ЗАБЕЛЕЖКА: Задължително сменете демонстрационния линк (://githubusercontent.com) с вашия истински манифест, когато качите проекта.
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://githubusercontent.com',
+            manifestUrl: 'https://://githubusercontent.com/ton-connect/demo-dapp-manifest/main/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-profile'
         });
 
-        // 2. Логика за работа на кликера, баланса и разхода на енергия
+        // Логика за играта (баланс и разход на енергия)
         let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -180,19 +194,15 @@
                 return;
             }
 
-            // Увеличаване на баланса и намаляване на енергията
             balance += 1;
             energy -= 10; 
 
-            // Обновяване на DOM елементите в страницата
             document.getElementById('valBalance').innerText = balance + " REED";
             document.getElementById('valEnergy').innerText = energy;
             
-            // Намаляване на визуализацията на прогрес бара
             const percentage = (energy / maxEnergy) * 100;
             document.getElementById('valBar').style.width = percentage + "%";
 
-            // Генериране на визуалния изскачащ ефект "+1"
             createPlusOneEffect();
         }
 
@@ -204,13 +214,9 @@
             
             clickZone.appendChild(plusText);
 
-            // Премахване на текстовия елемент от паметта след приключване на анимацията
             setTimeout(() => {
                 plusText.remove();
             }, 500);
         }
 
-        // Пасивно възстановяване на енергията (по +1 точка на всяка секунда)
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
+        // Пасивно възстановяване на енергията (по +1 точка на секунда)
