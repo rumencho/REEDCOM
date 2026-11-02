@@ -4,37 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Премахнати са всички тежки външни скриптове, които даваха 34-те грешки -->
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
         
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
-        
-        /* Контейнер за портфейла */
-        .wallet-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 10px auto 20px auto;
-            display: flex;
-            justify-content: center;
-        }
-        
-        /* Изчистен стабилен бутон */
-        .custom-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            color: white;
-            border-radius: 25px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            border: none;
-            padding: 12px 35px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.1s ease;
-        }
-        .custom-wallet-btn:active { transform: scale(0.98); }
 
         /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
@@ -69,12 +44,7 @@
 
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
-        <div class="wallet-container">
-            <!-- Използваме директна и сигурна връзка, която работи мигновено в Telegram -->
-            <button class="custom-wallet-btn" onclick="connectTonWallet()">Connect TON Wallet</button>
-        </div>
-
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
         
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
@@ -114,8 +84,7 @@
         <div class="screen-title">Profile</div>
         <div class="screen-desc">Your Account Information</div>
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
-            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
-            <p><strong>TON Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
+            <p><strong>Status:</strong> Active</p>
         </div>
     </div>
 
@@ -139,7 +108,7 @@
         </div>
     </div>
 
-    <!-- ЧИСТА И РАБОТЕЩА ЛОГИКА БЕЗ ВЪНШНИ КОНФЛИКТИ -->
+    <!-- ЧИСТА, ОТИМИЗИРАНА ИЗЦЯЛО РАБОТЕЩА ЛОГИКА -->
     <script>
         // 1. Смяна на табовете
         function switchTab(screenId, button) {
@@ -184,7 +153,7 @@
             setTimeout(() => { textPlus.remove(); }, 500);
         }
 
-        // Възстановяване на енергията
+        // Регенерация на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -192,14 +161,6 @@
                 valBar.style.width = (energy / maxEnergy * 100) + "%";
             }
         }, 1000);
-
-        // 3. Директно свързване към TON портфейли без чупещи се библиотеки
-        function connectTonWallet() {
-            // Линкът съдържа правилните инструкции за отваряне на TON Connect прозореца директно в Telegram
-            const tonConnectLink = "tg://ton-connect?v=2&id=reedcom_connect&r=" + encodeURIComponent(JSON.stringify({
-                manifestUrl: "https://github.io",
-                items: [{ name: "ton_addr" }]
-            }));
-
-            // Проверяваме дали играта е отворена вътре в Telegram
-            if (window.parent && window.parent.postMessage) {
+    </script>
+</body>
+</html>
