@@ -177,23 +177,24 @@
         }, 1500);
 
         // ==========================================
-        // 3. НАВИНЕН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ ВЪНШНИ ЛИБРАРИТА)
+        // 3. НАВИНЕН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ ГРЕШКИ)
         // ==========================================
         let userWalletAddress = null;
 
         async function connectCryptoWallet() {
-            // Проверка дали в браузъра има инжектиран Web3 портфейл
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // Поискване на достъп до адреса на потребителя
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userWalletAddress = accounts[0];
 
-                    // Превключване на мрежата автоматично към Binance Smart Chain (Chain ID: 56 или 0x38)
                     try {
                         await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: '0x38' }],
                         });
                     } catch (switchError) {
-                        // Ако мрежата липсва в портфейла му, я добавяме автоматично
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x38',
