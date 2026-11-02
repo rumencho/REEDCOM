@@ -10,7 +10,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
         
-        /* Логика за показване и скриване на екраните */
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
@@ -72,7 +71,6 @@
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <!-- Използваме изчистен бутон за избягване на конфликти със скрипта на TON -->
             <button class="custom-wallet-btn" onclick="toggleWalletConnection()" id="main-wallet-btn">Connect TON Wallet</button>
         </div>
 
@@ -82,7 +80,8 @@
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
             <div class="coin-btn" onclick="hitCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="https://placehold.co" alt="Coin" class="coin-img">
+                <!-- Временно примерно изображение за иконата на монетата -->
+                <img src="https://placehold.co" alt="Coin" class="coin-img" id="coinImg">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
@@ -186,7 +185,7 @@
             setTimeout(() => { textPlus.remove(); }, 500);
         }
 
-        // 3. Възстановяване на енергията
+        // Възстановяване на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -208,9 +207,5 @@
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof TON_CONNECT_UI !== 'undefined') {
                 try {
-          
-              {  
-               "url": "https://rumencho.github.io/REEDCOM",
-               "name": "Reedcom App",
-              "iconUrl": "https://github.io/coin.jpg.jpd"
-          }
+                    // Твоят правилен линк към твоя проект е генериран тук автоматично
+                    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
