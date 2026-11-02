@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за портфейла -->
+    <!-- ПОПРАВЕН РЕД 7: Официалното TON Connect SDK за портфейла -->
     <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -180,13 +180,12 @@
             }
         }, 1000);
 
-        // ИНТЕГРАЦИЯ НА TON CONNECT С ПРАВИЛНИЯ ЛИНК ЗА REEDCOM
+        // СИНХРОНИЗИРАН И ИЗОЛИРАН TON CONNECT КОД ЗА REEDCOM
         let tonConnectUI = null;
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof TON_CONNECT_UI !== 'undefined') {
                 try {
-                    // ТУК Е ЗАПИСАН ТОЧНИЯТ ЛИНК КЪМ REEDCOM ПАПКАТА В GITHUB
                     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
                         manifestUrl: 'https://rumencho.github.io/REEDCOM'
                     });
@@ -200,3 +199,4 @@
                             const shortAddr = rawAddr.slice(0, 5) + '...' + rawAddr.slice(-4);
                             
                             if (walletBtn) walletBtn.innerText = "Disconnect";
+                            if (statusText) {
