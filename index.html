@@ -1,219 +1,215 @@
-import React, { useState, useEffect } from 'react';
-
-// =========================================================
-// 1. ДОЛНА НАВИГАЦИЯ (Blum-Style Меню с REEDCOM Тема)
-// =========================================================
-function Navbar({ currentTab, setCurrentTab }) {
-  const tabs = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'earn', label: 'Earn', icon: '🪙' },
-    { id: 'frens', label: 'Frens', icon: '👥' },
-    { id: 'wallet', label: 'Wallet', icon: '🔌' }
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#070b13] border-t border-[#1e293b] px-6 py-3 flex justify-around items-center z-50 rounded-t-2xl shadow-[0_-10px_25px_rgba(0,0,0,0.5)]">
-      {tabs.map((tab) => {
-        const isActive = currentTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
-            className={`flex flex-col items-center justify-center w-16 transition-all duration-200 ${
-              isActive ? 'text-[#00d2ff] scale-105' : 'text-[#64748b]'
-            }`}
-          >
-            <span className="text-2xl mb-1">{tab.icon}</span>
-            <span className="text-[10px] font-bold tracking-wider uppercase">
-              {tab.label}
-            </span>
-            {isActive && (
-              <div className="w-1.5 h-1.5 bg-[#00d2ff] rounded-full mt-1 shadow-[0_0_10px_#00d2ff]" />
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// =========================================================
-// 2. НАЧАЛЕН ЕКРАН (Dashboard с Вашата Монета & Баланси)
-// =========================================================
-function DashboardScreen({ userPoints, connectedWallets }) {
-  const totalBalanceUSD = connectedWallets.reduce((acc, w) => acc + (w.connected ? w.balance : 0), 0);
-
-  return (
-    <div className="space-y-6 animate-fadeIn text-white">
-      {/* Профил с Вашето оригинално лотос лого */}
-      <div className="flex items-center justify-between bg-[#111622] p-4 rounded-2xl border border-[#1e293b]">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-[#030712] border-2 border-[#00d2ff] flex items-center justify-center shadow-[0_0_15px_rgba(0,210,255,0.4)]">
-            <img 
-              src="/logo.png" 
-              alt="REED COMMUNITY" 
-              className="w-full h-full object-cover transform scale-105"
-              onError={(e) => { e.target.src = "https://placehold.co" }}
-            />
-          </div>
-          <div>
-            <h4 className="font-black text-sm tracking-wide text-[#00d2ff]">REED COMMUNITY</h4>
-            <p className="text-[11px] text-gray-400">Blockchain Proof: Active</p>
-          </div>
-        </div>
-        <span className="text-[10px] bg-[#00ff66]/10 text-[#00ff66] border border-[#00ff66]/20 px-2 py-1 rounded-md font-mono">
-          EST. 2024
-        </span>
-      </div>
-
-      {/* Централен Баланс на Бранда с въртяща се монета */}
-      <div className="text-center py-8 bg-gradient-to-b from-[#111827] to-[#030712] rounded-3xl border border-[#1e293b] shadow-2xl relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#00d2ff]/5 rounded-full blur-3xl pointer-events-none" />
-
-        <p className="text-xs text-gray-400 font-bold tracking-widest uppercase mb-3">REED TOKEN BALANCE</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reedcom App</title>
+    <!-- Официалното TON Connect SDK за портфейла -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
         
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#00d2ff] shadow-[0_0_25px_rgba(0,210,255,0.5)] bg-[#030712]">
-            <img 
-              src="/logo.png" 
-              alt="REED Token Coin" 
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.src = "https://placehold.co🪷" }}
-            />
-          </div>
-          
-          <h1 className="text-5xl font-black tracking-tight text-white drop-shadow-[0_0_15px_rgba(0,210,255,0.2)]">
-            {userPoints.toLocaleString()}
-          </h1>
-        </div>
-
-        <p className="text-xs text-[#00d2ff] mt-4 font-semibold bg-[#00d2ff]/10 px-4 py-1.5 rounded-full inline-block border border-[#00d2ff]/20">
-          ⚡ Community Minting Enabled
-        </p>
-      </div>
-
-      {/* Web3 Крос-чейн Активи */}
-      <div className="bg-[#111622] p-5 rounded-2xl border border-[#1e293b]">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <span>💼</span> Multi-Chain Aggregated Assets
-        </h3>
-        <div className="text-3xl font-black mb-4 text-white">${totalBalanceUSD.toFixed(2)} <span className="text-sm text-gray-400 font-normal">USD</span></div>
+        /* Логика за показване и скриване на екраните */
+        .view-screen { display: none; text-align: center; }
+        .view-screen.visible { display: block; }
         
-        <div className="space-y-2.5">
-          {connectedWallets.map(w => (
-            <div key={w.id} className="flex justify-between items-center p-3 bg-[#1e293b]/40 rounded-xl text-xs border border-[#1e293b]/60 transition-all hover:border-[#00d2ff]/30">
-              <div className="flex items-center gap-2.5">
-                <span className="text-lg">{w.icon}</span>
-                <span className="font-semibold text-gray-200">{w.name} Network</span>
-              </div>
-              <span className={w.connected ? "text-[#00ff66] font-bold" : "text-gray-500 italic"}>
-                {w.connected ? `$${w.balance.toFixed(2)}` : "Not connected"}
-              </span>
-            </div>
-          ))}
+        /* Контейнер за TON Connect */
+        .wallet-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto 20px auto;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* Изчистен бутон за портфейла */
+        .custom-wallet-btn {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+            border: none;
+            padding: 12px 35px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.1s ease;
+        }
+        .custom-wallet-btn:active { transform: scale(0.98); }
+
+        /* Кликер дизайн */
+        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
+        .coin-btn:active { transform: scale(0.95); }
+        .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
+        
+        /* Енергиен бар */
+        .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+        .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
+        .energy-label { display: flex; align-items: center; gap: 6px; }
+        .energy-icon { color: #f59e0b; font-size: 16px; }
+        
+        .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
+        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
+        
+        /* Долно меню (Таскбар) */
+        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
+        .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-decoration: none; gap: 4px; }
+        .tab-btn.active-tab { color: #00b4db; }
+        .tab-icon { font-size: 20px; }
+        
+        /* Други екрани */
+        .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
+        .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
+
+        /* Изскачащ текст +1 в центъра на clickZone */
+        .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
+        @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+    </style>
+</head>
+<body>
+
+    <!-- ТАБ 1: КЛИКЕР (TAP) -->
+    <div id="screen-tap" class="view-screen visible">
+        <div class="wallet-container">
+            <!-- Използваме изчистен бутон за избягване на конфликти със скрипта на TON -->
+            <button class="custom-wallet-btn" onclick="toggleWalletConnection()" id="main-wallet-btn">Connect TON Wallet</button>
         </div>
-      </div>
-    </div>
-  );
-}
 
-// =========================================================
-// 3. ЕКРАН ЗА ЗАДАЧИ (Earn)
-// =========================================================
-function EarnScreen({ tasks, claimTask }) {
-  return (
-    <div className="space-y-4 text-white">
-      <div>
-        <h2 className="text-xl font-black text-[#00d2ff]">Tasks & Quests</h2>
-        <p className="text-xs text-gray-400">Complete daily tasks to mine more REED Tokens.</p>
-      </div>
-
-      <div className="space-y-3">
-        {tasks.map((task) => (
-          <div key={task.id} className="flex justify-between items-center p-4 bg-[#111622] rounded-2xl border border-[#1e293b]">
-            <div className="space-y-1 pr-2">
-              <h4 className="text-sm font-bold text-white">{task.title}</h4>
-              <p className="text-xs text-[#00ff66] font-semibold">+{task.reward} RC</p>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
+        <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
+        
+        <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
+            <div class="coin-btn" onclick="hitCoin()">
+                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                <img src="https://placehold.co" alt="Coin" class="coin-img">
+                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
-            
-            <button
-              disabled={task.status === 'claimed'}
-              onClick={() => claimTask(task.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                task.status === 'start' ? 'bg-white text-black hover:bg-gray-200' :
-                task.status === 'claim' ? 'bg-[#00ff66] text-black hover:bg-[#00dd55] animate-pulse' :
-                'bg-[#1e293b] text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {task.status === 'start' && 'Start'}
-              {task.status === 'claim' && 'Claim'}
-              {task.status === 'claimed' && '✓ Done'}
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// =========================================================
-// 4. РЕФЕРАЛНА СИСТЕМА (Frens)
-// =========================================================
-function FrensScreen() {
-  const [copied, setCopied] = useState(false);
-  const refLink = "https://t.me";
-
-  return (
-    <div className="space-y-5 text-white">
-      <div className="text-center py-4">
-        <h2 className="text-3xl font-black text-white">Invite Frens</h2>
-        <p className="text-xs text-gray-400 mt-1">Earn 10% from your friends' production activity.</p>
-      </div>
-
-      <div className="bg-[#111622] p-4 rounded-2xl border border-[#1e293b] space-y-3">
-        <div className="text-xs bg-[#030712] p-3 rounded-xl border border-[#1e293b] break-all text-gray-400 font-mono">
-          {refLink}
         </div>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(refLink);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          }}
-          className="w-full bg-[#00d2ff] text-black font-black py-3 rounded-xl text-sm shadow-[0_0_15px_rgba(0,210,255,0.2)]"
-        >
-          {copied ? "✓ Copied!" : "Copy Invitation Link"}
-        </button>
-      </div>
-    </div>
-  );
-}
 
-// =========================================================
-// 5. МУЛТИ-ПОРТФЕЙЛ ХЪБ (Web3 Wallets)
-// =========================================================
-function WalletScreen({ connectedWallets, toggleWalletConnect }) {
-  return (
-    <div className="space-y-4 text-white">
-      <div>
-        <h2 className="text-xl font-black text-[#00d2ff]">Web3 Multi-Chain</h2>
-        <p className="text-xs text-gray-400">Connect secure external cryptographic nodes.</p>
-      </div>
-
-      <div className="space-y-3">
-        {connectedWallets.map((wallet) => (
-          <div key={wallet.id} className="p-4 bg-[#111622] rounded-2xl border border-[#1e293b] space-y-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{wallet.icon}</span>
-                <div>
-                  <h4 className="text-sm font-bold text-white">{wallet.name}</h4>
-                  <p className="text-[11px] text-gray-400">{wallet.type}</p>
+        <div class="energy-wrapper">
+            <div class="energy-header">
+                <div class="energy-label">
+                    <span class="energy-icon">⚡</span>
+                    <span>Energy</span>
                 </div>
-              </div>
-              <div className={`w-2.5 h-2.5 rounded-full ${wallet.connected ? 'bg-[#00ff66] shadow-[0_0_8px_#00ff66]' : 'bg-red-500'}`} />
+                <span><strong id="valEnergy">1000</strong> / 1000</span>
             </div>
+            <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
+        </div>
+    </div>
 
-            {wallet.connected && (
-              <div className="bg-[#030712] p-2.5 rounded-xl border border-[#1e293b] flex justify-between items-center font-mono text-xs">
-                <span className="text-gray-400">{wallet.address}</span>
+    <!-- ТАБ 2: TASKS -->
+    <div id="screen-tasks" class="view-screen">
+        <div class="screen-title">Tasks</div>
+        <div class="screen-desc">Complete tasks to earn more REED tokens!</div>
+    </div>
+
+    <!-- ТАБ 3: FRIENDS -->
+    <div id="screen-friends" class="view-screen">
+        <div class="screen-title">Friends</div>
+        <div class="screen-desc">Invite your friends and get bonuses!</div>
+    </div>
+
+    <!-- ТАБ 4: PROFILE -->
+    <div id="screen-profile" class="view-screen">
+        <div class="screen-title">Profile</div>
+        <div class="screen-desc">Your Account Information</div>
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
+            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
+            <p><strong>TON Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
+        </div>
+    </div>
+
+    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
+    <div class="footer-tabs">
+        <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
+            <span class="tab-icon">⚡</span>
+            <span>Tap</span>
+        </div>
+        <div class="tab-btn" onclick="switchTab('screen-tasks', this)">
+            <span class="tab-icon">📋</span>
+            <span>Tasks</span>
+        </div>
+        <div class="tab-btn" onclick="switchTab('screen-friends', this)">
+            <span class="tab-icon">👥</span>
+            <span>Friends</span>
+        </div>
+        <div class="tab-btn" onclick="switchTab('screen-profile', this)">
+            <span class="tab-icon">👤</span>
+            <span>Profile</span>
+        </div>
+    </div>
+
+    <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
+    <script>
+        // 1. Смяна на табовете
+        function switchTab(screenId, button) {
+            const screens = document.querySelectorAll('.view-screen');
+            screens.forEach(screen => screen.classList.remove('visible'));
+            
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) targetScreen.classList.add('visible');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active-tab'));
+            
+            if (button) button.classList.add('active-tab');
+        }
+
+        // 2. Логика на Кликера
+        let balance = 0;
+        let energy = 1000;
+        const maxEnergy = 1000;
+
+        const valBalance = document.getElementById('valBalance');
+        const valEnergy = document.getElementById('valEnergy');
+        const valBar = document.getElementById('valBar');
+        const clickZone = document.getElementById('clickZone');
+
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                valBalance.innerText = balance + " REED";
+                valEnergy.innerText = energy;
+                valBar.style.width = (energy / maxEnergy * 100) + "%";
+                createPlusOne();
+            }
+        }
+
+        function createPlusOne() {
+            const textPlus = document.createElement('div');
+            textPlus.classList.add('text-plus');
+            textPlus.innerText = '+1';
+            clickZone.appendChild(textPlus);
+            setTimeout(() => { textPlus.remove(); }, 500);
+        }
+
+        // 3. Възстановяване на енергията
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy += 1;
+                valEnergy.innerText = energy;
+                valBar.style.width = (energy / maxEnergy * 100) + "%";
+            }
+        }, 1000);
+    </script>
+
+    <!-- ИНИЦИАЛИЗАЦИЯ НА TELEGRAM WEBAPP И TON CONNECT UI -->
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        let tonConnectUI = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof TON_CONNECT_UI !== 'undefined') {
+                try {
+                }       
+  "url": "https://rumencho.github.io/REEDCOM",
+  "name": "Reedcom App",
+  "iconUrl": "https://github.io/coin.jpg.jpd"
+}
