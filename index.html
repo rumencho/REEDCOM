@@ -5,26 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     
-    <!-- Официален, модерен AppKit скрипт от Reown (WalletConnect) без бъгове -->
-    <script type="module">
-        import { createAppKit } from 'https://esm.sh'
-        import { bsc } from 'https://esm.sh/networks'
-
-        // Инициализиране на WalletConnect връзката за Binance Smart Chain
-        const modal = createAppKit({
-            networks: [bsc],
-            projectId: 'a930055e8e09714214a80fce568ba908', // <--- Сложи твоя Project ID от ://reown.com тук
-            metadata: {
-                name: 'Reedcom App',
-                description: 'Tap and Claim Rewards',
-                url: 'https://rumencho.github.io/REEDCOM',
-                icons: ['https://rumencho.github.io/REEDCOM/coin.jpg.jpg']
-            }
-        })
-
-        // Правим обекта достъпен за функциите по-долу
-        window.walletModal = modal;
-    </script>
+    <!-- Зареждане на стабилна версия на ethers и WalletConnect доставчик, които не чупят браузъра -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://jsdelivr.net"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -89,7 +72,7 @@
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
             <div class="coin-btn" onclick="hitCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="https://github.io/coin.jpg.jpg" alt="Coin" class="coin-img">
+                <img src="https://github.io" alt="Coin" class="coin-img">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
@@ -124,15 +107,16 @@
         <div class="screen-desc">Your Account Information</div>
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
             <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
+            <p><strong>Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
         
-        <!-- Бутони за управление на портфейла -->
-        <button class="custom-wallet-btn" onclick="openWalletModal()">Manage Wallet</button>
+        <!-- Чисти стандартни бутони, които изпълняват базови JS функции -->
+        <button class="custom-wallet-btn" onclick="connectWallet()" id="wallet-connect-btn">Connect Wallet</button>
         <br>
-        <button class="custom-wallet-btn" style="background: linear-gradient(135deg, #00ffcc, #00b4db); color: #0b0f19; margin-top: 10px;" onclick="claimTokens()">Claim REED</button>
+        <button class="custom-wallet-btn" style="background: linear-gradient(135deg, #00ffcc, #00b4db); color: #0b0f19; margin-top: 10px; display: none;" onclick="claimTokens()" id="wallet-claim-btn">Claim REED</button>
     </div>
 
-    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
+    <!-- ДОЛНО МЕНЮ -->
     <div class="footer-tabs">
         <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
             <span class="tab-icon">⚡</span>
@@ -153,21 +137,18 @@
     </div>
 
     <script>
-        // 1. Навигация между екраните
+        // 1. Навигация
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
-            
             const targetScreen = document.getElementById(screenId);
             if (targetScreen) targetScreen.classList.add('visible');
-            
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active-tab'));
-            
             if (button) button.classList.add('active-tab');
         }
 
-        // 2. Логика на играта (Кликер)
+        // 2. Игра логика
         let balance = 0;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -185,7 +166,6 @@
                 valEnergy.innerText = energy;
                 valBar.style.width = (energy / maxEnergy * 100) + "%";
 
-                // Ефект на изскачащ текст +1
                 const plus = document.createElement('div');
                 plus.className = 'text-plus';
                 plus.innerText = '+1';
@@ -194,7 +174,6 @@
             }
         }
 
-        // Регенерация на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy = Math.min(maxEnergy, energy + 1);
@@ -203,7 +182,19 @@
             }
         }, 1500);
 
-        // 3. Web3 Действия (WalletConnect)
-        function openWalletModal() {
-            if (window.walletModal) {
-                window.walletModal.open();
+        // ==========================================
+        // 3. СТАБИЛНА ИЗЧИСТЕНА WEB3 ЛОГИКА
+        // ==========================================
+        let walletProvider = null;
+        let ethersProvider = null;
+
+        async function connectWallet() {
+            try {
+                // Използване на стабилния WalletConnect доставчик
+                walletProvider = new WalletConnectProvider.default({
+                    rpc: {
+                        56: "https://binance.org" // BSC мрежа
+                    },
+                    qrcodeModalOptions: {
+                        mobileLinks: ["metamask", "trust"] // Директно отваряне в мобилни портфейли
+                    }
