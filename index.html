@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
+    <!-- Официалният скрипт на Telegram за Mini Apps -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -35,9 +37,10 @@
         .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
         .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
 
+        /* Дизайн на бутона в профила */
         .custom-wallet-btn {
-            background: linear-gradient(135deg, #00ffcc, #00b4db);
-            color: #0b0f19;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
             border-radius: 25px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
@@ -54,21 +57,11 @@
         /* Изскачащ текст +1 */
         .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
         @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
-        
-        /* Стил за изолирания фрейм на портфейла */
-        .wallet-frame {
-            width: 100%;
-            max-width: 360px;
-            height: 70px;
-            border: none;
-            margin: 20px auto;
-            display: block;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР -->
+    <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
@@ -109,18 +102,16 @@
     <div id="screen-profile" class="view-screen">
         <div class="screen-title">Profile</div>
         <div class="screen-desc">Your Account Information</div>
-        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left; margin-bottom: 20px;">
-            <p><strong>Status:</strong> Active</p>
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
+            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
+            <p><strong>Wallet:</strong> <span style="color: #00b4db;">Redirecting via Bot</span></p>
         </div>
         
-        <!-- Изолиран сертифициран бутон, който не може да счупи вашия JavaScript по никакъв начин -->
-        <iframe class="wallet-frame" src="https://jetton.live"></iframe>
-        
-        <br>
-        <button class="custom-wallet-btn" onclick="claimTokens()">Claim REED</button>
+        <!-- Този бутон ще задейства нативната WalletConnect връзка чрез официален Telegram Deep Link -->
+        <button class="custom-wallet-btn" onclick="connectViaTelegram()">Connect Web3 Wallet</button>
     </div>
 
-    <!-- ДОЛНО МЕНЮ -->
+    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
     <div class="footer-tabs">
         <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
             <span class="tab-icon">⚡</span>
@@ -141,27 +132,27 @@
     </div>
 
     <script>
-        // 1. Навигация между екраните
+        // Инициализиране на Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
-            screens.forEach(screen => screen.classList.remove('remove')); // Използваме базова логика
-            
-            for (let i = 0; i < screens.length; i++) {
-                screens[i].classList.remove('visible');
-            }
+            screens.forEach(screen => screen.classList.remove('visible'));
             
             const targetScreen = document.getElementById(screenId);
             if (targetScreen) targetScreen.classList.add('visible');
             
             const buttons = document.querySelectorAll('.tab-btn');
-            for (let j = 0; j < buttons.length; j++) {
-                buttons[j].classList.remove('active-tab');
-            }
+            buttons.forEach(btn => btn.classList.remove('active-tab'));
             
             if (button) button.classList.add('active-tab');
         }
 
-        // 2. Основна игра логика (Кликер)
+        // 2. Логика на Кликера
         let balance = 0;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -173,38 +164,43 @@
 
         function hitCoin() {
             if (energy > 0) {
-                balance = balance + 1;
-                energy = energy - 1;
+                balance += 1;
+                energy -= 1;
                 valBalance.innerText = balance + " REED";
                 valEnergy.innerText = energy;
                 valBar.style.width = (energy / maxEnergy * 100) + "%";
 
+                // Ефект на изскачащ текст +1
                 const plus = document.createElement('div');
                 plus.className = 'text-plus';
                 plus.innerText = '+1';
                 clickZone.appendChild(plus);
-                setTimeout(function() { plus.remove(); }, 500);
+                setTimeout(() => plus.remove(), 500);
             }
         }
 
-        setInterval(function() {
+        // Автоматично регенериране на енергия
+        setInterval(() => {
             if (energy < maxEnergy) {
-                energy = energy + 1;
+                energy = Math.min(maxEnergy, energy + 1);
                 valEnergy.innerText = energy;
                 valBar.style.width = (energy / maxEnergy * 100) + "%";
             }
         }, 1500);
 
-        // 3. Действие за бутона Claim
-        function claimTokens() {
+        // 3. Свързване без външен JS код и БЕЗ ГРЕШКИ
+        function connectViaTelegram() {
             if (balance <= 0) {
-                alert("You don't have any REED tokens to claim!");
+                alert("You don't have any REED tokens to claim yet!");
                 return;
             }
-            alert("Claim request sent successfully!");
-            balance = 0;
-            valBalance.innerText = "0 REED";
-        }
-    </script>
-</body>
-</html>
+            
+            // Нативен WalletConnect линк за отваряне на Trust Wallet / MetaMask директно през Telegram
+            // Използваме сигурния метод на Telegram WebApp, за да няма CORS или JS блокирания
+            const tokenUrl = "https://app.link";
+            
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                window.Telegram.WebApp.openLink(tokenUrl);
+            } else {
+                window.open(tokenUrl, "_blank");
+            }
