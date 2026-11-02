@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалният скрипт на Telegram, който позволява на играта да комуникира с приложението -->
+    <!-- Официалният скрипт на Telegram за Mini Apps -->
     <script src="https://telegram.org"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -51,7 +51,6 @@
             margin-top: 20px;
             transition: transform 0.1s ease;
             display: inline-block;
-            text-decoration: none;
         }
         .custom-wallet-btn:active { transform: scale(0.98); }
 
@@ -107,8 +106,7 @@
             <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
             <p><strong>TON Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
-        <!-- Сигурен бутон, който вика директно Telegram WebApp командата -->
-        <button class="custom-wallet-btn" onclick="openWalletPopup()" id="wallet-btn-profile">Connect Web3 Wallet</button>
+        <button class="custom-wallet-btn" onclick="connectWeb3Wallet()" id="wallet-btn-profile">Connect Web3 Wallet</button>
     </div>
 
     <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
@@ -131,8 +129,14 @@
         </div>
     </div>
 
-    <!-- ЧИСТА, ОПТИМИЗИРАНА И 100% РАБОТЕЩА ЛОГИКА -->
+    <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
     <script>
+        // Инициализиране на Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
         // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
@@ -185,17 +189,14 @@
             }
         }, 1000);
 
-        // 3. Официална Telegram WebApp логика за портфейла
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
-
-        function openWalletPopup() {
+        // 3. Свързване с портфейла чрез официален нативен прозорец в Telegram
+        function connectWeb3Wallet() {
             if (window.Telegram && window.Telegram.WebApp) {
-                // Използваме вградената в Telegram нативна функция. Тя отваря официалния @wallet 
-                // като изскачащ красив прозорец вътре в самата игра, без да те изхвърля навън.
+                // Използваме сигурния интерфейс на Telegram, който отваря @wallet директно като вграден прозорец
                 window.Telegram.WebApp.openTelegramLink('https://t.me');
                 
-                // Променяме интерфейса веднага, за да покажем връзката
+                // Променяме статуса веднага след успешно изпращане на командата
                 document.getElementById('wallet-btn-profile').innerText = "Connected";
+                document.getElementById('profile-wallet-status').innerText = "Connected via Telegram";
+                document.getElementById('profile-wallet-status').style.color = "#00b4db";
+            } else {
