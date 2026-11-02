@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     
-    <!-- Добавяне на TON Connect SDK за Web3 връзка и WalletConnect поддръжка -->
-    <script src="https://unpkg.com"></script>
+    <!-- Зареждане на Ethers.js и WalletConnect през CDN (за Vanilla JS) -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://jsdelivr.net"></script>
+    <script src="https://jsdelivr.net"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -67,7 +69,7 @@
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР (TAP) -->
+    <!-- ТАБ 1: КЛИКЕР -->
     <div id="screen-tap" class="view-screen visible">
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
@@ -110,13 +112,12 @@
         <div class="screen-desc">Your Account Information</div>
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
             <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
-            <p><strong>TON Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
+            <p><strong>Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
-        <!-- Динамичен бутон за Wallet / Claim -->
-        <button class="custom-wallet-btn" onclick="handleWalletAction()" id="wallet-btn-profile">Connect Web3 Wallet</button>
+        <button class="custom-wallet-btn" onclick="handleWalletAction()" id="wallet-btn-profile">Connect WalletConnect</button>
     </div>
 
-    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
+    <!-- ДОЛНО МЕНЮ -->
     <div class="footer-tabs">
         <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
             <span class="tab-icon">⚡</span>
@@ -136,133 +137,68 @@
         </div>
     </div>
 
-    <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
     <script>
-      // 1. Смяна на табовете
-function switchTab(screenId, button) {
-    const screens = document.querySelectorAll('.view-screen');
-    screens.forEach(screen => screen.classList.remove('visible'));
-    
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) targetScreen.classList.add('visible');
-    
-    const buttons = document.querySelectorAll('.tab-btn');
-    buttons.forEach(btn => btn.classList.remove('active-tab'));
-    
-    if (button) button.classList.add('active-tab');
-}
+        function switchTab(screenId, button) {
+            const screens = document.querySelectorAll('.view-screen');
+            screens.forEach(screen => screen.classList.remove('visible'));
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) targetScreen.classList.add('visible');
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active-tab'));
+            if (button) button.classList.add('active-tab');
+        }
 
-// 2. Логика на Кликера
-let balance = 0;
-let energy = 1000;
-const maxEnergy = 1000;
+        let balance = 0;
+        let energy = 1000;
+        const maxEnergy = 1000;
 
-const valBalance = document.getElementById('valBalance');
-const valEnergy = document.getElementById('valEnergy');
-const valBar = document.getElementById('valBar');
-const clickZone = document.getElementById('clickZone');
+        const valBalance = document.getElementById('valBalance');
+        const valEnergy = document.getElementById('valEnergy');
+        const valBar = document.getElementById('valBar');
+        const clickZone = document.getElementById('clickZone');
 
-function hitCoin() {
-    if (energy > 0) {
-        balance += 1;
-        energy -= 1;
-        valBalance.innerText = balance + " REED";
-        valEnergy.innerText = energy;
-        valBar.style.width = (energy / maxEnergy * 100) + "%";
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                valBalance.innerText = balance + " REED";
+                valEnergy.innerText = energy;
+                valBar.style.width = (energy / maxEnergy * 100) + "%";
 
-        // Ефект на изскачащ текст +1
-        const plus = document.createElement('div');
-        plus.className = 'text-plus';
-        plus.innerText = '+1';
-        clickZone.appendChild(plus);
-        setTimeout(() => plus.remove(), 500);
-    }
-}
-
-// Автоматично регенериране на енергия
-setInterval(() => {
-    if (energy < maxEnergy) {
-        energy = Math.min(maxEnergy, energy + 1);
-        valEnergy.innerText = energy;
-        valBar.style.width = (energy / maxEnergy * 100) + "%";
-    }
-}, 1500);
-
-
-// ==========================================
-// 3. WEB3 И WALLETCONNECT ИНТЕГРАЦИЯ
-// ==========================================
-
-// Инициализация на TON Connect UI
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://github.io'
-});
-
-let isWalletConnected = false;
-
-// Следене на промяната на статуса на портфейла
-tonConnectUI.onStatusChange(wallet => {
-    const walletStatusText = document.getElementById('profile-wallet-status');
-    const walletBtn = document.getElementById('wallet-btn-profile');
-
-    if (wallet) {
-        isWalletConnected = true;
-        const rawAddress = wallet.account.address;
-        const formattedAddress = rawAddress.substring(0, 4) + '...' + rawAddress.substring(rawAddress.length - 4);
-        
-        walletStatusText.innerText = `Connected (${formattedAddress})`;
-        walletStatusText.style.color = '#00ffcc';
-        
-        walletBtn.innerText = "Claim Earned REED";
-        walletBtn.classList.add('connected-claim');
-    } else {
-        isWalletConnected = false;
-        walletStatusText.innerText = "Not Connected";
-        walletStatusText.style.color = '#64748b';
-        
-        walletBtn.innerText = "Connect Web3 Wallet";
-        walletBtn.classList.remove('connected-claim');
-    }
-});
-
-// Главна функция за управление на бутона в профила
-function handleWalletAction() {
-    if (!isWalletConnected) {
-        tonConnectUI.openModal();
-    } else {
-        claimTokens();
-    }
-}
-
-// ФУНКЦИЯ ЗА ТРАНСАКЦИЯТА (ЕТО ТУК Е АДРЕСЪТ)
-async function claimTokens() {
-    if (balance <= 0) {
-        alert("You don't have any REED tokens to claim yet! Start tapping.");
-        return;
-    }
-
-    const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 300, // 5 минути валидност
-        messages: [
-            {
-                // === СМЕНИ ТОВА С ТВОЯ РЕАЛЕН АДРЕС ===
-                address: "0x35A1A66B06C469a2cdC7204F9f2313C57529A099", 
-                
-                amount: "20000000", // Такса (0.02 TON)
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                setTimeout(() => plus.remove(), 500);
             }
-        ]
-    };
+        }
 
-    try {
-        alert(`Confirm transaction in your wallet to claim ${balance} REED.`);
-        const result = await tonConnectUI.sendTransaction(transaction);
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy = Math.min(maxEnergy, energy + 1);
+                valEnergy.innerText = energy;
+                valBar.style.width = (energy / maxEnergy * 100) + "%";
+            }
+        }, 1500);
+
+        // ==========================================
+        // EVM WALLETCONNECT & ETHERS INTEGRATION
+        // ==========================================
         
-        alert(`Success! Successfully claimed ${balance} REED tokens.`);
-        balance = 0;
-        valBalance.innerText = "0 REED";
-        console.log("Transaction success:", result);
-    } catch (error) {
-        alert("Transaction rejected or failed.");
-        console.error("Web3 Error:", error);
-    }
-}
+        // Адресът на твоята монета, който предостави
+        const tokenAddress = "0x35A1A66B06C469a2cdC7204F9f2313C57529A099"; 
+        
+        // Минимален ABI интерфейс, нужен за извикване на функция за трансакция (напр. claim или transfer)
+        const tokenAbi = [
+            "function claim() external", 
+            "function balanceOf(address owner) view returns (uint256)"
+        ];
+
+        let web3Modal;
+        let provider;
+        let signer;
+        let userAddress = null;
+
+        // Инициализиране на Web3Modal с WalletConnect поддръжка
+        function initWeb3() {
+            const providerOptions = {
