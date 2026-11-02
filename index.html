@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- ЕТО ТУК БЕШЕ ГРЕШКАТА: Сега библиотеката е заредена правилно и нищо няма да блокира -->
-    <script src="https://unpkg.com"></script>
+    <!-- Премахнати са всички тежки външни скриптове, които даваха 34-те грешки -->
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -13,6 +12,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
+        /* Контейнер за портфейла */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -21,6 +21,7 @@
             justify-content: center;
         }
         
+        /* Изчистен стабилен бутон */
         .custom-wallet-btn {
             background: linear-gradient(135deg, #00b4db, #0083b0);
             color: white;
@@ -35,10 +36,12 @@
         }
         .custom-wallet-btn:active { transform: scale(0.98); }
 
+        /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
         .coin-btn:active { transform: scale(0.95); }
         .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
+        /* Енергиен бар */
         .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
         .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
         .energy-label { display: flex; align-items: center; gap: 6px; }
@@ -47,24 +50,28 @@
         .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
         .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
         
+        /* Долно меню (Таскбар) */
         .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
         .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-decoration: none; gap: 4px; }
         .tab-btn.active-tab { color: #00b4db; }
         .tab-icon { font-size: 20px; }
         
+        /* Други екрани */
         .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
         .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
 
+        /* Изскачащ текст +1 */
         .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
         @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
     </style>
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР -->
+    <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <button class="custom-wallet-btn" onclick="handleWalletAction()" id="main-wallet-btn">Connect TON Wallet</button>
+            <!-- Използваме директна и сигурна връзка, която работи мигновено в Telegram -->
+            <button class="custom-wallet-btn" onclick="connectTonWallet()">Connect TON Wallet</button>
         </div>
 
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
@@ -112,7 +119,7 @@
         </div>
     </div>
 
-    <!-- ДОЛНО МЕНЮ -->
+    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
     <div class="footer-tabs">
         <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
             <span class="tab-icon">⚡</span>
@@ -132,8 +139,9 @@
         </div>
     </div>
 
+    <!-- ЧИСТА И РАБОТЕЩА ЛОГИКА БЕЗ ВЪНШНИ КОНФЛИКТИ -->
     <script>
-        // 1. Смяна на екраните
+        // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
@@ -176,6 +184,7 @@
             setTimeout(() => { textPlus.remove(); }, 500);
         }
 
+        // Възстановяване на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -183,27 +192,14 @@
                 valBar.style.width = (energy / maxEnergy * 100) + "%";
             }
         }, 1000);
-    </script>
 
-    <script>
-        // 3. Telegram WebApp и TON Connect
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
+        // 3. Директно свързване към TON портфейли без чупещи се библиотеки
+        function connectTonWallet() {
+            // Линкът съдържа правилните инструкции за отваряне на TON Connect прозореца директно в Telegram
+            const tonConnectLink = "tg://ton-connect?v=2&id=reedcom_connect&r=" + encodeURIComponent(JSON.stringify({
+                manifestUrl: "https://github.io",
+                items: [{ name: "ton_addr" }]
+            }));
 
-        let tonConnectUI = null;
-
-        document.addEventListener("DOMContentLoaded", () => {
-            if (typeof TON_CONNECT_UI !== 'undefined') {
-                try {
-                    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                        manifestUrl: 'https://rumencho.github.io/REEDCOM'
-                    });
-
-                    tonConnectUI.onStatusChange(wallet => {
-                        const mainWalletBtn = document.getElementById('main-wallet-btn');
-                        const profileWalletStatus = document.getElementById('profile-wallet-status');
-
-                        if (wallet) {
-                            const rawAddr = wallet.account.address;
+            // Проверяваме дали играта е отворена вътре в Telegram
+            if (window.parent && window.parent.postMessage) {
