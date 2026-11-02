@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com"></script>
+    
+    <!-- 1. ЗАДЪЛЖИТЕЛЕН СКРИПТ ЗА TELEGRAM MINI APPS -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; overflow-x: hidden; }
         
-        /* Логика за показване и скриване на екраните */
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -23,7 +23,6 @@
             justify-content: center;
         }
         
-        /* Изчистен бутон за портфейла */
         .custom-wallet-btn {
             background: linear-gradient(135deg, #00b4db, #0083b0);
             color: white;
@@ -41,7 +40,7 @@
         /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; position: relative; }
         .coin-btn:active { transform: scale(0.95); }
-        .coin-img { width: 95px; height: 95px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; border: 2px solid #00b4db; shadow: 0 0 10px rgba(0, 180, 219, 0.5); }
+        .coin-img { width: 95px; height: 95px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; border: 2px solid #00b4db; }
         
         /* Енергиен бар */
         .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
@@ -53,17 +52,16 @@
         .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
         
         /* Долно меню (Таскбар) */
-        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-decoration: none; gap: 4px; }
         .tab-btn.active-tab { color: #00b4db; }
         .tab-icon { font-size: 20px; }
         
-        /* Други екрани */
         .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
         .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
 
-        /* Изскачащ текст +1 над мястото на кликане */
-        .text-plus { position: absolute; font-size: 28px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.6s ease-out forwards; text-shadow: 0 0 10px rgba(0, 255, 204, 0.6); }
+        /* Анимация за изскачащия текст +1 */
+        .text-plus { position: absolute; font-size: 28px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.6s ease-out forwards; text-shadow: 0 0 10px rgba(0, 255, 204, 0.6); z-index: 100; }
         @keyframes goUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(0.8); } }
     </style>
 </head>
@@ -75,15 +73,13 @@
             <button class="custom-wallet-btn" onclick="toggleWalletConnection()" id="main-wallet-btn">Connect TON Wallet</button>
         </div>
 
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px; tracking-spacing: 1px;">Your Balance</div>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
         
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
-            <!-- При клик подаваме event на функцията за взимане на координатите на пръста -->
             <div class="coin-btn" onclick="hitCoin(event)">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <!-- Вашата оригинална монета -->
-                <img src="/logo.png" alt="Coin" class="coin-img" onerror="this.src='https://placehold.co'">
+                <img src="logo.png" alt="Coin" class="coin-img" onerror="this.src='https://placehold.co'">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
@@ -119,7 +115,7 @@
         <div class="screen-desc">Invite your friends and get bonuses!</div>
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto;">
             <p style="font-size: 14px; color: #94a3b8; margin-bottom: 12px;">Your Referral Link:</p>
-            <p style="font-size: 12px; color: #00b4db; font-mono; background: #000; padding: 10px; border-radius: 8px; word-break: break-all;">https://t.me</p>
+            <p style="font-size: 12px; color: #00b4db; font-family: monospace; background: #000; padding: 10px; border-radius: 8px; word-break: break-all;">https://t.me</p>
         </div>
     </div>
 
@@ -153,8 +149,14 @@
         </div>
     </div>
 
-    <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
+    <!-- ИГРОВА ЛОГИКА -->
     <script>
+        // Инициализация на Telegram WebApp интерфейса
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand(); // Разпъване на цял екран
+        }
+
         // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
@@ -169,7 +171,7 @@
             if (button) button.classList.add('active-tab');
         }
 
-        // 2. Логика на Кликера
+        // 2. Параметри на кликера
         let balance = 0;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -181,5 +183,8 @@
 
         function hitCoin(e) {
             if (energy > 0) {
-                // Увеличаване на баланса и намаляване на енергията
                 balance += 1;
+                energy -= 1;
+                
+                valBalance.innerText = balance + " REED";
+                valEnergy.innerText = energy;
