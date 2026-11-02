@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    
-    <!-- Зареждане на стабилна версия на ethers и WalletConnect доставчик, които не чупят браузъра -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://jsdelivr.net"></script>
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -56,7 +51,7 @@
             display: inline-block;
         }
         .custom-wallet-btn:active { transform: scale(0.98); }
-
+        
         /* Изскачащ текст +1 */
         .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
         @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
@@ -64,7 +59,7 @@
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР (TAP) -->
+    <!-- ТАБ 1: КЛИКЕР -->
     <div id="screen-tap" class="view-screen visible">
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
@@ -110,8 +105,7 @@
             <p><strong>Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
         
-        <!-- Чисти стандартни бутони, които изпълняват базови JS функции -->
-        <button class="custom-wallet-btn" onclick="connectWallet()" id="wallet-connect-btn">Connect Wallet</button>
+        <button class="custom-wallet-btn" onclick="connectCryptoWallet()" id="wallet-connect-btn">Connect Wallet</button>
         <br>
         <button class="custom-wallet-btn" style="background: linear-gradient(135deg, #00ffcc, #00b4db); color: #0b0f19; margin-top: 10px; display: none;" onclick="claimTokens()" id="wallet-claim-btn">Claim REED</button>
     </div>
@@ -183,18 +177,23 @@
         }, 1500);
 
         // ==========================================
-        // 3. СТАБИЛНА ИЗЧИСТЕНА WEB3 ЛОГИКА
+        // 3. НАВИНЕН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ ВЪНШНИ ЛИБРАРИТА)
         // ==========================================
-        let walletProvider = null;
-        let ethersProvider = null;
+        let userWalletAddress = null;
 
-        async function connectWallet() {
-            try {
-                // Използване на стабилния WalletConnect доставчик
-                walletProvider = new WalletConnectProvider.default({
-                    rpc: {
-                        56: "https://binance.org" // BSC мрежа
-                    },
-                    qrcodeModalOptions: {
-                        mobileLinks: ["metamask", "trust"] // Директно отваряне в мобилни портфейли
-                    }
+        async function connectCryptoWallet() {
+            // Проверка дали в браузъра има инжектиран Web3 портфейл
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Поискване на достъп до адреса на потребителя
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userWalletAddress = accounts[0];
+
+                    // Превключване на мрежата автоматично към Binance Smart Chain (Chain ID: 56 или 0x38)
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }],
+                        });
+                    } catch (switchError) {
+                        // Ако мрежата липсва в портфейла му, я добавяме автоматично
