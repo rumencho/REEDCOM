@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <style>
+    <script src="https://unpkg.com"></script>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
         
@@ -154,7 +154,7 @@
         const valBar = document.getElementById('valBar');
         const clickZone = document.getElementById('clickZone');
 
-        function hitCoin() {
+               function hitCoin() {
             if (energy > 0) {
                 balance += 1;
                 energy -= 1;
@@ -173,7 +173,7 @@
             setTimeout(() => { textPlus.remove(); }, 500);
         }
 
-        // Регенерация на енергията
+        // Автоматично възстановяване на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -182,21 +182,58 @@
             }
         }, 1000);
 
-         // ПРАВИЛНАТА РЕАЛНА Web3 ВРЪЗКА ЗА ТВОЯ ПРОЕКТ REEDCOM
+        // ИСТИНСКА Web3 ИНТЕГРАЦИЯ БЕЗ СИМУЛАЦИИ
+        let tonConnectUI = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof TON_CONNECT_UI !== 'undefined') {
+                try {
+                    // Свързваме се с твоя manifest файл в папка REEDCOM
+                    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                        manifestUrl: 'https://github.io'
+                    });
+
+                    // Слушаме за реален отговор от портфейла на потребителя
+                    tonConnectUI.onStatusChange(wallet => {
+                        const walletBtn = document.getElementById('wallet-btn-profile');
+                        const statusText = document.getElementById('profile-wallet-status');
+
+                        if (wallet) {
+                            // Взимаме реалния крипто адрес
+                            const rawAddr = wallet.account.address;
+                            // Скъсяваме го за дизайн (напр. EQBl...4fX9)
+                            const shortAddr = rawAddr.slice(0, 5) + '...' + rawAddr.slice(-4);
+                            
+                            if (walletBtn) walletBtn.innerText = "Disconnect";
+                            if (statusText) {
+                                statusText.innerText = shortAddr;
+                                statusText.style.color = "#00b4db";
+                            }
+                        } else {
+                            if (walletBtn) walletBtn.innerText = "Connect Web3 Wallet";
+                            if (statusText) {
+                                statusText.innerText = "Not Connected";
+                                statusText.style.color = "#64748b";
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error("TON Connect Error:", err);
+                }
+            }
+        });
+
+        // Тази функция задейства реалния прозорец за избор на портфейли
         function connectWeb3Wallet() {
-            // Официалният сигурен TON Connect линк, който търси твоя качен manifest файл
-            const tonWalletLink = "tg://ton-connect?v=2&id=reedcom_app&r=" + encodeURIComponent(JSON.stringify({
-                manifestUrl: "https://rumencho.github.io/REEDCOM",
-                items: [{ name: "ton_addr" }]
-            }));
-
-            // Извикваме командата директно в браузъра на Telegram
-            window.location.href = tonWalletLink;
-
-            // Сменяме статуса на реално свързан
-            document.getElementById('wallet-btn-profile').innerText = "Connected";
-            document.getElementById('profile-wallet-status').innerText = "Connected via TON";
-            document.getElementById('profile-wallet-status').style.color = "#00b4db";
+            if (tonConnectUI) {
+                if (tonConnectUI.connected) {
+                    tonConnectUI.disconnect();
+                } else {
+                    tonConnectUI.openModal();
+                }
+            } else {
+                alert("Портфейлът се зарежда. Моля, опитайте пак след секунда.");
+            }
         }
     </script>
 </body>
