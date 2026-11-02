@@ -1,204 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reedcom App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REEDCOM - Claim Coins</title>
+    
+    <!-- Добавяне на TON Connect SDK през CDN -->
+    <script src="https://unpkg.com"></script>
+    
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
-        
-        .view-screen { display: none; text-align: center; }
-        .view-screen.visible { display: block; }
-
-        /* Кликер дизайн */
-        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
-        .coin-btn:active { transform: scale(0.95); }
-        .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
-        
-        /* Енергиен бар */
-        .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
-        .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
-        .energy-label { display: flex; align-items: center; gap: 6px; }
-        .energy-icon { color: #f59e0b; font-size: 16px; }
-        
-        .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
-        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
-        
-        /* Долно меню (Таскбар) */
-        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-decoration: none; gap: 4px; }
-        .tab-btn.active-tab { color: #00b4db; }
-        .tab-icon { font-size: 20px; }
-        
-        /* Други екрани */
-        .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
-        .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
-
-        /* Дизайн на Web3 бутона в профила */
-        .custom-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
+        /* Примерен стил за бутона за теглене */
+        #claim-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #0088cc;
             color: white;
-            border-radius: 25px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
             border: none;
-            padding: 12px 35px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
             margin-top: 20px;
-            transition: transform 0.1s ease;
-            display: inline-block;
         }
-        .custom-wallet-btn:active { transform: scale(0.98); }
-
-        /* Изскачащ текст +1 */
-        .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
-        @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+        #claim-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР (TAP) -->
-    <div id="screen-tap" class="view-screen visible">
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
-        <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
-        
-        <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
-            <div class="coin-btn" onclick="hitCoin()">
-                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="https://placehold.co" alt="Coin" class="coin-img">
-                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
-            </div>
-        </div>
+    <h1>Добре дошли в REEDCOM</h1>
+    
+    <!-- Мястото, където ще се рендерира бутонът за свързване на портфейл -->
+    <div id="ton-connect-button"></div>
 
-        <div class="energy-wrapper">
-            <div class="energy-header">
-                <div class="energy-label">
-                    <span class="energy-icon">⚡</span>
-                    <span>Energy</span>
-                </div>
-                <span><strong id="valEnergy">1000</strong> / 1000</span>
-            </div>
-            <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
-        </div>
-    </div>
+    <!-- Твоят бутон за прехвърляне на спечелените монети -->
+    <button id="claim-btn" disabled onclick="claimRewards()">Изтегли спечелените монети</button>
 
-    <!-- ТАБ 2: TASKS -->
-    <div id="screen-tasks" class="view-screen">
-        <div class="screen-title">Tasks</div>
-        <div class="screen-desc">Complete tasks to earn more REED tokens!</div>
-    </div>
-
-    <!-- ТАБ 3: FRIENDS -->
-    <div id="screen-friends" class="view-screen">
-        <div class="screen-title">Friends</div>
-        <div class="screen-desc">Invite your friends and get bonuses!</div>
-    </div>
-
-    <!-- ТАБ 4: PROFILE -->
-    <div id="screen-profile" class="view-screen">
-        <div class="screen-title">Profile</div>
-        <div class="screen-desc">Your Account Information</div>
-        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
-            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
-            <p><strong>TON Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
-        </div>
-        <!-- Ето го изчистения бутон за свързване на портфейл в Профила -->
-        <button class="custom-wallet-btn" onclick="connectWeb3Wallet()" id="wallet-btn-profile">Connect Web3 Wallet</button>
-    </div>
-
-    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
-    <div class="footer-tabs">
-        <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
-            <span class="tab-icon">⚡</span>
-            <span>Tap</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-tasks', this)">
-            <span class="tab-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-friends', this)">
-            <span class="tab-icon">👥</span>
-            <span>Friends</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-profile', this)">
-            <span class="tab-icon">👤</span>
-            <span>Profile</span>
-        </div>
-    </div>
-
-    <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
     <script>
-        // 1. Смяна на табовете
-        function switchTab(screenId, button) {
-            const screens = document.querySelectorAll('.view-screen');
-            screens.forEach(screen => screen.classList.remove('visible'));
-            
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) targetScreen.classList.add('visible');
-            
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active-tab'));
-            
-            if (button) button.classList.add('active-tab');
-        }
+        // 1. Инициализиране на TON Connect UI
+        // Замени URL адреса с точния линк към твоя манифест в GitHub Pages
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://github.io',
+            buttonRootId: 'ton-connect-button'
+        });
 
-        // 2. Логика на Кликера
-        let balance = 0;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        const valBalance = document.getElementById('valBalance');
-        const valEnergy = document.getElementById('valEnergy');
-        const valBar = document.getElementById('valBar');
-        const clickZone = document.getElementById('clickZone');
-
-        function hitCoin() {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                valBalance.innerText = balance + " REED";
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-                createPlusOne();
+        // 2. Следене на състоянието на портфейла (дали е свързан)
+        tonConnectUI.onStatusChange(wallet => {
+            const claimBtn = document.getElementById('claim-btn');
+            if (wallet) {
+                console.log('Портфейлът е свързан:', wallet.account.address);
+                claimBtn.disabled = false; // Активираме бутона за теглене
+            } else {
+                console.log('Портфейлът е разкачен');
+                claimBtn.disabled = true; // Деактивираме го
             }
-        }
+        });
 
-        function createPlusOne() {
-            const textPlus = document.createElement('div');
-            textPlus.classList.add('text-plus');
-            textPlus.innerText = '+1';
-            clickZone.appendChild(textPlus);
-            setTimeout(() => { textPlus.remove(); }, 500);
-        }
+        // 3. Функция за изпращане на трансакция (Прехвърляне на монети)
+        async function claimRewards() {
+            // Сумата на монетите, които играчът трябва да плати/прехвърли
+            // Забележка: TON измерва сумите в Нанотони (1 TON = 1,000,000,000 Нанотона)
+            // Ако трансакцията е просто заявка към твоя смарт договор:
+            
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 360, // Валидност 6 минути
+                messages: [
+                    {
+                        address: "EQ_ТВОЯТ_СМАРТ_ДОГОВОР_ИЛИ_ПОРТФЕЙЛ_ТУК", // Адресът на контракта на монетата ти
+                        amount: "10000000", // Например 0.01 TON за такса или трансакция
+                        // Ако имаш специфичен payload (data за смарт договора), се слага тук:
+                        // payload: "te6ccgEBAQE..." 
+                    }
+                ]
+            };
 
-        // Регенерация на енергията
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
+            try {
+                alert("Моля, потвърдете трансакцията в портфейла си.");
+                const result = await tonConnectUI.sendTransaction(transaction);
+                
+                // Ако трансакцията е успешна:
+                alert("Успешно прехвърляне! Монетите са изпратени.");
+                console.log("Резултат от трансакцията:", result);
+                
+                // Тук можеш да добавиш логика, която занулява баланса на играча в играта
+            } catch (error) {
+                alert("Трансакцията беше отказана или възникна грешка.");
+                console.error("Грешка при изпращане:", error);
             }
-        }, 1000);
-
-        // 3. Директно свързване към Web3 портфейли през Telegram протокола
-        function connectWeb3Wallet() {
-            // Генерираме официалния сигурен линк за TON Connect протокола на Telegram
-            const tonLink = "tg://ton-connect?v=2&id=reed_app&r=" + encodeURIComponent(JSON.stringify({
-                manifestUrl: "https://github.io",
-                items: [{ name: "ton_addr" }]
-            }));
-
-            // Отваряме линка директно през браузъра на играта
-            window.location.href = tonLink;
-
-            // Симулираме красива промяна на интерфейса в играта, за да покажем, че командата е изпратена
-            setTimeout(() => {
-                document.getElementById('wallet-btn-profile').innerText = "Connected";
-                document.getElementById('profile-wallet-status').innerText = "Connected (TON Network)";
-                document.getElementById('profile-wallet-status').style.color = "#00b4db";
-            }, 1500);
         }
     </script>
 </body>
