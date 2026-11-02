@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>REEDCOM COMMUNITY</title>
     
-    <!-- Официален Telegram скрипт за интеграция на приложението -->
+    <!-- КОРИГИРАНО: Правилният и официален Telegram скрипт за интеграция -->
     <script src="https://telegram.org"></script>
 
     <style>
@@ -16,7 +16,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Секция за въвеждане на адрес (Преместена в Профила) */
+        /* Секция за въвеждане на адрес (В Профила) */
         .address-box {
             width: 100%;
             max-width: 360px;
@@ -87,7 +87,8 @@
         <div style="font-size: 46px; font-weight: 900; color: #00b4db; margin-bottom: 20px;" id="valBalance">0 REED</div>
         
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
-            <div class="coin-btn" onclick="hitCoin(event)">
+            <!-- КОРИГИРАНО: Използваме 'touchstart' за по-бърза реакция при мобилни телефони (без забавяне) -->
+            <div class="coin-btn" ontouchstart="hitCoin(event)">
                 <div style="font-size:10px; letter-spacing:2px; color:#88f2ff; font-weight: bold; opacity: 0.8;">REED TOKEN</div>
                 
                 <!-- Лотос Вектор икона -->
@@ -121,7 +122,7 @@
                 <p style="font-size: 14px; font-weight: bold;">Join REED Channel</p>
                 <p style="font-size: 12px; color: #00ffcc; font-weight: bold;">+500 REED</p>
             </div>
-            <button style="padding: 10px 22px; border-radius: 20px; border: none; background: white; color: black; font-weight: bold; font-size: 13px;">Start</button>
+            <button style="padding: 10px 22px; border-radius: 20px; border: none; background: white; color: black; font-weight: bold; font-size: 13px; cursor: pointer;">Start</button>
         </div>
     </div>
 
@@ -131,39 +132,42 @@
         <div class="screen-desc">Invite community partners to receive production bonuses.</div>
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; max-width: 400px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.05);">
             <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">Your Unique Network Link:</p>
-            <p style="font-size: 12px; color: #00b4db; font-family: monospace; background: #02040a; padding: 12px; border-radius: 10px; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">https://t.me</p>
+            <p id="refLink" style="font-size: 12px; color: #00b4db; font-family: monospace; background: #02040a; padding: 12px; border-radius: 10px; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">https://t.me</p>
         </div>
     </div>
 
     <!-- ТАБ 4: PROFILE / NODE -->
     <div id="screen-profile" class="view-screen">
         <div class="screen-title">User Node</div>
-        <div class="screen-desc">Cryptographic account status parameters.</div>
+        <div class="screen-desc">Cryptographic account & wallet integration.</div>
         
-        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; max-width: 400px; margin: 0 auto; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
-            <p style="margin-bottom: 12px; font-size: 14px;"><strong>Node Status:</strong> <span style="color: #00ffcc;">Active Verified</span></p>
-            <p style="font-size: 14px; word-break: break-all; line-height: 1.4;"><strong>Payout Address:</strong> <br><span id="profile-wallet-status" style="color: #64748b; font-family: monospace; font-size: 12px;">Not Provided</span></p>
-        </div>
-
-        <!-- Полето за въвеждане е преместено успешно тук -->
         <div class="address-box">
-            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px; text-align: left; font-weight: bold;">Update Payout Gateway:</div>
-            <input type="text" class="address-input" id="wallet-input-field" placeholder="Enter TON / EVM Address">
-            <button class="save-btn" onclick="saveWalletAddress()">Save Wallet Address</button>
+            <input type="text" id="walletAddress" class="address-input" placeholder="Enter TON Wallet Address" />
+            <button class="save-btn" onclick="saveWallet()">Save Address</button>
         </div>
     </div>
 
-    <!-- ДОЛНО МЕНЮ -->
+    <!-- ДОБАВЕНО: Пълен Таскбар (Долно меню), който липсваше в HTML-а -->
     <div class="footer-tabs">
-        <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
-            <span class="tab-icon">⚡</span>
-            <span>Tap</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-tasks', this)">
-            <span class="tab-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-friends', this)">
-            <span class="tab-icon">👥</span>
-            <span>Frens</span>
-        </div>
+        <div class="tab-btn active-tab" onclick="switchTab('tap', this)"><span class="tab-icon">⚡</span>Tap</div>
+        <div class="tab-btn" onclick="switchTab('tasks', this)"><span class="tab-icon">📋</span>Tasks</div>
+        <div class="tab-btn" onclick="switchTab('friends', this)"><span class="tab-icon">👥</span>Frens</div>
+        <div class="tab-btn" onclick="switchTab('profile', this)"><span class="tab-icon">👤</span>Node</div>
+    </div>
+
+    <!-- ДОБАВЕНО: Цялата функционална JavaScript Логика -->
+    <script>
+        // Инициализиране на Telegram WebApp
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand(); // Разпъва приложението на цял екран в Telegram
+        }
+
+        // Локално състояние (за демо цели се пази в localStorage, за реален проект ви трябва Бекенд)
+        let balance = parseInt(localStorage.getItem('reed_balance')) || 0;
+        let energy = parseInt(localStorage.getItem('reed_energy')) || 1000;
+        const maxEnergy = 1000;
+
+        // Обновяване на интерфейса първоначално
+        document.getElementById('valBalance').innerText = balance + " REED";
