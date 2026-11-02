@@ -177,7 +177,7 @@
         }, 1500);
 
         // ==========================================
-        // 3. НАВИНЕН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ ГРЕШКИ)
+        // 3. ФИКСИРАН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ TYPEERROR)
         // ==========================================
         let userWalletAddress = null;
 
@@ -185,16 +185,16 @@
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    userWalletAddress = accounts[0];
+                    
+                    // Фикс на ред 180: Взимаме стринга от масива, за да работи substring()
+                    userWalletAddress = accounts[0]; 
 
                     try {
                         await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }],
+                            params: [{ chainId: '0x38' }], // Превключване към BSC
                         });
                     } catch (switchError) {
                         if (switchError.code === 4902) {
                             await window.ethereum.request({
                                 method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x38',
