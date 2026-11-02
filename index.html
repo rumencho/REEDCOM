@@ -4,6 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
+    
+    <!-- Модерен и стабилен скрипт за WalletConnect (AppKit) -->
+    <script type="module">
+        import { createAppKit } from 'https://jsdelivr.net'
+        import { bsc } from 'https://jsdelivr.net'
+
+        // Инициализация на модала за Binance Smart Chain
+        // ЗАДЪЛЖИТЕЛНО генерирай безплатен projectId от ://reown.com, за да се отварят портфейлите!
+        const modal = createAppKit({
+            networks: [bsc],
+            projectId: 'f948f95c478c1b69828751bf87807d93', // Използвай твоя projectId тук
+            metadata: {
+                name: 'Reedcom App',
+                description: 'Tap and Claim Rewards',
+                url: 'https://github.io',
+                icons: ['https://github.io/coin.jpg.jpg']
+            }
+        });
+
+        // Записваме обекта глобално, за да може чистият JS да го вижда
+        window.walletModal = modal;
+
+        // Следене за промяна на статуса на портфейла (свързан/разкачен)
+        modal.subscribeState(state => {
+            const statusText = document.getElementById('profile-wallet-status');
+            const connectBtn = document.getElementById('wallet-connect-btn');
+            const claimBtn = document.getElementById('wallet-claim-btn');
+
+            if (modal.getIsConnectedByUser()) {
+                statusText.innerText = "Wallet Connected";
+                statusText.style.color = '#00ffcc';
+                connectBtn.innerText = "Disconnect Wallet";
+                if (claimBtn) claimBtn.style.display = "inline-block";
+            } else {
+                statusText.innerText = "Not Connected";
+                statusText.style.color = '#64748b';
+                connectBtn.innerText = "Connect Wallet";
+                if (claimBtn) claimBtn.style.display = "none";
+            }
+        });
+    </script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -67,7 +109,7 @@
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
             <div class="coin-btn" onclick="hitCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="https://github.io" alt="Coin" class="coin-img">
+                <img src="https://github.io/coin.jpg.jpg" alt="Coin" class="coin-img">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
@@ -105,7 +147,7 @@
             <p><strong>Wallet:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
         
-        <button class="custom-wallet-btn" onclick="connectCryptoWallet()" id="wallet-connect-btn">Connect Wallet</button>
+        <button class="custom-wallet-btn" onclick="toggleWallet()" id="wallet-connect-btn">Connect Wallet</button>
         <br>
         <button class="custom-wallet-btn" style="background: linear-gradient(135deg, #00ffcc, #00b4db); color: #0b0f19; margin-top: 10px; display: none;" onclick="claimTokens()" id="wallet-claim-btn">Claim REED</button>
     </div>
@@ -152,49 +194,3 @@
         const valBar = document.getElementById('valBar');
         const clickZone = document.getElementById('clickZone');
 
-        function hitCoin() {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                valBalance.innerText = balance + " REED";
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-
-                const plus = document.createElement('div');
-                plus.className = 'text-plus';
-                plus.innerText = '+1';
-                clickZone.appendChild(plus);
-                setTimeout(() => plus.remove(), 500);
-            }
-        }
-
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy = Math.min(maxEnergy, energy + 1);
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-            }
-        }, 1500);
-
-        // ==========================================
-        // 3. ФИКСИРАН ИЗЧИСТЕН WEB3 СКРИПТ (БЕЗ TYPEERROR)
-        // ==========================================
-        let userWalletAddress = null;
-
-        async function connectCryptoWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // Фикс на ред 180: Взимаме стринга от масива, за да работи substring()
-                    userWalletAddress = accounts[0]; 
-
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }], // Превключване към BSC
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
