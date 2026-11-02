@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
     <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -71,8 +71,9 @@
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <button class="custom-wallet-btn" onclick="handleWalletConnection()" id="main-wallet-btn">Connect TON Wallet</button>
-       </div>
+            <!-- Сложих изчистена и директна функция за отваряне -->
+            <button class="custom-wallet-btn" onclick="openTonModal()" id="main-wallet-btn">Connect TON Wallet</button>
+        </div>
 
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
         <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
@@ -80,7 +81,6 @@
         <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
             <div class="coin-btn" onclick="hitCoin()">
                 <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <!-- Временно примерно изображение за иконата на монетата -->
                 <img src="https://placehold.co" alt="Coin" class="coin-img" id="coinImg">
                 <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
@@ -142,7 +142,6 @@
 
     <!-- ЛОГИКА ЗА ИГРАТА И НАВИГАЦИЯТА -->
     <script>
-        // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
@@ -156,7 +155,6 @@
             if (button) button.classList.add('active-tab');
         }
 
-        // 2. Логика на Кликера
         let balance = 0;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -185,7 +183,6 @@
             setTimeout(() => { textPlus.remove(); }, 500);
         }
 
-        // Възстановяване на енергията
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += 1;
@@ -195,7 +192,7 @@
         }, 1000);
     </script>
 
-    <!-- ИНИЦИАЛИЗАЦИЯ НА TELEGRAM WEBAPP И TON CONNECT UI -->
+    <!-- ОФИЦИАЛНА СТАБИЛНА ИНТЕГРАЦИЯ НА TON CONNECT -->
     <script>
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -204,8 +201,12 @@
 
         let tonConnectUI = null;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (typeof TON_CONNECT_UI !== 'undefined') {
-                try {
-                    // Твоят правилен линк към твоя проект е генериран тук автоматично
-                    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        // Инициализираме веднага щом браузърът зареди обектите
+        try {
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://github.io'
+            });
+
+            // Наблюдаваме промените в състоянието
+            tonConnectUI.onStatusChange(wallet => {
+                const btn = document.getElementById('main-wallet-btn');
