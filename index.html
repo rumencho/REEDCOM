@@ -3,177 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>REEDCOM COMMUNITY</title>
-
+    <title>Reedcom App</title>
+    <!-- Официалното TON Connect SDK за чист JavaScript (Vanilla JS) -->
+    <script src="https://unpkg.com"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #040814; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 110px; user-select: none; overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; }
         
-        /* Скриване/Показване на екраните */
-        .view-screen { display: none; text-align: center; }
+        .view-screen { display: none; padding-bottom: 90px; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Секция за въвеждане на адрес */
-        .address-box {
+        /* Стил за бутона на портфейла (Интегрира се с TON Connect) */
+        .wallet-container {
             width: 100%;
-            max-width: 360px;
-            margin: 15px auto 0 auto;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 14px;
-            border-radius: 16px;
+            max-width: 400px;
+            margin: 10px auto 20px auto;
+            display: flex;
+            justify-content: center;
         }
-        .address-input {
-            width: 100%;
-            padding: 11px 14px;
-            background: #02040a;
-            border: 1px solid #1e293b;
-            border-radius: 10px;
-            color: #00ffcc;
-            font-size: 12px;
-            font-family: monospace;
-            text-align: center;
-            outline: none;
-            margin-bottom: 10px;
+        /* Пренаписваме стиловете на TON Connect бутона, за да съвпада с вашия дизайн */
+        #ton-connect-btn-container button {
+            background: linear-gradient(135deg, #00b4db, #0083b0) !important;
+            color: white !important;
+            border-radius: 25px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3) !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            transition: transform 0.1s ease !important;
         }
-        .address-input:focus { border-color: #00b4db; }
-        .save-btn {
-            background: #00b4db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
+        #ton-connect-btn-container button:active {
+            transform: scale(0.98);
         }
-        .save-btn:hover { background: #0083b0; }
+        #ton-connect-btn-container svg {
+            fill: white !important;
+        }
+        #ton-connect-btn-container div {
+            color: white !important;
+        }
 
         /* Кликер дизайн */
-        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #111a2e 0%, #060b14 100%); border: 4px solid #00b4db; margin: 40px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 30px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; position: relative; }
+        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
         .coin-btn:active { transform: scale(0.95); }
-        .coin-svg { width: 95px; height: 95px; filter: drop-shadow(0px 0px 12px rgba(0, 180, 219, 0.8)); margin: 5px 0; pointer-events: none; }
+        .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
-        /* Енергиен бар */
-        .energy-wrapper { width: 100%; max-width: 360px; margin: 30px auto; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; }
-        .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; }
-        .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
+        .bar-bg { width: 100%; max-width: 400px; height: 12px; background-color: #1e293b; border-radius: 6px; margin: 10px auto; overflow: hidden; }
         .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
         
-        /* Долно меню */
-        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #0b1120; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; width: 25%; text-transform: uppercase; gap: 4px; }
+        /* Долна лента (Таскбар) */
+        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
+        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; }
         .tab-btn.active-tab { color: #00b4db; }
-        .tab-icon { font-size: 20px; }
         
-        .screen-title { font-size: 24px; font-weight: 900; margin-top: 25px; color: #00b4db; }
-        .screen-desc { color: #94a3b8; font-size: 13px; margin-top: 6px; margin-bottom: 20px; }
-
-        /* Анимация +1 */
-        .text-plus { position: absolute; font-size: 32px; font-weight: 900; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; text-shadow: 0 0 12px rgba(0, 255, 204, 0.8); z-index: 1000; }
-        @keyframes goUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px) scale(0.8); } }
+        /* Изскачащ текст +1 */
+        .text-plus { position: absolute; font-size: 30px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 40%; transform: translate(-50%, -50%); }
+        @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
     </style>
 </head>
 <body>
 
-    <!-- ТАБ 1: КЛИКЕР (TAP) -->
-    <div id="screen-tap" class="view-screen visible">
-        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-top: 30px; font-weight: bold; letter-spacing: 0.5px;">Your Balance</div>
-        <div style="font-size: 46px; font-weight: 900; color: #00b4db; margin-bottom: 20px;" id="valBalance">0 REED</div>
+    <!-- ТАБ 1: КЛИКЕР -->
+    <div id="tab1" class="view-screen visible">
         
-        <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
-            <!-- Променено на стандартно кликане, което работи перфектно навсякъде без нужда от скриптове -->
-            <div class="coin-btn" onclick="hitCoin(event)">
-                <div style="font-size:10px; letter-spacing:2px; color:#88f2ff; font-weight: bold; opacity: 0.8;">REED TOKEN</div>
-                
-                <svg class="coin-svg" viewBox="0 0 64 64" fill="none" xmlns="http://w3.org">
-                    <path d="M32 8C32 8 26 24 32 44C38 24 32 8 32 8Z" fill="#00ffff" opacity="0.9"/>
-                    <path d="M32 20C24 24 12 30 18 44C26 44 30 32 32 20Z" fill="#00b4db" opacity="0.8"/>
-                    <path d="M32 20C40 24 52 30 46 44C38 44 34 32 32 20Z" fill="#00b4db" opacity="0.8"/>
-                    <path d="M32 28C20 32 6 42 12 52C24 52 28 40 32 28Z" fill="#0083b0" opacity="0.7"/>
-                    <path d="M32 28C44 32 58 42 52 52C40 52 36 40 32 28Z" fill="#0083b0" opacity="0.7"/>
-                </svg>
+        <!-- Контейнер за TON Connect бутона (Позициониран най-отгоре) -->
+        <div class="wallet-container">
+            <div id="ton-connect-btn-container"></div>
+        </div>
 
-                <div style="font-size:12px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
+        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
+        <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">788 REED</div>
+        
+        <div style="position: relative;" id="clickZone">
+            <div class="coin-btn" onclick="hitCoin()">
+                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
+                <img src="coin.jpg" alt="Coin" class="coin-img">
+                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
             </div>
         </div>
 
-        <div class="energy-wrapper">
-            <div class="energy-header">
-                <div>⚡ Energy</div>
-                <div><strong id="valEnergy">1000</strong> / 1000</div>
+        <div style="width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8;">
+                <span>⚡ Energy</span><span><strong id="valEnergy">1000</strong> / 1000</span>
             </div>
             <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
         </div>
     </div>
 
-    <!-- ТАБ 2: TASKS -->
-    <div id="screen-tasks" class="view-screen">
-        <div class="screen-title">Tasks & Quests</div>
-        <div class="screen-desc">Complete simple operations to mine tokens.</div>
-        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 16px; margin: 10px auto; max-width: 400px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.06);">
-            <div style="text-align: left;">
-                <p style="font-size: 14px; font-weight: bold;">Join REED Channel</p>
-                <p style="font-size: 12px; color: #00ffcc; font-weight: bold;">+500 REED</p>
-            </div>
-            <button style="padding: 10px 22px; border-radius: 20px; border: none; background: white; color: black; font-weight: bold; font-size: 13px; cursor: pointer;">Start</button>
-        </div>
-    </div>
-
-    <!-- ТАБ 3: FRIENDS -->
-    <div id="screen-friends" class="view-screen">
-        <div class="screen-title">Frens System</div>
-        <div class="screen-desc">Invite community partners to receive production bonuses.</div>
-        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; max-width: 400px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.05);">
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">Your Unique Network Link:</p>
-            <p style="font-size: 12px; color: #00b4db; font-family: monospace; background: #02040a; padding: 12px; border-radius: 10px; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">https://t.me</p>
-        </div>
-    </div>
-
-    <!-- ТАБ 4: PROFILE -->
-    <div id="screen-profile" class="view-screen">
-        <div class="screen-title">User Node</div>
-        <div class="screen-desc">Cryptographic account & wallet integration.</div>
-        <div class="address-box">
-            <input type="text" id="walletAddress" class="address-input" placeholder="Enter TON Wallet Address" />
-            <button class="save-btn" onclick="saveWallet()">Save Address</button>
-        </div>
-    </div>
-
-    <!-- Долно меню -->
-    <div class="footer-tabs">
-        <div class="tab-btn active-tab" onclick="switchTab('tap', this)"><span class="tab-icon">⚡</span>Tap</div>
-        <div class="tab-btn" onclick="switchTab('tasks', this)"><span class="tab-icon">📋</span>Tasks</div>
-        <div class="tab-btn" onclick="switchTab('friends', this)"><span class="tab-icon">👥</span>Frens</div>
-        <div class="tab-btn" onclick="switchTab('profile', this)"><span class="tab-icon">👤</span>Node</div>
-    </div>
-
-    <!-- Чист JavaScript без външни библиотеки -->
+    <!-- 1. ЛОГИКА ЗА TON CONNECT (ПОРТФЕЙЛ) -->
     <script>
-        let balance = 0;
+        const tonConnectUI = new TONConnectUI.TonConnectUI({
+            manifestUrl: 'https://xn----7sbfkfpkwlg5b8dye.com', // ⚠️ СМЕНЕТЕ С ВАШИЯ HTTPS URL ДО МАНИФЕСТА
+            buttonRootId: 'ton-connect-btn-container',
+            actionsConfiguration: {
+                // Автоматично връща потребителя в Telegram след потвърждение в Tonkeeper/MyTonWallet
+                twaReturnUrl: 'https://t.me' // ⚠️ СМЕНЕТЕ С ЛИНКА НА ВАШИЯ БОТ
+            }
+        });
+
+        // Следене на състоянието на портфейла в реално време
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                console.log("Портфейлът е свързан успешно. Адрес:", wallet.account.address);
+                // ТУК: Добавете fetch() заявка към вашия бекенд, за да запишете адреса на потребителя
+            } else {
+                console.log("Портфейлът не е свързан или връзката е прекъсната.");
+            }
+        });
+    </script>
+
+    <!-- 2. ЛОГИКА ЗА КЛИКЕРА И ЕНЕРГИЯТА -->
+    <script>
+        let balance = 788;
         let energy = 1000;
         const maxEnergy = 1000;
 
-        // Изпълнява се веднага щом браузърът зареди
-        window.addEventListener('DOMContentLoaded', () => {
-            updateUI();
-        });
+        function hitCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                
+                // Обновяване на интерфейса
+                document.getElementById('valBalance').innerText = balance + " REED";
+                document.getElementById('valEnergy').innerText = energy;
+                document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+                
+                // Създаване на изскачащия текст +1 на мястото на кликането
+                const clickZone = document.getElementById('clickZone');
+                const plus = document.createElement('div');
+                plus.className = 'text-plus';
+                plus.innerText = '+1';
+                clickZone.appendChild(plus);
+                
+                // Премахване на елемента след края на анимацията
+                setTimeout(() => {
+                    plus.remove();
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
 
-        function updateUI() {
-            document.getElementById('valBalance').innerText = balance + " REED";
-            document.getElementById('valEnergy').innerText = energy;
-            document.getElementById('valBar').style.width = (energy / maxEnergy * 100) + "%";
+
+    <!-- ТАБ 2: ЗАДАЧИ -->
+    <div id="tab2" class="view-screen">
+        <div style="padding:50px 20px; color:#94a3b8;">📋 Tasks Section Coming Soon</div>
+    </div>
+
+    <!-- ТАБ 3: ПРИЯТЕЛИ -->
+    <div id="tab3" class="view-screen">
+        <div style="padding:50px 20px; color:#94a3b8;">👥 Friends Section Coming Soon</div>
+    </div>
+
+    <!-- ТАБ 4: ПРОФИЛ -->
+    <div id="tab4" class="view-screen">
+        <div class="profile-container">
+            <div class="profile-username">👤 @ReedcomUser</div>
+            
+            <div class="wallet-box">
+                <div class="wallet-status-label">Web3 Wallet Status</div>
+                <div class="wallet-address-text" id="walletStatusText">Not Connected</div>
+                <button class="btn-ton-connect" id="customWalletBtn" onclick="handleWalletAction()">Connect TON Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ДОЛНА ЛЕНТА (ТАСКБАР) -->
+    <nav class="footer-tabs">
+        <div class="tab-btn active-tab" onclick="changeScreen('tab1', this)">
+            <span style="font-size: 20px;">🔘</span><span>Tap</span>
+        </div>
+        <div class="tab-btn" onclick="changeScreen('tab2', this)">
+            <span style="font-size: 20px;">📋</span><span>Tasks</span>
+        </div>
+        <div class="tab-btn" onclick="changeScreen('tab3', this)">
+            <span style="font-size: 20px;">👥</span><span>Friends</span>
+        </div>
+        <div class="tab-btn" onclick="changeScreen('tab4', this)">
+            <span style="font-size: 20px;">👤</span><span>Profile</span>
+        </div>
+    </nav>
+
+    <script>
+        // Чисти локални променливи
+        var gamePoints = 788;
+        var gameEnergy = 1000;
+        var gameMax = 1000;
+        var isConnected = false;
+
+        // Превключване на страниците
+        function changeScreen(scrId, btnEl) {
+            var allScrs = document.getElementsByClassName('view-screen');
+            for(var i=0; i<allScrs.length; i++){ allScrs[i].classList.remove('visible'); }
+            
+            var allBtns = document.getElementsByClassName('tab-btn');
+            for(var i=0; i<allBtns.length; i++){ allBtns[i].classList.remove('active-tab'); }
+            
+            document.getElementById(scrId).classList.add('visible');
+            btnEl.classList.add('active-tab');
         }
 
-        // Превключване на екраните
-        function switchTab(screenId, element) {
-            const screens = document.querySelectorAll('.view-screen');
-            screens.forEach(screen => screen.classList.remove('visible'));
+        // Локално симулирано свързване в Профила (стабилно и безопасно)
+        function handleWalletAction() {
+            var btn = document.getElementById('customWalletBtn');
+            var statusText = document.getElementById('walletStatusText');
             
-            document.getElementById('screen-' + screenId).classList.add('visible');
+            if (!isConnected) {
+                // Симулираме успешно свързване с реален TON формат адрес
+                var mockAddress = "UQAnR_oX...7b3A9z";
+                statusText.innerText = "Connected: " + mockAddress;
+                btn.innerText = "Disconnect";
+                btn.style.background = "#ef4444"; // Променя цвета на червен за Дисънект
+                isConnected = true;
+            } else {
+                statusText.innerText = "Not Connected";
+                btn.innerText = "Connect TON Wallet";
+                btn.style.background = "linear-gradient(135deg, #00b4db, #0083b0)";
+                isConnected = false;
+            }
+        }
 
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active-tab'));
+        // Кликер логика
+        function hitCoin() {
+            if (gameEnergy <= 0) return;
+            gamePoints++;
+            gameEnergy--;
             
+            document.getElementById('valBalance').innerText = gamePoints + " REED";
+            document.getElementById('valEnergy').innerText = gameEnergy;
+            document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
+            
+            // Създаване на +1 ефекта
+            var zone = document.getElementById('clickZone');
+            var p = document.createElement('div');
+            p.className = 'text-plus';
+            p.innerText = '+1';
+            zone.appendChild(p);
+            
+            setTimeout(function(){ p.remove(); }, 500);
+        }
+
+        // Автоматично пълнене на енергията
+        setInterval(function() {
+            if (gameEnergy < gameMax) {
+                gameEnergy++;
+                document.getElementById('valEnergy').innerText = gameEnergy;
+                document.getElementById('valBar').style.width = (gameEnergy / gameMax * 100) + '%';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
