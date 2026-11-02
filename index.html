@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reedcom App</title>
-    <!-- Официалното TON Connect SDK за портфейла -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
@@ -13,7 +11,7 @@
         .view-screen { display: none; text-align: center; }
         .view-screen.visible { display: block; }
         
-        /* Контейнер за TON Connect бутоните */
+        /* Контейнер за портфейла */
         .wallet-container {
             width: 100%;
             max-width: 400px;
@@ -22,7 +20,6 @@
             justify-content: center;
         }
         
-        /* Персонализирани бутони за свързване, които не чупят логиката */
         .custom-wallet-btn {
             background: linear-gradient(135deg, #00b4db, #0083b0);
             color: white;
@@ -37,12 +34,50 @@
         }
         .custom-wallet-btn:active { transform: scale(0.98); }
 
+        /* Дизайн на менюто за избор на портфейл (Modal) */
+        .wallet-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .wallet-modal-content {
+            background-color: #111723;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 340px;
+            text-align: center;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #00b4db; }
+        .provider-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #172237;
+            border: 1px solid #00b4db;
+            color: white;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .provider-btn:hover { background: #1e2d4a; }
+        .close-modal-btn { margin-top: 15px; color: #64748b; cursor: pointer; font-size: 14px; display: inline-block; }
+
         /* Кликер дизайн */
         .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
         .coin-btn:active { transform: scale(0.95); }
         .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
         
-        /* Енергиен бар със светкавица */
+        /* Енергиен бар */
         .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
         .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
         .energy-label { display: flex; align-items: center; gap: 6px; }
@@ -68,10 +103,22 @@
 </head>
 <body>
 
+    <!-- МЕНЮ ЗА ИЗБОР НА Web3 ПОРТФЕЙЛ -->
+    <div class="wallet-modal" id="walletModal">
+        <div class="wallet-modal-content">
+            <div class="modal-title">Select Web3 Wallet</div>
+            <button class="provider-btn" onclick="connectProvider('okx')">🖤 OKX Wallet</button>
+            <button class="provider-btn" onclick="connectProvider('binance')">💛 Binance Web3</button>
+            <button class="provider-btn" onclick="connectProvider('gate')">🍒 Gate.io Wallet</button>
+            <div class="close-modal-btn" onclick="closeModal()">Cancel</div>
+        </div>
+    </div>
+
     <!-- ТАБ 1: КЛИКЕР (TAP) -->
     <div id="screen-tap" class="view-screen visible">
         <div class="wallet-container">
-            <button class="custom-wallet-btn" onclick="handleWalletAction()" id="wallet-btn-tap">Connect Wallet</button>
+            <!-- Бутонът е САМО ТУК в началото на играта -->
+            <button class="custom-wallet-btn" onclick="openModal()" id="main-wallet-btn">Connect Wallet</button>
         </div>
 
         <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 20px;">Your Balance</div>
@@ -112,10 +159,10 @@
     <!-- ТАБ 4: PROFILE -->
     <div id="screen-profile" class="view-screen">
         <div class="screen-title">Profile</div>
-        <div class="screen-desc">Manage your account and connect your wallet below:</div>
-        
-        <div class="wallet-container">
-            <button class="custom-wallet-btn" onclick="handleWalletAction()" id="wallet-btn-profile">Connect Wallet</button>
+        <div class="screen-desc">Your Account Information</div>
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
+            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
+            <p><strong>Wallet Address:</strong> <span id="profile-wallet-status" style="color: #64748b;">Not Connected</span></p>
         </div>
     </div>
 
@@ -141,25 +188,19 @@
 
     <!-- ЛОГИКА ЗА ИГРАТА И ТАБОВЕТЕ -->
     <script>
-        // 1. Смяна на табовете
         function switchTab(screenId, button) {
             const screens = document.querySelectorAll('.view-screen');
             screens.forEach(screen => screen.classList.remove('visible'));
             
             const targetScreen = document.getElementById(screenId);
-            if (targetScreen) {
-                targetScreen.classList.add('visible');
-            }
+            if (targetScreen) targetScreen.classList.add('visible');
             
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active-tab'));
             
-            if (button) {
-                button.classList.add('active-tab');
-            }
+            if (button) button.classList.add('active-tab');
         }
 
-        // 2. Кликер функционалност
         let balance = 0;
         let energy = 1000;
         const maxEnergy = 1000;
@@ -167,58 +208,3 @@
         const valBalance = document.getElementById('valBalance');
         const valEnergy = document.getElementById('valEnergy');
         const valBar = document.getElementById('valBar');
-        const clickZone = document.getElementById('clickZone');
-
-        function hitCoin() {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                
-                valBalance.innerText = balance + " REED";
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-
-                createPlusOne();
-            }
-        }
-
-        function createPlusOne() {
-            const textPlus = document.createElement('div');
-            textPlus.classList.add('text-plus');
-            textPlus.innerText = '+1';
-
-            clickZone.appendChild(textPlus);
-
-            setTimeout(() => {
-                textPlus.remove();
-            }, 500);
-        }
-
-        // 3. Регенерация на енергия
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-            }
-        }, 1000);
-    </script>
-
-    <!-- ИНИЦИАЛИЗАЦИЯ НА TELEGRAM WEBAPP И TON CONNECT UI -->
-    <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
-        }
-
-        let tonConnectUI = null;
-
-        document.addEventListener("DOMContentLoaded", () => {
-            if (typeof TON_CONNECT_UI !== 'undefined') {
-                try {
-                    // Стартираме чиста инстанция с демо манифест от документацията на TON
-                    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                        manifestUrl: 'https://github.io'
-                    });
-
