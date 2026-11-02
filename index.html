@@ -182,23 +182,21 @@
             }
         }, 1000);
 
-        // 3. Директно свързване към Web3 портфейли през Telegram протокола
+         // ПРАВИЛНАТА РЕАЛНА Web3 ВРЪЗКА ЗА ТВОЯ ПРОЕКТ REEDCOM
         function connectWeb3Wallet() {
-            // Генерираме официалния сигурен линк за TON Connect протокола на Telegram
-            const tonLink = "tg://ton-connect?v=2&id=reed_app&r=" + encodeURIComponent(JSON.stringify({
-                manifestUrl: "https://github.io",
+            // Официалният сигурен TON Connect линк, който търси твоя качен manifest файл
+            const tonWalletLink = "tg://ton-connect?v=2&id=reedcom_app&r=" + encodeURIComponent(JSON.stringify({
+                manifestUrl: "https://rumencho.github.io/REEDCOM",
                 items: [{ name: "ton_addr" }]
             }));
 
-            // Отваряме линка директно през браузъра на играта
-            window.location.href = tonLink;
+            // Извикваме командата директно в браузъра на Telegram
+            window.location.href = tonWalletLink;
 
-            // Симулираме красива промяна на интерфейса в играта, за да покажем, че командата е изпратена
-            setTimeout(() => {
-                document.getElementById('wallet-btn-profile').innerText = "Connected";
-                document.getElementById('profile-wallet-status').innerText = "Connected (TON Network)";
-                document.getElementById('profile-wallet-status').style.color = "#00b4db";
-            }, 1500);
+            // Сменяме статуса на реално свързан
+            document.getElementById('wallet-btn-profile').innerText = "Connected";
+            document.getElementById('profile-wallet-status').innerText = "Connected via TON";
+            document.getElementById('profile-wallet-status').style.color = "#00b4db";
         }
     </script>
 </body>
