@@ -1,206 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reedcom App</title>
-    <!-- Официалният скрипт на Telegram за Mini Apps -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 16px; min-height: 100vh; padding-bottom: 100px; user-select: none; }
-        
-        .view-screen { display: none; text-align: center; }
-        .view-screen.visible { display: block; }
+import React, { useState, useEffect } from 'react';
 
-        /* Кликер дизайн */
-        .coin-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #172237 0%, #0e1420 100%); border: 5px solid #00b4db; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 25px rgba(0, 180, 219, 0.4); transition: transform 0.05s linear; }
-        .coin-btn:active { transform: scale(0.95); }
-        .coin-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; margin: 8px 0; pointer-events: none; }
-        
-        /* Енергиен бар */
-        .energy-wrapper { width: 100%; max-width: 400px; margin: 20px auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
-        .energy-header { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; align-items: center; }
-        .energy-label { display: flex; align-items: center; gap: 6px; }
-        .energy-icon { color: #f59e0b; font-size: 16px; }
-        
-        .bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 10px; overflow: hidden; }
-        .bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00b4db, #00ffcc); transition: width 0.1s ease; }
-        
-        /* Долно меню (Таскбар) */
-        .footer-tabs { position: fixed; bottom: 15px; left: 5%; width: 90%; height: 65px; background-color: #111723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 12px; font-weight: bold; cursor: pointer; width: 25%; text-decoration: none; gap: 4px; }
-        .tab-btn.active-tab { color: #00b4db; }
-        .tab-icon { font-size: 20px; }
-        
-        /* Други екрани */
-        .screen-title { font-size: 24px; font-weight: bold; margin-top: 30px; color: #00b4db; }
-        .screen-desc { color: #94a3b8; margin-top: 10px; margin-bottom: 20px; }
+// ==========================================
+// 1. КОМПОНЕНТ: НАВИГАЦИЯ (Blum-style Navbar)
+// ==========================================
+function Navbar({ currentTab, setCurrentTab }) {
+  const tabs = [
+    { id: 'home', label: 'Home', icon: '🏠' },
+    { id: 'earn', label: 'Earn', icon: '🪙' },
+    { id: 'frens', label: 'Frens', icon: '👥' },
+    { id: 'wallet', label: 'Wallet', icon: '🔌' }
+  ];
 
-        /* Дизайн на бутона в профила */
-        .custom-wallet-btn {
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            color: white;
-            border-radius: 25px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            border: none;
-            padding: 12px 35px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 20px;
-            transition: transform 0.1s ease;
-            display: inline-block;
-        }
-        .custom-wallet-btn:active { transform: scale(0.98); }
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-[#0b0b0c] border-t border-[#1f1f23] px-6 py-3 flex justify-around items-center z-50 rounded-t-2xl shadow-xl">
+      {tabs.map((tab) => {
+        const isActive = currentTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => setCurrentTab(tab.id)}
+            className={`flex flex-col items-center justify-center w-16 transition-all duration-200 ${
+              isActive ? 'text-[#00ff66] scale-105' : 'text-[#71717a]'
+            }`}
+          >
+            <span className="text-2xl mb-1">{tab.icon}</span>
+            <span className="text-[11px] font-semibold tracking-wider uppercase">
+              {tab.label}
+            </span>
+            {isActive && (
+              <div className="w-1.5 h-1.5 bg-[#00ff66] rounded-full mt-1 shadow-[0_0_8px_#00ff66]" />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
-        /* Изскачащ текст +1 */
-        .text-plus { position: absolute; font-size: 32px; font-weight: bold; color: #00ffcc; pointer-events: none; animation: goUp 0.5s ease-out forwards; left: 50%; top: 30%; transform: translate(-50%, -50%); }
-        @keyframes goUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
-    </style>
-</head>
-<body>
+// ==========================================
+// 2. ЕКРАН: HOME / DASHBOARD
+// ==========================================
+function DashboardScreen({ userPoints, connectedWallets }) {
+  const totalBalanceUSD = connectedWallets.reduce((acc, w) => acc + (w.connected ? w.balance : 0), 0);
 
-    <!-- ТАБ 1: КЛИКЕР (TAP) -->
-    <div id="screen-tap" class="view-screen visible">
-        <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-top: 40px;">Your Balance</div>
-        <div style="font-size: 44px; font-weight: bold; color: #00b4db; margin-bottom: 10px;" id="valBalance">0 REED</div>
-        
-        <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;" id="clickZone">
-            <div class="coin-btn" onclick="hitCoin()">
-                <div style="font-size:11px; letter-spacing:2px; color:#88f2ff; font-weight: bold;">REED TOKEN</div>
-                <img src="https://github.io" alt="Coin" class="coin-img">
-                <div style="font-size:13px; color:#00b4db; font-weight: bold;">COMMUNITY</div>
-            </div>
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      {/* Профил на потребителя */}
+      <div className="flex items-center space-x-3 bg-[#16161a] p-3 rounded-xl border border-[#232329]">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#00ff66] to-[#005522] flex items-center justify-center font-bold text-black">
+          RC
         </div>
+        <div>
+          <h4 className="font-bold text-sm">REEDCOM User</h4>
+          <p className="text-xs text-gray-400">Status: Verified Builder</p>
+        </div>
+      </div>
 
-        <div class="energy-wrapper">
-            <div class="energy-header">
-                <div class="energy-label">
-                    <span class="energy-icon">⚡</span>
-                    <span>Energy</span>
+      {/* Голям баланс на точките (По подобие на Blum) */}
+      <div className="text-center py-6 bg-gradient-to-b from-[#16161a] to-[#0b0b0c] rounded-3xl border border-[#232329] shadow-lg">
+        <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mb-1">REEDCOM Balance</p>
+        <h1 className="text-5xl font-black text-white tracking-tight flex justify-center items-center gap-2">
+          <span className="text-[#00ff66]">🪙</span> {userPoints.toLocaleString()}
+        </h1>
+        <p className="text-xs text-[#00ff66] mt-2 font-medium bg-[#00ff66]/10 px-3 py-1 rounded-full inline-block">
+          +100 RC / daily farming active
+        </p>
+      </div>
+
+      {/* Мулти-чейн Web3 баланс */}
+      <div className="bg-[#16161a] p-4 rounded-2xl border border-[#232329]">
+        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+          <span>💼</span> Connected Crypto Assets
+        </h3>
+        <div className="text-3xl font-bold mb-4">${totalBalanceUSD.toFixed(2)} <span className="text-xs text-gray-400 font-normal">USD</span></div>
+        
+        <div className="space-y-2">
+          {connectedWallets.map(w => (
+            <div key={w.id} className="flex justify-between items-center p-2.5 bg-[#202024] rounded-xl text-xs">
+              <div className="flex items-center gap-2">
+                <span>{w.icon}</span>
+                <span className="font-medium">{w.name} Network</span>
+              </div>
+              <span className={w.connected ? "text-white font-bold" : "text-gray-500 italic"}>
+                {w.connected ? `$${w.balance.toFixed(2)}` : "Not connected"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 3. ЕКРАН: EARN / TASKS
+// ==========================================
+function EarnScreen({ tasks, claimTask, userPoints }) {
+  return (
+    <div className="space-y-4 animate-fadeIn">
+      <div className="mb-2">
+        <h2 className="text-xl font-black">Tasks & Quests</h2>
+        <p className="text-xs text-gray-400">Complete tasks to accumulate more REEDCOM points.</p>
+      </div>
+
+      <div className="space-y-3">
+        {tasks.map((task) => (
+          <div key={task.id} className="flex justify-between items-center p-4 bg-[#16161a] rounded-2xl border border-[#232329] transition-all hover:border-[#32323b]">
+            <div className="space-y-1 pr-4">
+              <h4 className="text-sm font-bold text-white">{task.title}</h4>
+              <p className="text-xs text-[#00ff66] font-semibold">+{task.reward} RC</p>
+            </div>
+            
+            <button
+              disabled={task.status === 'claimed'}
+              onClick={() => claimTask(task.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+                task.status === 'start' ? 'bg-white text-black hover:bg-gray-200' :
+                task.status === 'claim' ? 'bg-[#00ff66] text-black hover:bg-[#00dd55] animate-pulse' :
+                'bg-[#232329] text-gray-500 cursor-not-allowed shadow-none'
+              }`}
+            >
+              {task.status === 'start' && 'Start'}
+              {task.status === 'claim' && 'Claim'}
+              {task.status === 'claimed' && '✓ Done'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 4. ЕКРАН: FRENS / REFERRALS
+// ==========================================
+function FrensScreen() {
+  const [copied, setCopied] = useState(false);
+  const refLink = "https://t.me";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(refLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const mockFrens = [
+    { id: 1, name: "Ivan_Web3", reward: 250 },
+    { id: 2, name: "Crypto_bg", reward: 250 },
+    { id: 3, name: "Elena_V", reward: 100 }
+  ];
+
+  return (
+    <div className="space-y-5 animate-fadeIn">
+      <div className="text-center py-4">
+        <h2 className="text-3xl font-black text-white">Invite Frens!</h2>
+        <p className="text-xs text-gray-400 mt-1">Get 10% of your friends' farming rewards + bonuses.</p>
+      </div>
+
+      {/* Бутон за покана */}
+      <div className="bg-[#16161a] p-4 rounded-2xl border border-[#232329] space-y-3">
+        <div className="text-xs bg-[#0b0b0c] p-3 rounded-xl border border-[#1f1f23] break-all text-gray-400 font-mono">
+          {refLink}
+        </div>
+        <button
+          onClick={handleCopy}
+          className="w-full bg-[#00ff66] text-black font-bold py-3 rounded-xl text-sm transition-all hover:opacity-90 active:scale-[0.99] shadow-lg shadow-[#00ff66]/10"
+        >
+          {copied ? "✓ Link Copied!" : "Copy Invite Link"}
+        </button>
+      </div>
+
+      {/* Списък с приятели */}
+      <div>
+        <h3 className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 px-1">Your Frens ({mockFrens.length})</h3>
+        <div className="space-y-2">
+          {mockFrens.map(fren => (
+            <div key={fren.id} className="flex justify-between items-center p-3 bg-[#16161a] rounded-xl border border-[#232329]">
+              <div className="flex items-center gap-2 text-sm">
+                <span>👤</span>
+                <span className="font-semibold">{fren.name}</span>
+              </div>
+              <span className="text-xs font-bold text-[#00ff66]">+{fren.reward} RC</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 5. ЕКРАН: MULTI-CHAIN WEB3 WALLET
+// ==========================================
+function WalletScreen({ connectedWallets, toggleWalletConnect }) {
+  return (
+    <div className="space-y-4 animate-fadeIn">
+      <div className="mb-2">
+        <h2 className="text-xl font-black">Web3 Hub</h2>
+        <p className="text-xs text-gray-400">Connect your multi-chain wallets to verify operations in REEDCOM.</p>
+      </div>
+
+      <div className="space-y-3">
+        {connectedWallets.map((wallet) => (
+          <div key={wallet.id} className="p-4 bg-[#16161a] rounded-2xl border border-[#232329] space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{wallet.icon}</span>
+                <div>
+                  <h4 className="text-sm font-bold text-white">{wallet.name} Wallet</h4>
+                  <p className="text-[11px] text-gray-400">{wallet.type}</p>
                 </div>
-                <span><strong id="valEnergy">1000</strong> / 1000</span>
+              </div>
+              
+              <div className={`w-2.5 h-2.5 rounded-full ${wallet.connected ? 'bg-[#00ff66] shadow-[0_0_8px_#00ff66]' : 'bg-red-500'}`} />
             </div>
-            <div class="bar-bg"><div class="bar-fill" id="valBar" style="width: 100%;"></div></div>
-        </div>
-    </div>
 
-    <!-- ТАБ 2: TASKS -->
-    <div id="screen-tasks" class="view-screen">
-        <div class="screen-title">Tasks</div>
-        <div class="screen-desc">Complete tasks to earn more REED tokens!</div>
-    </div>
+            {wallet.connected && (
+              <div className="bg-[#0b0b0c] p-2.5 rounded-xl border border-[#1f1f23] flex justify-between items-center">
+                <span className="text-xs font-mono text-gray-400">{wallet.address}</span>
+                <span className="text-xs font-bold text-[#00ff66]">${wallet.balance.toFixed(2)}</span>
+              </div>
+            )}
 
-    <!-- ТАБ 3: FRIENDS -->
-    <div id="screen-friends" class="view-screen">
-        <div class="screen-title">Friends</div>
-        <div class="screen-desc">Invite your friends and get bonuses!</div>
-    </div>
-
-    <!-- ТАБ 4: PROFILE -->
-    <div id="screen-profile" class="view-screen">
-        <div class="screen-title">Profile</div>
-        <div class="screen-desc">Your Account Information</div>
-        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; text-align: left;">
-            <p style="margin-bottom: 10px;"><strong>Status:</strong> Active</p>
-            <p><strong>Wallet:</strong> <span style="color: #00b4db;">Redirecting via Bot</span></p>
-        </div>
-        
-        <!-- Този бутон ще задейства нативната WalletConnect връзка чрез официален Telegram Deep Link -->
-        <button class="custom-wallet-btn" onclick="connectViaTelegram()">Connect Web3 Wallet</button>
-    </div>
-
-    <!-- ДОЛНО МЕНЮ (ТАСКБАР) -->
-    <div class="footer-tabs">
-        <div class="tab-btn active-tab" onclick="switchTab('screen-tap', this)">
-            <span class="tab-icon">⚡</span>
-            <span>Tap</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-tasks', this)">
-            <span class="tab-icon">📋</span>
-            <span>Tasks</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-friends', this)">
-            <span class="tab-icon">👥</span>
-            <span>Friends</span>
-        </div>
-        <div class="tab-btn" onclick="switchTab('screen-profile', this)">
-            <span class="tab-icon">👤</span>
-            <span>Profile</span>
-        </div>
-    </div>
-
-    <script>
-        // Инициализиране на Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
-
-        // 1. Смяна на табовете
-        function switchTab(screenId, button) {
-            const screens = document.querySelectorAll('.view-screen');
-            screens.forEach(screen => screen.classList.remove('visible'));
-            
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) targetScreen.classList.add('visible');
-            
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active-tab'));
-            
-            if (button) button.classList.add('active-tab');
-        }
-
-        // 2. Логика на Кликера
-        let balance = 0;
-        let energy = 1000;
-        const maxEnergy = 1000;
-
-        const valBalance = document.getElementById('valBalance');
-        const valEnergy = document.getElementById('valEnergy');
-        const valBar = document.getElementById('valBar');
-        const clickZone = document.getElementById('clickZone');
-
-        function hitCoin() {
-            if (energy > 0) {
-                balance += 1;
-                energy -= 1;
-                valBalance.innerText = balance + " REED";
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-
-                // Ефект на изскачащ текст +1
-                const plus = document.createElement('div');
-                plus.className = 'text-plus';
-                plus.innerText = '+1';
-                clickZone.appendChild(plus);
-                setTimeout(() => plus.remove(), 500);
-            }
-        }
-
-        // Автоматично регенериране на енергия
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy = Math.min(maxEnergy, energy + 1);
-                valEnergy.innerText = energy;
-                valBar.style.width = (energy / maxEnergy * 100) + "%";
-            }
-        }, 1500);
-
-        // 3. Свързване без външен JS код и БЕЗ ГРЕШКИ
-        function connectViaTelegram() {
-            if (balance <= 0) {
-                alert("You don't have any REED tokens to claim yet!");
-                return;
-            }
-            
-            // Нативен WalletConnect линк за отваряне на Trust Wallet / MetaMask директно през Telegram
-            // Използваме сигурния метод на Telegram WebApp, за да няма CORS или JS блокирания
-            const tokenUrl = "https://app.link";
-            
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-                window.Telegram.WebApp.openLink(tokenUrl);
-            } else {
-                window.open(tokenUrl, "_blank");
-            }
+            <button
+              onClick={() => toggleWalletConnect(wallet.id)}
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${
+                wallet.connected 
+                  ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20' 
+                  : 'bg-white text-black hover:bg-gray-200'
+              }`}
+            >
